@@ -1,0 +1,217 @@
+@model NeuroSync.Models.Paciente
+
+@{
+    ViewData["Title"] = "Prontuário - " + Model.Nome;
+    
+    // Cálculo seguro de idade
+    var idade = DateTime.Today.Year - Model.DataNascimento.Year;
+    if (Model.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
+}
+
+<style>
+    /* Cabeçalho Limpo */
+    .prontuario-header { 
+        background: white; 
+        border-radius: 12px; 
+        padding: 20px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+        margin-bottom: 24px; 
+        display: flex; 
+        align-items: center; 
+    }
+    .info-divisor { 
+        border-left: 2px solid #e2e8f0; 
+        padding-left: 20px; 
+        margin-left: 20px; 
+    }
+
+    /* Menu Lateral Vertical (Exatamente como no seu print) */
+    .nav-pills-custom .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        text-align: left;
+        background: transparent;
+        transition: 0.2s;
+    }
+    .nav-pills-custom .nav-link.active {
+        color: #4f46e5;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .text-financeiro { color: #10b981 !important; }
+
+    /* Área de Conteúdo */
+    .tab-content-area {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        min-height: 550px;
+    }
+</style>
+
+<div class="pt-3">
+    <h3 class="fw-bold mb-4" style="color: var(--text-dark);">Prontuário do Paciente</h3>
+
+    <!-- CABEÇALHO DO PACIENTE (Com tratativa para não dar erro no Responsável) -->
+    <div class="prontuario-header">
+        <div class="d-flex align-items-center">
+            <div class="me-3" style="width: 50px; height: 50px; border-radius: 50%; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                @Model.Nome.Substring(0, 1).ToUpper()
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">@Model.Nome</h5>
+                <small class="text-muted">@idade anos • Nascido em @Model.DataNascimento.ToString("dd/MM/yyyy")</small><br/>
+                <small class="text-muted">Responsável: 
+                @{
+                    var respProntuario = "-";
+                    if (!string.IsNullOrWhiteSpace(Model.Responsavel)) { respProntuario = Model.Responsavel; }
+                    else if (!string.IsNullOrWhiteSpace(Model.NomeMae)) { respProntuario = Model.NomeMae; }
+                    else if (!string.IsNullOrWhiteSpace(Model.NomePai)) { respProntuario = Model.NomePai; }
+                }
+                @respProntuario
+            </small>
+            </div>
+        </div>
+        
+        <div class="info-divisor">
+            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Criado Em</small>
+            <span class="text-dark fw-bold small">@Model.CriadoEm.ToString("dd/MM/yyyy")</span>
+        </div>
+        
+        <div class="info-divisor">
+            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Status</small>
+            <span class="text-success fw-bold small"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Ativo</span>
+        </div>
+    </div>
+
+    <!-- CORPO: MENU NA ESQUERDA E CONTEÚDO NA DIREITA -->
+    <div class="row g-4">
+        
+        <!-- COLUNA ESQUERDA: AS 7 ABAS ORIGINAIS -->
+        <div class="col-md-3">
+            <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#resumo" type="button" role="tab">Resumo</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#anamnese" type="button" role="tab">Anamnese</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#evolucao" type="button" role="tab">Evolução</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#atendimentos" type="button" role="tab">Atendimentos</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#documentos" type="button" role="tab">Documentos</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#anexos" type="button" role="tab"><i class="bi bi-paperclip"></i> Anexos</button>
+                <button class="nav-link text-financeiro fw-bold" data-bs-toggle="pill" data-bs-target="#financeiro" type="button" role="tab">$ Financeiro</button>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: CONTEÚDO DAS ABAS -->
+        <div class="col-md-9">
+            <div class="tab-content tab-content-area" id="v-pills-tabContent">
+                
+                <!-- 1. RESUMO -->
+                <div class="tab-pane fade show active" id="resumo" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Visão Geral</h5>
+                    <p class="text-muted">Bem-vindo ao prontuário de <strong>@Model.Nome</strong>. Navegue pelas abas à esquerda para acessar o histórico clínico.</p>
+                </div>
+
+                <!-- 2. ANAMNESE -->
+                <div class="tab-pane fade" id="anamnese" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Anamnese</h5>
+                    <div class="alert alert-light text-muted border">Formulário de anamnese estruturado será disponibilizado em breve.</div>
+                </div>
+
+                <!-- 3. EVOLUÇÃO (LINHA DO TEMPO) -->
+                <div class="tab-pane fade" id="evolucao" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Evolução Clínica</h5>
+                    
+                    <form asp-action="AdicionarEvolucao" method="post" class="mb-5 bg-light p-3 rounded-4">
+                        <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
+                        <div class="mb-3">
+                            <label class="fw-bold mb-2">Registrar nova anotação:</label>
+                            <textarea name="Anotacao" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">Salvar Registro</button>
+                        </div>
+                    </form>
+
+                    @if (ViewBag.Evolucoes != null)
+                    {
+                        <div class="ps-3 border-start border-2 border-primary border-opacity-25">
+                            @foreach (var ev in ViewBag.Evolucoes)
+                            {
+                                <div class="mb-4 position-relative">
+                                    <div class="position-absolute bg-primary rounded-circle" style="width: 12px; height: 12px; left: -23px; top: 5px;"></div>
+                                    <div class="small fw-bold text-primary mb-1">@ev.DataRegistro.ToString("dd/MM/yyyy 'às' HH:mm")</div>
+                                    <div class="text-dark bg-light p-3 rounded-3">@ev.Anotacao</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- 4. ATENDIMENTOS -->
+                <div class="tab-pane fade" id="atendimentos" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Próximos Atendimentos</h5>
+                    @if (ViewBag.Agendamentos != null)
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var ag in ViewBag.Agendamentos)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-bottom">
+                                    <div>
+                                        <div class="fw-bold text-dark mb-1">@ag.DataHora.ToString("dd/MM/yyyy - HH:mm")</div>
+                                        <small class="text-muted">Tipo: @ag.TipoSessao</small>
+                                    </div>
+                                    <span class="badge bg-light text-dark border rounded-pill">@ag.Status</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- 5. DOCUMENTOS -->
+                <div class="tab-pane fade" id="documentos" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Geração de Documentos</h5>
+                    <div class="alert alert-light text-muted border">Módulo de atestados, recibos e declarações.</div>
+                </div>
+
+                <!-- 6. ANEXOS (UPLOAD) -->
+                <div class="tab-pane fade" id="anexos" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Anexos e Exames</h5>
+                    <form asp-action="UploadArquivo" enctype="multipart/form-data" method="post" class="mb-4 d-flex gap-3 align-items-end bg-light p-3 rounded-4">
+                        <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
+                        <div class="flex-grow-1">
+                            <label class="form-label fw-bold small">Selecione o arquivo</label>
+                            <input type="file" name="arquivoUpload" class="form-control bg-white" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">Enviar</button>
+                    </form>
+                    
+                    @if (ViewBag.Anexos != null)
+                    {
+                        <div class="list-group">
+                            @foreach (var anexo in ViewBag.Anexos)
+                            {
+                                <a href="@anexo.CaminhoArquivo" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 rounded-3 mb-2 border">
+                                    <span class="fw-bold text-dark"><i class="bi bi-file-earmark-text text-primary me-3 fs-5"></i> @anexo.NomeArquivo</span>
+                                    <small class="text-muted bg-light px-3 py-1 rounded-pill">@anexo.DataUpload.ToString("dd/MM/yyyy")</small>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- 7. FINANCEIRO -->
+                <div class="tab-pane fade" id="financeiro" role="tabpanel">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4 text-success">$ Extrato Financeiro</h5>
+                    <div class="alert alert-success bg-success bg-opacity-10 text-success border-success-subtle">
+                        Integração financeira do paciente em construção...
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
