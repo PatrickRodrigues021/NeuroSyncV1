@@ -1,0 +1,548 @@
+@model NeuroSync.Models.RelatoriosViewModel
+
+@{
+    ViewData["Title"] = "Relatórios";
+}
+
+<style>
+    /* Estilos da Tela de Relatórios */
+    .reports-container {
+        padding-top: 0.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.5px;
+    }
+
+    /* Abas Superiores */
+    .reports-nav-tabs {
+        display: flex;
+        gap: 2rem;
+        border-bottom: 1px solid #E2E8F0;
+        padding-bottom: 0;
+        margin-bottom: 1.75rem;
+    }
+
+    .reports-nav-item {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding-bottom: 12px;
+        text-decoration: none;
+        position: relative;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+
+    .reports-nav-item:hover {
+        color: #1E293B;
+    }
+
+    .reports-nav-item.active {
+        color: #2563EB;
+    }
+
+    .reports-nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #2563EB;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* Botões de Ação do Topo */
+    .btn-filter-period {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 9px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .btn-filter-period:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #0F172A;
+    }
+
+    .btn-export-custom {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        color: #2563EB;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 9px 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .btn-export-custom:hover {
+        background: #EFF6FF;
+        border-color: #BFDBFE;
+        color: #1D4ED8;
+    }
+
+    /* Cards de Indicadores (KPIs) */
+    .kpi-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 22px 24px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .kpi-label {
+        color: #64748B;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .kpi-value {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+    }
+
+    .kpi-trend {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #10B981;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .kpi-trend.negative {
+        color: #EF4444;
+    }
+
+    /* Cards de Gráficos */
+    .chart-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        height: 100%;
+    }
+
+    .chart-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 0;
+    }
+
+    .select-period-view {
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        font-size: 0.82rem;
+        padding: 4px 12px;
+        color: #475569;
+        font-weight: 600;
+        background-color: #FFFFFF;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .select-period-view:focus {
+        border-color: #2563EB;
+    }
+
+    /* Legenda customizada do Donut Chart */
+    .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .legend-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .legend-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .legend-pct {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+</style>
+
+<div class="reports-container">
+    
+    <!-- CABEÇALHO -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="page-title mb-0">Relatórios</h2>
+
+        <!-- Ações do Topo: Período e Exportar -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Botão do Seletor de Período -->
+            <div class="dropdown">
+                <button class="btn-filter-period dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-calendar3 text-primary"></i>
+                    <span>@Model.PeriodoTexto</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end p-3 shadow-lg border-0" style="min-width: 320px; border-radius: 16px;">
+                    <h6 class="fw-bold text-dark mb-3">Filtrar Período</h6>
+                    <form method="get" asp-action="Index">
+                        <input type="hidden" name="aba" value="@Model.AbaAtiva" />
+                        <div class="mb-2">
+                            <label class="form-label small text-muted fw-bold">Data Inicial</label>
+                            <input type="date" name="dataInicio" class="form-control" value="@Model.DataInicio.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Data Final</label>
+                            <input type="date" name="dataFim" class="form-control" value="@Model.DataFim.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold rounded-pill">Aplicar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Botão Exportar -->
+            <div class="dropdown">
+                <button class="btn-export-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-box-arrow-up"></i>
+                    <span>Exportar</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
+                    <li>
+                        <a class="dropdown-item py-2 fw-semibold" asp-action="Exportar" asp-route-dataInicio="@Model.DataInicio.ToString("yyyy-MM-dd")" asp-route-dataFim="@Model.DataFim.ToString("yyyy-MM-dd")">
+                            <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i> Exportar Dados (CSV/Excel)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2 fw-semibold" href="javascript:window.print();">
+                            <i class="bi bi-printer text-primary me-2"></i> Imprimir / Salvar em PDF
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <div class="reports-nav-tabs">
+        <a href="@Url.Action("Index", new { aba = "Indicadores" })" class="reports-nav-item @(Model.AbaAtiva == "Indicadores" ? "active" : "")">
+            Indicadores
+        </a>
+        <a href="@Url.Action("Index", new { aba = "Atendimentos" })" class="reports-nav-item @(Model.AbaAtiva == "Atendimentos" ? "active" : "")">
+            Atendimentos
+        </a>
+        <a href="@Url.Action("Index", new { aba = "Financeiro" })" class="reports-nav-item @(Model.AbaAtiva == "Financeiro" ? "active" : "")">
+            Financeiro
+        </a>
+        <a href="@Url.Action("Index", new { aba = "Personalizados" })" class="reports-nav-item @(Model.AbaAtiva == "Personalizados" ? "active" : "")">
+            Personalizados
+        </a>
+    </div>
+
+    <!-- LINHA DE 4 CARDS DE INDICADORES (KPIs) -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Card 1: Atendimentos Realizados -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Atendimentos realizados</div>
+                <div class="kpi-value">@Model.AtendimentosRealizados</div>
+                <div class="kpi-trend">
+                    <i class="bi bi-arrow-up-short fs-6"></i>
+                    <span>+@(Model.VariacaoAtendimentos.ToString("N0"))% vs período anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Novos Pacientes -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Novos pacientes</div>
+                <div class="kpi-value">@Model.NovosPacientes</div>
+                <div class="kpi-trend">
+                    <i class="bi bi-arrow-up-short fs-6"></i>
+                    <span>+@(Model.VariacaoNovosPacientes.ToString("N0"))% vs período anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Taxa de Faltas -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Taxa de faltas</div>
+                <div class="kpi-value">@Model.TaxaFaltas.ToString("0.0")%</div>
+                <div class="kpi-trend">
+                    <i class="bi bi-arrow-down-short fs-6"></i>
+                    <span>@(Model.VariacaoTaxaFaltas > 0 ? "+" : "")@Model.VariacaoTaxaFaltas.ToString("0.0")% vs período anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Satisfação Média -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Satisfação média</div>
+                <div class="kpi-value">@Model.SatisfacaoMedia.ToString("0.0")/5</div>
+                <div class="kpi-trend">
+                    <i class="bi bi-arrow-up-short fs-6"></i>
+                    <span>+@Model.VariacaoSatisfacao.ToString("0.0") vs período anterior</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LINHA DE GRÁFICOS -->
+    <div class="row g-4">
+        
+        <!-- GRÁFICO 1: ATENDIMENTOS POR ÁREA (Donut Chart) -->
+        <div class="col-12 col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-card-title mb-4">Atendimentos por área</h5>
+                
+                <div class="row align-items-center">
+                    <!-- Canvas Donut -->
+                    <div class="col-12 col-sm-6 d-flex justify-content-center mb-3 mb-sm-0">
+                        <div style="width: 220px; height: 220px; position: relative;">
+                            <canvas id="graficoPorArea"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Legenda Lateral Customizada -->
+                    <div class="col-12 col-sm-6 ps-sm-4">
+                        @foreach (var item in Model.AtendimentosPorArea)
+                        {
+                            <div class="legend-item">
+                                <div class="d-flex align-items-center">
+                                    <span class="legend-indicator" style="background-color: @item.CorHex;"></span>
+                                    <span class="legend-name">@item.NomeArea</span>
+                                </div>
+                                <span class="legend-pct">@item.Porcentagem%</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO 2: EVOLUÇÃO DE ATENDIMENTOS (Line/Area Chart) -->
+        <div class="col-12 col-lg-6">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="chart-card-title">Evolução de atendimentos</h5>
+                    
+                    <!-- Dropdown seletor de Periodicidade -->
+                    <select class="select-period-view" id="selectPeriodicidade">
+                        <option value="Mensal" selected>Mensal</option>
+                        <option value="Semanal">Semanal</option>
+                    </select>
+                </div>
+
+                <!-- Canvas Gráfico de Linha/Área -->
+                <div style="height: 220px; width: 100%; position: relative;">
+                    <canvas id="graficoEvolucao"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // ==========================================
+            // 1. GRÁFICO DE ROSCA (DONUT): ATENDIMENTOS POR ÁREA
+            // ==========================================
+            const ctxArea = document.getElementById('graficoPorArea').getContext('2d');
+            
+            const areaLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.NomeArea)));
+            const areaValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.Porcentagem)));
+            const areaColors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.CorHex)));
+
+            new Chart(ctxArea, {
+                type: 'doughnut',
+                data: {
+                    labels: areaLabels,
+                    datasets: [{
+                        data: areaValues,
+                        backgroundColor: areaColors,
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            display: false // Usamos a legenda customizada HTML à direita
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ==========================================
+            // 2. GRÁFICO DE LINHA/ÁREA: EVOLUÇÃO DE ATENDIMENTOS
+            // ==========================================
+            const ctxEvolucao = document.getElementById('graficoEvolucao').getContext('2d');
+            
+            // Criação do gradiente de preenchimento azul suave
+            const gradientBlue = ctxEvolucao.createLinearGradient(0, 0, 0, 200);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+
+            const evolucaoLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoLabels));
+            const evolucaoValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoValores));
+
+            const chartEvolucao = new Chart(ctxEvolucao, {
+                type: 'line',
+                data: {
+                    labels: evolucaoLabels,
+                    datasets: [{
+                        data: evolucaoValores,
+                        borderColor: '#2563EB',
+                        borderWidth: 2.5,
+                        fill: true,
+                        backgroundColor: gradientBlue,
+                        tension: 0.45, // Curva suave Bézier idêntica ao design
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#2563EB',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#2563EB',
+                        pointHoverBorderColor: '#FFFFFF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#0F172A',
+                            titleFont: { family: "'Segoe UI', sans-serif", size: 12 },
+                            bodyFont: { family: "'Segoe UI', sans-serif", size: 13, weight: 'bold' },
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function (context) {
+                                    return context.raw + ' atendimentos';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 60,
+                            ticks: {
+                                stepSize: 15,
+                                color: '#94A3B8',
+                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '500' }
+                            },
+                            grid: {
+                                color: '#F1F5F9',
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '500' }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Alternância entre Mensal e Semanal dinamicamente no gráfico
+            const selectPeriodo = document.getElementById('selectPeriodicidade');
+            if (selectPeriodo) {
+                selectPeriodo.addEventListener('change', function () {
+                    if (this.value === 'Semanal') {
+                        chartEvolucao.data.labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+                        chartEvolucao.data.datasets[0].data = [12, 18, 15, 22];
+                        chartEvolucao.options.scales.y.max = 30;
+                        chartEvolucao.options.scales.y.ticks.stepSize = 10;
+                    } else {
+                        chartEvolucao.data.labels = evolucaoLabels;
+                        chartEvolucao.data.datasets[0].data = evolucaoValores;
+                        chartEvolucao.options.scales.y.max = 60;
+                        chartEvolucao.options.scales.y.ticks.stepSize = 15;
+                    }
+                    chartEvolucao.update();
+                });
+            }
+
+        });
+    </script>
+}

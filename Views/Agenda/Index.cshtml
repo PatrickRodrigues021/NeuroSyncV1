@@ -7,68 +7,419 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
 <style>
-    /* Cartão Base */
-    .card-calendar { background-color: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); padding: 24px; }
+    /* Cartão Base do Calendário - Mais compacto para caber na tela sem rolagem */
+    .card-calendar { 
+        background-color: #FFFFFF; 
+        border-radius: 16px; 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); 
+        padding: 16px 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
     
-    /* Customização da Barra Superior para ficar igual ao Print */
-    .toolbar-custom { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    /* Barra Superior Customizada */
+    .toolbar-custom { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 12px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
     
-    .btn-toolbar-icon { background: white; border: 1px solid #e2e8f0; border-radius: 8px; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
-    .btn-toolbar-icon:hover { background: #f8fafc; color: var(--primary); }
+    .btn-toolbar-icon { 
+        background: #FFFFFF; 
+        border: 1px solid #E2E8F0; 
+        border-radius: 8px; 
+        width: 34px; 
+        height: 34px; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        color: #475569; 
+        cursor: pointer; 
+        transition: all 0.2s ease; 
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .btn-toolbar-icon:hover { 
+        background: #F8FAFC; 
+        border-color: #CBD5E1; 
+        color: #2563EB; 
+    }
     
-    .btn-toolbar-text { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 16px; color: var(--text-dark); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
-    .btn-toolbar-text:hover { background: #f8fafc; }
+    .btn-toolbar-text { 
+        background: #FFFFFF; 
+        border: 1px solid #E2E8F0; 
+        border-radius: 8px; 
+        padding: 5px 14px; 
+        color: #1E293B; 
+        font-weight: 600; 
+        font-size: 0.85rem; 
+        cursor: pointer; 
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .btn-toolbar-text:hover { 
+        background: #F8FAFC; 
+        border-color: #CBD5E1; 
+    }
     
-    .toolbar-title { font-weight: 700; color: var(--text-dark); font-size: 1.1rem; }
+    .toolbar-title { 
+        font-weight: 700; 
+        color: #0F172A; 
+        font-size: 1.15rem;
+        letter-spacing: -0.3px;
+        text-transform: capitalize;
+    }
     
-    .view-group { display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; }
-    .btn-view { border: none; background: transparent; padding: 6px 16px; border-radius: 6px; font-weight: 600; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; transition: 0.3s; }
-    .btn-view.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .view-group { 
+        display: flex; 
+        background: #F1F5F9; 
+        border-radius: 8px; 
+        padding: 3px; 
+        gap: 2px; 
+    }
+    .btn-view { 
+        border: none; 
+        background: transparent; 
+        padding: 5px 14px; 
+        border-radius: 6px; 
+        font-weight: 600; 
+        color: #64748B; 
+        font-size: 0.82rem; 
+        cursor: pointer; 
+        transition: all 0.2s ease; 
+    }
+    .btn-view:hover {
+        color: #1E293B;
+    }
+    .btn-view.active { 
+        background: #FFFFFF; 
+        color: #2563EB; 
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); 
+    }
 
-    /* Customização do FullCalendar */
-    .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { border-color: #f1f5f9; border-width: 1px; }
-    .fc-scrollgrid { border: none !important; }
-    .fc-col-header-cell-cushion { padding: 12px 0 !important; color: var(--text-muted); font-weight: 600; text-transform: capitalize; font-size: 0.95rem; text-decoration: none !important; }
-    .fc-day-today .fc-col-header-cell-cushion { color: var(--primary); font-weight: 700; }
-    .fc-timegrid-now-indicator-line { border-color: var(--primary); }
-    .fc-timegrid-now-indicator-arrow { border-color: var(--primary); background-color: var(--primary); }
+    /* Botão Novo Atendimento Compacto */
+    .btn-novo-atendimento {
+        background-color: var(--primary);
+        color: #FFFFFF;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 6px 16px;
+        border-radius: 50px;
+        text-decoration: none;
+        box-shadow: 0 2px 5px rgba(49, 91, 239, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-novo-atendimento:hover {
+        background-color: #2143c7;
+        color: #FFFFFF;
+        box-shadow: 0 3px 8px rgba(49, 91, 239, 0.3);
+    }
 
-    /* Formatação dos Blocos de Consulta */
-    .fc-event { border: none !important; border-radius: 6px !important; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; }
-    .fc-event:hover { transform: scale(1.02); }
-    .fc-event-time { display: none; } 
-    .fc-event-title { font-weight: 700; font-size: 0.85rem; line-height: 1.2; }
-    .event-subtitle { font-weight: 500; font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+    /* =======================================================
+       CUSTOMIZAÇÃO GERAL DO FULLCALENDAR
+       ======================================================= */
+    .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid { 
+        border-color: #F1F5F9 !important; 
+        border-width: 1px; 
+    }
+    .fc-scrollgrid { 
+        border: 1px solid #F1F5F9 !important; 
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    /* Cabeçalhos de Coluna Compactos */
+    .fc-col-header-cell {
+        background: #F8FAFC;
+        padding: 6px 0 !important;
+    }
+    .fc-col-header-cell-cushion { 
+        padding: 2px 0 !important; 
+        color: #475569 !important; 
+        font-weight: 700 !important; 
+        text-transform: capitalize; 
+        font-size: 0.82rem !important; 
+        text-decoration: none !important; 
+    }
+    
+    /* Régua de Horas Lateral */
+    .fc-timegrid-slot-label-cushion {
+        font-size: 0.76rem !important;
+        font-weight: 600;
+        color: #94A3B8;
+        padding: 0 4px !important;
+    }
+
+    /* Linha do Momento Atual */
+    .fc-timegrid-now-indicator-line { border-color: #2563EB; border-width: 2px; }
+    .fc-timegrid-now-indicator-arrow { border-color: #2563EB; background-color: #2563EB; }
+
+    /* =======================================================
+       MODERNIZAÇÃO DA VISÃO DE MÊS (dayGridMonth)
+       ======================================================= */
+    .fc-daygrid-day:hover {
+        background-color: #FAFCFF;
+    }
+    .fc-daygrid-day-top {
+        flex-direction: row;
+        padding: 4px 6px 2px 6px;
+    }
+    .fc-daygrid-day-number { 
+        color: #334155; 
+        font-weight: 600; 
+        font-size: 0.82rem; 
+        text-decoration: none !important;
+        padding: 2px 5px;
+    }
+
+    /* Destaque circular do dia atual (Hoje) */
+    .fc-day-today {
+        background-color: rgba(37, 99, 235, 0.02) !important;
+    }
+    .fc-day-today .fc-daygrid-day-number { 
+        background-color: #2563EB !important; 
+        color: #FFFFFF !important; 
+        border-radius: 50% !important; 
+        width: 24px; 
+        height: 24px; 
+        display: inline-flex !important; 
+        align-items: center; 
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.35);
+    }
+    .fc-timegrid .fc-day-today .fc-col-header-cell-cushion {
+        color: #2563EB !important;
+        font-weight: 800 !important;
+    }
+
+    /* Dias fora do mês atual esmaecidos */
+    .fc-day-other {
+        background-color: #FAFAFC;
+    }
+    .fc-day-other .fc-daygrid-day-number {
+        opacity: 0.35;
+    }
+
+    /* Pílula de Evento no Mês (1 Linha) */
+    .month-event-pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        overflow: hidden;
+        white-space: nowrap;
+        margin: 1px 2px;
+        border: 1px solid transparent;
+    }
+    .month-event-pill:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
+    .month-event-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .month-event-time {
+        font-weight: 700;
+        font-size: 0.72rem;
+        opacity: 0.9;
+        flex-shrink: 0;
+    }
+    .month-event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-grow: 1;
+    }
+
+    .fc-more-link {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: #2563EB !important;
+        padding: 1px 5px !important;
+        text-decoration: none !important;
+    }
+
+    .fc-popover {
+        border-radius: 12px !important;
+        border: 1px solid #E2E8F0 !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+        overflow: hidden !important;
+    }
+
+    /* =======================================================
+       CARD MODERNO PARA SEMANA E DIA (2 Linhas Sem Cortes)
+       ======================================================= */
+    .fc-timegrid-event-harness > .fc-timegrid-event {
+        inset: 1px 2px !important;
+        border-radius: 6px !important;
+    }
+
+    .timegrid-event-card {
+        padding: 3px 6px;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        box-sizing: border-box;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .timegrid-event-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 20;
+    }
+    
+    /* Linha 1: [Horário] [Nome do Paciente] */
+    .timegrid-line-1 {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 2px;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: 1.15;
+    }
+    .timegrid-time-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+    .timegrid-patient-name {
+        font-size: 0.78rem;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Linha 2: [Status] • [Tipo de Sessão] */
+    .timegrid-line-2 {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        line-height: 1.1;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .timegrid-status-mini {
+        font-size: 0.64rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+    .timegrid-session-type {
+        font-size: 0.68rem;
+        font-weight: 500;
+        opacity: 0.85;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Remove estilos padrão feios do FullCalendar */
+    .fc-v-event, .fc-h-event {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .fc-event-main {
+        padding: 0 !important;
+        height: 100% !important;
+    }
+
+    /* Legenda de Status Compacta no Rodapé */
+    .legend-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #F1F5F9;
+        flex-wrap: wrap;
+    }
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748B;
+    }
+    .legend-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0" style="color: var(--text-dark);">Agenda</h3>
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <h4 class="fw-bold mb-0" style="color: var(--text-dark);">Agenda</h4>
+    </div>
 </div>
 
 <div class="card-calendar">
+    <!-- BARRA SUPERIOR: NAVEGAÇÃO, TÍTULO, VIEWS E NOVO ATENDIMENTO -->
     <div class="toolbar-custom">
-        <div class="d-flex gap-2">
-            <button class="btn-toolbar-icon" id="btnPrev"><i class="bi bi-chevron-left"></i></button>
-            <button class="btn-toolbar-icon" id="btnNext"><i class="bi bi-chevron-right"></i></button>
+        <div class="d-flex gap-2 align-items-center">
+            <button class="btn-toolbar-icon" id="btnPrev" title="Período anterior"><i class="bi bi-chevron-left"></i></button>
+            <button class="btn-toolbar-icon" id="btnNext" title="Próximo período"><i class="bi bi-chevron-right"></i></button>
             <button class="btn-toolbar-text" id="btnToday">Hoje</button>
         </div>
 
         <div class="toolbar-title" id="calendarTitle">Carregando...</div>
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
             <div class="view-group">
                 <button class="btn-view" id="viewDay">Dia</button>
                 <button class="btn-view active" id="viewWeek">Semana</button>
                 <button class="btn-view" id="viewMonth">Mês</button>
             </div>
-            <!-- Botão aponta para a rota Create que já existe no seu controller -->
-            <a href="/Agenda/Create" class="btn btn-primary fw-bold rounded-pill px-4 text-decoration-none" style="background: var(--primary);">
-                <i class="bi bi-plus-lg me-1"></i> Novo atendimento
+            
+            <a href="/Agenda/Create" class="btn-novo-atendimento">
+                <i class="bi bi-plus-lg"></i>
+                <span>Novo atendimento</span>
             </a>
         </div>
     </div>
 
+    <!-- ELEMENTO DO CALENDÁRIO (Altura calibrada para caber 100% na tela) -->
     <div id="calendar"></div>
+
+    <!-- LEGENDA VISUAL DE STATUS -->
+    <div class="legend-bar">
+        <span class="small fw-bold text-dark" style="font-size: 0.78rem;">Legenda:</span>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #2563EB;"></span> Agendado
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #16A34A;"></span> Realizado
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #D97706;"></span> Falta
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #DC2626;"></span> Cancelado
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -76,51 +427,69 @@
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
-            // 1. MÁGICA DE INTEGRAÇÃO: O C# gerando o Javascript!
+            // 1. DADOS DOS AGENDAMENTOS DO BANCO
             var eventosDoBanco = [
                 @if (Model != null && Model.Any())
                 {
                     foreach (var agendamento in Model)
                     {
-                        var nomePaciente = agendamento.Paciente != null ? agendamento.Paciente.Nome : "Paciente não encontrado";
-                        
-                        // Formata a data para o Javascript entender
+                        var nomePaciente = agendamento.Paciente != null ? agendamento.Paciente.Nome : "Paciente";
                         var dataInicio = agendamento.DataHora.ToString("yyyy-MM-ddTHH:mm:ss");
                         var dataFim = agendamento.DataHora.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss");
-
-                        // LÓGICA DE CORES E STATUS
                         var statusAtual = string.IsNullOrEmpty(agendamento.Status) ? "Agendado" : agendamento.Status;
-                        
-                        string bgColor = "#e0e7ff"; // Azul pastel (Padrão/Agendado)
-                        string txtColor = "#3730a3"; 
+                        var tipoSessao = string.IsNullOrEmpty(agendamento.TipoSessao) ? "Sessão" : agendamento.TipoSessao;
 
-                        if (statusAtual.Contains("Cancelado"))
+                        // Cores suaves com contraste
+                        string bgColor = "#EFF6FF";
+                        string borderColor = "#BFDBFE";
+                        string textColor = "#1E40AF";
+                        string dotColor = "#2563EB";
+                        string badgeBg = "#DBEAFE";
+                        string badgeText = "#1D4ED8";
+
+                        if (statusAtual.Contains("Realizado"))
                         {
-                            bgColor = "#fee2e2"; // Vermelho pastel
-                            txtColor = "#991b1b";
-                        }
-                        else if (statusAtual.Contains("Realizado"))
-                        {
-                            bgColor = "#dcfce3"; // Verde pastel
-                            txtColor = "#166534";
+                            bgColor = "#ECFDF5";
+                            borderColor = "#A7F3D0";
+                            textColor = "#065F46";
+                            dotColor = "#10B981";
+                            badgeBg = "#D1FAE5";
+                            badgeText = "#047857";
                         }
                         else if (statusAtual.Contains("Falta"))
                         {
-                            bgColor = "#ffedd5"; // Laranja pastel
-                            txtColor = "#9a3412";
+                            bgColor = "#FFFBEB";
+                            borderColor = "#FDE68A";
+                            textColor = "#92400E";
+                            dotColor = "#F59E0B";
+                            badgeBg = "#FEF3C7";
+                            badgeText = "#B45309";
+                        }
+                        else if (statusAtual.Contains("Cancelado"))
+                        {
+                            bgColor = "#FEF2F2";
+                            borderColor = "#FECACA";
+                            textColor = "#991B1B";
+                            dotColor = "#EF4444";
+                            badgeBg = "#FEE2E2";
+                            badgeText = "#B91C1C";
                         }
 
                         <text>
                         {
                             id: '@agendamento.IdAgendamento',
-                            title: '@Html.Raw(nomePaciente)',
+                            title: '@Html.Raw(nomePaciente.Replace("'", "\\'"))',
                             start: '@dataInicio',
                             end: '@dataFim',
-                            backgroundColor: '@bgColor',
-                            textColor: '@txtColor',
                             extendedProps: {
-                                // Mostra o status real que vem do banco de dados
-                                terapia: '@Html.Raw(statusAtual)' 
+                                status: '@Html.Raw(statusAtual)',
+                                tipo: '@Html.Raw(tipoSessao)',
+                                bgColor: '@bgColor',
+                                borderColor: '@borderColor',
+                                textColor: '@textColor',
+                                dotColor: '@dotColor',
+                                badgeBg: '@badgeBg',
+                                badgeText: '@badgeText'
                             }
                         },
                         </text>
@@ -128,6 +497,7 @@
                 }
             ];
 
+            // 2. CONFIGURAÇÃO DO FULLCALENDAR COM ALTURA CALIBRADA (SEM ROLAGEM)
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek', 
                 locale: 'pt-br',             
@@ -135,24 +505,64 @@
                 allDaySlot: false,           
                 slotMinTime: '08:00:00',     
                 slotMaxTime: '19:00:00',     
-                slotDuration: '01:00:00',    
+                slotDuration: '00:30:00',
+                slotLabelInterval: '01:00',
                 expandRows: true,
-                height: 700,
-                
+                height: 520, // Altura perfeita para caber em qualquer monitor sem rolagem externa
+                nowIndicator: true,
+
+                // Configurações do modo Mês inteligente
+                dayMaxEvents: 3,           
+                moreLinkClick: 'popover',   
+                fixedWeekCount: false,      
+
                 datesSet: function(info) {
                     document.getElementById('calendarTitle').innerText = info.view.title;
                 },
 
+                // 3. RENDERIZAÇÃO ADAPTATIVA (SEM CORTAR TEXTOS)
                 eventContent: function(arg) {
-                    let titleHtml = `<div class="fc-event-title">${arg.event.title}</div>`;
-                    let subHtml = arg.event.extendedProps.terapia ? `<div class="event-subtitle">${arg.event.extendedProps.terapia}</div>` : '';
-                    return { html: titleHtml + subHtml };
+                    const timeStr = arg.event.start 
+                        ? arg.event.start.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) 
+                        : '';
+                    
+                    const props = arg.event.extendedProps;
+                    const tooltipText = `${arg.event.title} (${timeStr}) - Status: ${props.status} - Tipo: ${props.tipo}`;
+
+                    // --- VISÃO DE MÊS: Pílula compacta de 1 linha ---
+                    if (arg.view.type === 'dayGridMonth') {
+                        return {
+                            html: `
+                                <div class="month-event-pill" title="${tooltipText}" style="background-color: ${props.bgColor}; border-color: ${props.borderColor}; color: ${props.textColor};">
+                                    <span class="month-event-dot" style="background-color: ${props.dotColor};"></span>
+                                    <span class="month-event-time">${timeStr}</span>
+                                    <span class="month-event-title">${arg.event.title}</span>
+                                </div>
+                            `
+                        };
+                    }
+
+                    // --- VISÕES DE SEMANA E DIA: 2 Linhas Compactas e Perfeitamente Visíveis ---
+                    return {
+                        html: `
+                            <div class="timegrid-event-card" title="${tooltipText}" style="background-color: ${props.bgColor}; border-color: ${props.borderColor}; color: ${props.textColor};">
+                                <div class="timegrid-line-1">
+                                    <span class="timegrid-time-badge">${timeStr}</span>
+                                    <span class="timegrid-patient-name">${arg.event.title}</span>
+                                </div>
+                                <div class="timegrid-line-2">
+                                    <span class="timegrid-status-mini" style="background-color: ${props.badgeBg}; color: ${props.badgeText};">${props.status}</span>
+                                    <span class="timegrid-session-type">• ${props.tipo}</span>
+                                </div>
+                            </div>
+                        `
+                    };
                 },
 
-                // INJETA OS EVENTOS DO C# AQUI
+                // Injeta os agendamentos
                 events: eventosDoBanco,
 
-                // 2. NAVEGAÇÃO: Clicar no agendamento leva para a tela de edição
+                // Clicar no agendamento abre tela de edição
                 eventClick: function(info) {
                     window.location.href = '/Agenda/Edit/' + info.event.id;
                 }
@@ -160,11 +570,12 @@
 
             calendar.render();
 
-            // Lógica dos nossos botões superiores
+            // Lógica dos botões da Toolbar
             document.getElementById('btnPrev').addEventListener('click', function() { calendar.prev(); });
             document.getElementById('btnNext').addEventListener('click', function() { calendar.next(); });
             document.getElementById('btnToday').addEventListener('click', function() { calendar.today(); });
             
+            // Alternância entre Dia, Semana e Mês
             let views = { 'viewDay': 'timeGridDay', 'viewWeek': 'timeGridWeek', 'viewMonth': 'dayGridMonth' };
             for (let id in views) {
                 document.getElementById(id).addEventListener('click', function() {
