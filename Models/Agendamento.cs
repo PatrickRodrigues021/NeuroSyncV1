@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 //segundo teste de versionamento.
 
+//atualizacao teste
 namespace NeuroSync.Models
 {
     [Table("agendamento")]
