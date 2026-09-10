@@ -1,0 +1,104 @@
+@model NeuroSync.Models.ParecerTecnico
+
+@{
+    ViewData["Title"] = "Emitir Relatório / Parecer Técnico";
+}
+
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Emitir Relatório de Avaliação Neuropsicopedagógica</h3>
+            <p class="text-muted small mb-0">Preencha as seções clínicas do relatório. O documento será criptografado e salvo com segurança.</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-light fw-bold text-muted rounded-pill px-4">
+            <i class="bi bi-arrow-left me-2"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+        <!-- Adicionamos um ID no form para facilitar a manipulação via JavaScript -->
+        <form asp-action="Criar" method="post" id="formParecer">
+            
+            <!-- Campo oculto para o ID do Prontuário -->
+            <input type="hidden" asp-for="ProntuarioId" />
+
+            <!-- Título do Documento -->
+            <div class="mb-4">
+                <label asp-for="Titulo" class="form-label fw-bold">Título do Relatório</label>
+                <input asp-for="Titulo" class="form-control rounded-pill px-3" value="Relatório de Avaliação Neuropsicopedagógica" required />
+                <span asp-validation-for="Titulo" class="text-danger small"></span>
+            </div>
+
+            <hr class="my-4 text-muted opacity-25">
+
+            <!-- SEÇÕES DO RELATÓRIO CLÍNICO -->
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold text-primary">2. Motivo da Avaliação</label>
+                <textarea id="txtMotivo" class="form-control rounded-4 p-3" rows="3" placeholder="Descreva o contexto, queixas iniciais da escola ou da família..."></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold text-primary">3. Procedimentos e Recursos Utilizados</label>
+                <textarea id="txtProcedimentos" class="form-control rounded-4 p-3" rows="3" placeholder="Descreva os instrumentos, sessões, anamnese e observações clínicas realizadas..."></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold text-primary">4. Análise do Processo Avaliativo (Aspectos Psicomotores, Cognitivos e Emocionais)</label>
+                <textarea id="txtAnalise" class="form-control rounded-4 p-3" rows="5" placeholder="Descreva os aspectos psicomotores, orientação temporal, linguagem, leitura, escrita e raciocínio lógico..."></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold text-primary">5. Síntese Avaliativa</label>
+                <textarea id="txtSintese" class="form-control rounded-4 p-3" rows="3" placeholder="Resumo das potencialidades e principais necessidades observadas..."></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-primary">6. Recomendações e Considerações Finais</label>
+                <textarea id="txtRecomendacoes" class="form-control rounded-4 p-3" rows="4" placeholder="Indicações de acompanhamento, orientações para a escola e família..."></textarea>
+            </div>
+
+            <!-- Campo oculto real que vai mapear para a propriedade ConteudoCriptografado da model -->
+            <input type="hidden" asp-for="ConteudoCriptografado" id="ConteudoCriptografado" />
+
+            <div class="alert alert-secondary d-flex align-items-center rounded-3 p-3 mb-4" role="alert">
+                <i class="bi bi-shield-lock-fill fs-4 me-3 text-primary"></i>
+                <div class="small text-muted">
+                    As informações preenchidas serão estruturadas e protegidas com diretrizes de segurança e criptografia para garantir o sigilo clínico.
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+                <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                    <i class="bi bi-check2-circle me-1"></i> Salvar e Emitir Relatório
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Captura o envio do formulário de forma segura
+        document.getElementById('formParecer').addEventListener('submit', function (e) {
+            // Pega os valores das textareas
+            const motivo = document.getElementById('txtMotivo').value || '';
+            const procedimentos = document.getElementById('txtProcedimentos').value || '';
+            const analise = document.getElementById('txtAnalise').value || '';
+            const sintese = document.getElementById('txtSintese').value || '';
+            const recomendacoes = document.getElementById('txtRecomendacoes').value || '';
+
+            // Monta o texto completo formatado com seções
+            let conteudoCompleto = 
+                "2. MOTIVO DA AVALIAÇÃO:\n" + motivo + "\n\n" +
+                "3. PROCEDIMENTOS E RECURSOS UTILIZADOS:\n" + procedimentos + "\n\n" +
+                "4. ANÁLISE DO PROCESSO AVALIATIVO:\n" + analise + "\n\n" +
+                "5. SÍNTESE AVALIATIVA:\n" + sintese + "\n\n" +
+                "6. RECOMENDAÇÕES:\n" + recomendacoes;
+
+            // Insere o texto completo diretamente no input oculto que vai para a model
+            document.getElementById('ConteudoCriptografado').value = conteudoCompleto;
+        });
+    </script>
+}

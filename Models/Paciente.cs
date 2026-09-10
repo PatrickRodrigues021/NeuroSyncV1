@@ -26,16 +26,8 @@ namespace NeuroSync.Models
 
         [Column("idade")]
         public int Idade { get; set; }
-        
-        // --- NOVOS CAMPOS PARA A TELA ---
-        [MaxLength(100)]
-        [Column("responsavel")]
-        public string? Responsavel { get; set; }
 
-        [Column("data_cadastro")]
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
-
-        // --- ENDEREÇO DIVIDIDO ---
+        // --- NOVO ENDEREÇO DIVIDIDO ---
         [MaxLength(10)]
         [Column("cep")]
         public string? Cep { get; set; }
@@ -72,6 +64,7 @@ namespace NeuroSync.Models
         [Column("telefone")]
         public string? Telefone { get; set; }
 
+
         // --- DADOS DO PAI ---
         [MaxLength(100)]
         [Column("nome_pai")]
@@ -95,6 +88,7 @@ namespace NeuroSync.Models
         [MaxLength(100)]
         [Column("profissao_pai")]
         public string? ProfissaoPai { get; set; }
+
 
         // --- DADOS DA MÃE ---
         [MaxLength(100)]
@@ -120,6 +114,7 @@ namespace NeuroSync.Models
         [Column("profissao_mae")]
         public string? ProfissaoMae { get; set; }
 
+
         // --- DADOS ESCOLARES ---
         [MaxLength(150)]
         [Column("escola_estuda")]
@@ -128,6 +123,13 @@ namespace NeuroSync.Models
         [MaxLength(50)]
         [Column("serie")]
         public string? Serie { get; set; }
+
+        [Column("data_cadastro")]
+        public DateTime DataCadastro { get; set; } = DateTime.Now;
+
+        [MaxLength(100)]
+        [Column("responsavel")]
+        public string? Responsavel { get; set; }
 
         [MaxLength(100)]
         [Column("nome_professora")]

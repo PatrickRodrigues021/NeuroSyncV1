@@ -415,7 +415,7 @@
                 <div class="kpi-value">@Model.ReceitaMes.ToString("C")</div>
                 <div class="kpi-trend">
                     <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@Model.VariacaoReceitaMes.ToString("0.0")% vs período anterior</span>
+                    <span>+@Model.TotalRecebido.ToString("C")% vs período anterior</span>
                 </div>
             </div>
         </div>
@@ -426,7 +426,7 @@
                 <div class="kpi-label">Recebido</div>
                 <div class="kpi-value text-success">@Model.TotalRecebido.ToString("C")</div>
                 <div class="kpi-subtext">
-                    @Model.PercentualRecebido.ToString("0")% do total
+                    @Model.PercentualRecebido.ToString("N2")
                 </div>
             </div>
         </div>
@@ -437,7 +437,7 @@
                 <div class="kpi-label">A receber</div>
                 <div class="kpi-value text-primary">@Model.TotalAReceber.ToString("C")</div>
                 <div class="kpi-subtext">
-                    @Model.PercentualAReceber.ToString("0")% do total
+                    @Model.PercentualAReceber.ToString("0")
                 </div>
             </div>
         </div>
@@ -449,7 +449,7 @@
                 <div class="kpi-value">@Model.DespesasMes.ToString("C")</div>
                 <div class="kpi-trend">
                     <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@Model.VariacaoDespesas.ToString("0.0")% vs mês anterior</span>
+                    <span>+@Model.VariacaoDespesas% vs mês anterior</span>
                 </div>
             </div>
         </div>

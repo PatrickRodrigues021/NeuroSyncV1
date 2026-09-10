@@ -11,15 +11,6 @@
         </div>
         <div class="card-body p-4">
             <h5 class="text-center mb-4">Confirmar o recebimento deste valor?</h5>
-
-            <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3"></div>
-
-            @if (ViewBag.SessaoPendente == true)
-            {
-                <div class="alert alert-warning fw-bold">
-                    <i class="bi bi-exclamation-triangle"></i> Esta cobrança está vinculada a uma sessão que ainda não foi marcada como <strong>"Realizado"</strong> na Agenda. Atualize o status da sessão antes de confirmar o pagamento.
-                </div>
-            }
             
             <!-- Resumo do Boleto -->
             <div class="bg-light p-3 rounded mb-4 border">
@@ -41,7 +32,7 @@
 
                 <div class="d-flex justify-content-between mt-4">
                     <a asp-action="Index" class="btn btn-outline-secondary px-4 fw-bold">Cancelar</a>
-                    <button type="submit" class="btn btn-success px-4 fw-bold" @(ViewBag.SessaoPendente == true ? "disabled" : "")><i class="bi bi-cash"></i> Confirmar Pagamento</button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold"><i class="bi bi-cash"></i> Confirmar Pagamento</button>
                 </div>
             </form>
         </div>

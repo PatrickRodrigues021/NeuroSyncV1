@@ -38,16 +38,6 @@
                     <input asp-for="DataHora" type="datetime-local" class="form-control" required />
                 </div>
 
-                <!-- TIPO DE SESSÃO (NOVO) -->
-                <div class="mb-4">
-                    <label asp-for="TipoSessao" class="form-label">Tipo de Sessão</label>
-                    <select asp-for="TipoSessao" class="form-select">
-                        <option value="Intervenção">Intervenção (Rotina)</option>
-                        <option value="Avaliação">Avaliação</option>
-                        <option value="Devolutiva">Devolutiva com os Pais</option>
-                    </select>
-                </div>
-
                 <!-- CAMPO DE REPETIÇÃO SEMANAL (NOVO) -->
                 <div class="mb-4">
                     <label class="form-label text-primary"><i class="bi bi-arrow-repeat"></i> Repetição Semanal</label>
@@ -60,16 +50,6 @@
                     </select>
                     <div class="form-text text-muted small mt-2">
                         <i class="bi bi-info-circle"></i> O sistema criará as sessões de forma independente. Você poderá alterar o horário ou cancelar uma semana específica sem afetar as outras.
-                    </div>
-                </div>
-
-                <!-- VALOR DA SESSÃO / GERAÇÃO AUTOMÁTICA DE COBRANÇA (NOVO) -->
-                <div class="mb-4">
-                    <label class="form-label text-success"><i class="bi bi-cash-coin"></i> Valor da Sessão (R$)</label>
-                    <!-- name="valorSessao" conecta com o parâmetro do Controller -->
-                    <input type="number" step="0.01" min="0" name="valorSessao" class="form-control border-success bg-light" placeholder="Ex: 150,00" />
-                    <div class="form-text text-muted small mt-2">
-                        <i class="bi bi-info-circle"></i> Se preenchido, o sistema gera automaticamente uma cobrança pendente para <strong>cada sessão criada</strong> (o mesmo valor se repete em todas). O fechamento do pagamento de cada cobrança só fica liberado depois que a respectiva sessão for marcada como <strong>Realizado</strong> na Agenda.
                     </div>
                 </div>
 

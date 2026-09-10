@@ -1,0 +1,58 @@
+@model NeuroSync.Models.ParecerTecnico
+
+@{
+    ViewData["Title"] = "Emitir Parecer Técnico";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                
+                <!-- Cabeçalho -->
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Emitir Parecer Técnico</h4>
+                        <p class="text-muted small mb-0">O conteúdo inserido será criptografado automaticamente para garantir total segurança e sigilo clínico.</p>
+                    </div>
+                    <a asp-action="Detalhes" asp-controller="Prontuarios" asp-route-id="@Model.ProntuarioId" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+
+                <!-- Formulário de Emissão -->
+                <form asp-controller="Parecer" asp-action="Criar" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- ID do Prontuário oculto -->
+                    <input type="hidden" asp-for="ProntuarioId" />
+
+                    <!-- Campo Título -->
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label fw-semibold text-secondary">Título do Parecer / Laudo</label>
+                        <input asp-for="Titulo" class="form-control rounded-3 py-2" placeholder="Ex: Parecer Neurológico Inicial - Avaliação Comportamental" required />
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Campo Conteúdo (Texto que será criptografado) -->
+                    <div class="mb-4">
+                        <label for="textoPlanoConteudo" class="form-label fw-semibold text-secondary">Conteúdo Clínico / Observações</label>
+                        <textarea id="textoPlanoConteudo" name="textoPlanoConteudo" class="form-control rounded-3" rows="7" placeholder="Digite detalhadamente as conclusões clínicas, evoluções ou laudos técnicos..." required></textarea>
+                        <div class="form-text text-muted small mt-1">
+                            <i class="bi bi-shield-lock-fill text-success"></i> Este texto será protegido por criptografia simétrica AES no banco de dados.
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Detalhes" asp-controller="Prontuarios" asp-route-id="@Model.ProntuarioId" class="btn btn-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-lock-fill me-1"></i> Salvar e Criptografar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
