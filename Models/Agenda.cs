@@ -2,6 +2,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+//testando o uso do github
+
 namespace NeuroSync.Models
 {
     [Table("agenda")]
