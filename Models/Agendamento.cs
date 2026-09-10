@@ -2,6 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+
+//segundo teste de versionamento.
+
 namespace NeuroSync.Models
 {
     [Table("agendamento")]
