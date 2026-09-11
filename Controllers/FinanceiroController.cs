@@ -57,7 +57,7 @@ namespace NeuroSync.Controllers
                 TotalRecebido = todasCobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor),
                 TotalAReceber = totalEmAberto,
                 TotalEmAberto = totalEmAberto,
-                TotalDespesas = 102.00m, // Valor padrão para bater com o design da sua foto
+                TotalDespesas = 102.00m,
                 DespesasMes = 102.00m,
                 VariacaoDespesas = "+4.1%",
                 TaxaInadimplencia = Math.Round(inadimplencia, 1),
@@ -68,12 +68,14 @@ namespace NeuroSync.Controllers
             return View(viewModel);
         }
 
+        // 2. GET: Abre a tela para gerar uma nova cobrança
         public IActionResult Create()
         {
             ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome");
             return View();
         }
 
+        // 3. POST: Salva o boleto/cobrança no banco
         [HttpPost]
         public IActionResult Create(Cobranca cobranca)
         {
@@ -81,52 +83,75 @@ namespace NeuroSync.Controllers
             {
                 _context.Cobrancas.Add(cobranca);
                 _context.SaveChanges();
+                
                 return RedirectToAction("Index"); 
             }
+            
             ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", cobranca.PacienteId);
             return View(cobranca);
         }
 
+        // 4. GET: Abre a tela de confirmação de pagamento
         public IActionResult Baixa(int? id)
         {
             if (id == null) return NotFound();
-            var cobranca = _context.Cobrancas.Include(c => c.Paciente).FirstOrDefault(c => c.IdCobranca == id);
+
+            var cobranca = _context.Cobrancas
+                                   .Include(c => c.Paciente)
+                                   .FirstOrDefault(c => c.IdCobranca == id);
+
             if (cobranca == null) return NotFound();
+
             cobranca.DataPagamento = DateTime.Today;
+
             return View(cobranca);
         }
 
+        // 5. POST: Efetiva o pagamento no banco de dados
         [HttpPost]
         public IActionResult Baixa(int id, Cobranca cobranca)
         {
             if (id != cobranca.IdCobranca) return NotFound();
+
             var cobrancaOriginal = _context.Cobrancas.Find(id);
+            
             if (cobrancaOriginal != null)
             {
                 cobrancaOriginal.Status = "Pago";
                 cobrancaOriginal.DataPagamento = cobranca.DataPagamento;
+                
                 _context.SaveChanges();
             }
+            
             return RedirectToAction("Index");
         }
 
+        // 6. GET: Abre a tela de confirmação para apagar o boleto
         public IActionResult Delete(int? id)
         {
             if (id == null) return NotFound();
-            var cobranca = _context.Cobrancas.Include(c => c.Paciente).FirstOrDefault(c => c.IdCobranca == id);
+
+            var cobranca = _context.Cobrancas
+                                   .Include(c => c.Paciente)
+                                   .FirstOrDefault(c => c.IdCobranca == id);
+
             if (cobranca == null) return NotFound();
+
             return View(cobranca);
         }
 
+        // 7. POST: Vai no banco de dados e apaga de vez
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmed(int id)
         {
             var cobranca = _context.Cobrancas.Find(id);
+            
             if (cobranca != null)
             {
                 _context.Cobrancas.Remove(cobranca);
                 _context.SaveChanges();
             }
+            
             return RedirectToAction("Index");
         }
     }
