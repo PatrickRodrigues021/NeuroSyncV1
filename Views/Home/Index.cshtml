@@ -1,201 +1,891 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
+@model NeuroSync.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard Clínico";
 }
 
 <style>
-    /* Fundo padrão do sistema */
-    .dashboard-container { background-color: #f1f5f9; min-height: 80vh; padding-bottom: 2rem; }
-    
-    /* Cartões Premium */
-    .dashboard-card { 
-        background: white; 
-        border-radius: 16px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
-        padding: 24px; 
-        border: none; 
-        height: 100%;
+    /* Estilos do Dashboard Clínico NeuroSync */
+    .dashboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
     }
-    
-    /* Caixas de ícones dos mini-cards */
-    .icon-box {
-        width: 54px; 
-        height: 54px; 
-        border-radius: 14px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        font-size: 1.5rem;
+
+    /* Cabeçalho da tela */
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dashboard-title-area h2 {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #0b223d;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+    }
+
+    .dashboard-title-area p {
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    .dashboard-date-badge {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 50px;
+        padding: 8px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        color: #475569;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .dashboard-date-badge i {
+        color: #0284c7;
+        font-size: 1.1rem;
+    }
+
+    /* Cartões Base */
+    .premium-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035);
+        padding: 22px 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Mini-cards de KPIs Clínicos */
+    .kpi-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .kpi-icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+    }
+
+    .icon-blue   { background: #e0f2fe; color: #0284c7; }
+    .icon-green  { background: #dcfce7; color: #10b981; }
+    .icon-amber  { background: #fef3c7; color: #d97706; }
+    .icon-rose   { background: #ffe4e6; color: #e11d48; }
+
+    .kpi-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0b223d;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .kpi-subtext {
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Faixa de Métricas Secundárias (Compacta) */
+    .secondary-metrics-strip {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.025);
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .metric-pill-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        color: #64748b;
+    }
+
+    .metric-pill-item strong {
+        color: #0b223d;
+        font-weight: 700;
+    }
+
+    .metric-pill-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    /* Lista de Atendimentos */
+    .appointment-item-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #f1f5f9;
+        background: #f8fafc;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .appointment-item-card:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    .appointment-time-badge {
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 0.95rem;
+        font-weight: 800;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-align: center;
+        flex-shrink: 0;
+        min-width: 68px;
+    }
+
+    .patient-avatar-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .patient-info-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .patient-name-link {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0b223d;
+        text-decoration: none;
+    }
+
+    .patient-name-link:hover {
+        color: #0284c7;
+    }
+
+    .patient-sub-details {
+        font-size: 0.81rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .patient-sub-details span.badge-room {
+        background: #e2e8f0;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.72rem;
+        padding: 2px 7px;
+        border-radius: 6px;
+    }
+
+    .status-badge-custom {
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 50px;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .status-confirmed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-pending   { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-done      { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+    /* Barra de Ações Rápidas */
+    .quick-actions-bar {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035);
+        padding: 18px 24px;
+    }
+
+    .quick-actions-header {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #64748b;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .btn-quick-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #0b223d;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-quick-action:hover {
+        background: #0284c7;
+        border-color: #0284c7;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25);
+    }
+
+    .btn-quick-action:hover .quick-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+    }
+
+    .quick-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #e0f2fe;
+        color: #0284c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        transition: all 0.2s ease;
+    }
+
+    /* Gráfico com Abas e Visual Limpo */
+    .chart-tabs-btn {
+        background: #f1f5f9;
+        border: none;
+        border-radius: 10px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #64748b;
+        transition: all 0.2s ease;
+    }
+
+    .chart-tabs-btn.active {
+        background: #0284c7;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    }
+
+    .status-prog-item {
+        margin-bottom: 12px;
+    }
+
+    .status-prog-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 4px;
+    }
+
+    .status-prog-bar {
+        height: 8px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        overflow: hidden;
+    }
+
+    .status-prog-fill {
+        height: 100%;
+        border-radius: 10px;
     }
 </style>
 
-<div class="dashboard-container pt-3">
-    
-    <!-- CABEÇALHO -->
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1" style="color: var(--text-dark);">Visão Geral</h3>
-        <p class="text-muted fw-bold mb-0">Acompanhe os indicadores da sua clínica em tempo real.</p>
-    </div>
+<div class="dashboard-wrapper pt-2">
 
-    <!-- LINHA 1: OS 4 CARDS DE INDICADORES -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Pacientes -->
-        <div class="col-md-3">
-            <div class="dashboard-card d-flex align-items-center">
-                <div class="icon-box bg-primary bg-opacity-10 text-primary me-3">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Pacientes Ativos</h6>
-                    <h3 class="fw-bold text-dark mb-0">@ViewBag.TotalPacientes</h3>
-                </div>
-            </div>
+    <!-- 1. CABEÇALHO COM SAUDAÇÃO E DATA -->
+    <div class="dashboard-header">
+        <div class="dashboard-title-area">
+            <h2>@Model.Saudacao, @Model.NomeUsuario! 👋</h2>
+            <p>Acompanhe os atendimentos e a rotina clínica de hoje em tempo real.</p>
         </div>
-        
-        <!-- Sessões -->
-        <div class="col-md-3">
-            <div class="dashboard-card d-flex align-items-center">
-                <div class="icon-box bg-success bg-opacity-10 text-success me-3">
-                    <i class="bi bi-calendar2-check-fill"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Sessões (Hoje)</h6>
-                    <h3 class="fw-bold text-dark mb-0">@ViewBag.SessoesHoje <span class="fs-6 text-success fw-semibold">/ @ViewBag.SessoesConcluidas concl.</span></h3>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Pendências -->
-        <div class="col-md-3">
-            <div class="dashboard-card d-flex align-items-center">
-                <div class="icon-box bg-warning bg-opacity-10 text-warning me-3">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Pendências</h6>
-                    <h3 class="fw-bold text-danger mb-0">@ViewBag.Pendencias</h3>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Receita -->
-        <div class="col-md-3">
-            <div class="dashboard-card d-flex align-items-center">
-                <div class="icon-box bg-info bg-opacity-10 text-info me-3">
-                    <i class="bi bi-currency-dollar"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Receita (Mês)</h6>
-                    <h3 class="fw-bold text-success mb-0">@(ViewBag.ReceitaMes != null ? ((decimal)ViewBag.ReceitaMes).ToString("C") : "R$ 0,00")</h3>
-                </div>
-            </div>
+
+        <div class="dashboard-date-badge">
+            <i class="bi bi-calendar3"></i>
+            <span>@Model.DataFormatada</span>
         </div>
     </div>
 
-    <!-- LINHA 2: LISTA DE ATENDIMENTOS E GRÁFICO -->
+    <!-- 2. OS 4 CARDS CLÍNICOS PRINCIPAIS -->
+    <div class="row g-4">
+        <!-- 1. Atendimentos Hoje -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="premium-card">
+                <div class="kpi-stat-card">
+                    <div class="kpi-icon-box icon-blue">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Atendimentos hoje</div>
+                        <div class="kpi-value">@Model.AtendimentosHoje</div>
+                        <div class="kpi-subtext text-primary">
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1">
+                                <i class="bi bi-check2 me-1"></i>@Model.ConcluidosHoje concluídos
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Confirmados -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="premium-card">
+                <div class="kpi-stat-card">
+                    <div class="kpi-icon-box icon-green">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Confirmados</div>
+                        <div class="kpi-value">@Model.ConfirmadosHoje</div>
+                        <div class="kpi-subtext text-success">
+                            <i class="bi bi-arrow-up-right me-1"></i>@Model.ConfirmadosPercentual% do total de hoje
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Aguardando Confirmação -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="premium-card">
+                <div class="kpi-stat-card">
+                    <div class="kpi-icon-box icon-amber">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Aguardando confirmação</div>
+                        <div class="kpi-value">@Model.AguardandoConfirmacaoHoje</div>
+                        <div class="kpi-subtext text-warning">
+                            <i class="bi bi-exclamation-circle me-1"></i>Requer atenção (@Model.AguardandoPercentual%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Pendências -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="premium-card">
+                <div class="kpi-stat-card">
+                    <div class="kpi-icon-box icon-rose">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Pendências clínicas</div>
+                        <div class="kpi-value text-danger">@Model.PendenciasHoje</div>
+                        <div class="kpi-subtext text-danger">
+                            Sessões a regularizar
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. FAIXA COMPACTA DE MÉTRICAS SECUNDÁRIAS (GESTÃO E CLÍNICA) -->
+    <div class="secondary-metrics-strip">
+        <!-- Pacientes Ativos -->
+        <div class="metric-pill-item">
+            <div class="metric-pill-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-person-heart"></i>
+            </div>
+            <span>Pacientes Ativos: <strong>@Model.TotalPacientesAtivos</strong></span>
+        </div>
+
+        <div class="vr d-none d-md-block opacity-25"></div>
+
+        <!-- Receita do Mês -->
+        <div class="metric-pill-item">
+            <div class="metric-pill-icon bg-success bg-opacity-10 text-success">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <span>Receita de @Model.NomeMes: <strong class="text-success">@Model.ReceitaMes.ToString("C")</strong></span>
+        </div>
+
+        <div class="vr d-none d-md-block opacity-25"></div>
+
+        <!-- Sessões no Mês -->
+        <div class="metric-pill-item">
+            <div class="metric-pill-icon bg-info bg-opacity-10 text-info">
+                <i class="bi bi-calendar2-check"></i>
+            </div>
+            <span>Sessões Realizadas: <strong>@Model.SessoesRealizadasMes</strong></span>
+        </div>
+
+        <div class="vr d-none d-md-block opacity-25"></div>
+
+        <!-- Aniversariantes -->
+        <div class="metric-pill-item">
+            <div class="metric-pill-icon bg-purple bg-opacity-10 text-primary" style="background-color: #f3e8ff; color: #a855f7;">
+                <i class="bi bi-gift-fill" style="color: #a855f7;"></i>
+            </div>
+            <span>Aniversariantes no mês: <strong>@Model.AniversariantesMes</strong></span>
+        </div>
+
+        <a href="/Relatorios" class="btn btn-sm btn-link text-primary text-decoration-none fw-bold ms-auto">
+            Ver Relatórios <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- 4. LINHA CENTRAL: PRÓXIMOS ATENDIMENTOS & STATUS DAS SESSÕES / RITMO -->
     <div class="row g-4">
         
-        <!-- COLUNA ESQUERDA: PRÓXIMOS ATENDIMENTOS -->
-        <div class="col-md-5">
-            <div class="dashboard-card">
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h5 class="fw-bold text-dark mb-0">Próximos Atendimentos</h5>
-                    <a href="/Agenda" class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3">Ver Agenda</a>
-                </div>
-                
-                @if (ViewBag.ProximosAtendimentos != null && ViewBag.ProximosAtendimentos.Count > 0)
-                {
-                    foreach (var agendamento in ViewBag.ProximosAtendimentos)
-                    {
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                            <!-- Horário -->
-                            <div class="me-3 text-center pe-3 border-end">
-                                <div class="fw-bold text-primary fs-5">@agendamento.DataHora.ToString("HH:mm")</div>
-                            </div>
-                            
-                            <!-- Nome do Paciente -->
-                            <div class="flex-grow-1 ps-2">
-                                <h6 class="mb-0 fw-bold text-dark">@(agendamento.Paciente != null ? agendamento.Paciente.Nome : "Sem Nome")</h6>
-                                <small class="text-muted fw-semibold">Consulta</small>
-                            </div>
-                            
-                            <!-- Status -->
-                            <div>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
-                                    @agendamento.Status
-                                </span>
-                            </div>
+        <!-- COLUNA ESQUERDA: PRÓXIMOS ATENDIMENTOS CLÍNICOS -->
+        <div class="col-12 col-lg-6">
+            <div class="premium-card">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="icon-box icon-blue" style="width: 38px; height: 38px; border-radius: 10px; font-size: 1.1rem;">
+                            <i class="bi bi-calendar-week"></i>
                         </div>
-                    }
+                        <h5 class="fw-bold text-dark mb-0">Próximos Atendimentos</h5>
+                    </div>
+                    <a href="/Agenda" class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 border">
+                        Ver Agenda <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                @if (Model.ProximosAtendimentos != null && Model.ProximosAtendimentos.Any())
+                {
+                    <div class="appointment-list-wrapper">
+                        @foreach (var item in Model.ProximosAtendimentos)
+                        {
+                            <div class="appointment-item-card">
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Horário -->
+                                    <div class="appointment-time-badge">
+                                        @item.Horario
+                                    </div>
+
+                                    <!-- Avatar -->
+                                    <div class="patient-avatar-circle">
+                                        @if (item.AvatarGenero == "girl")
+                                        {
+                                            <svg viewBox="0 0 44 44" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#d1fae5"/>
+                                                <path d="M12 26C12 16 16 11 22 11C28 11 32 16 32 26C32 28 31 32 30 32C29 32 28 26 28 24C28 24 25 24 22 24C19 24 16 24 16 24C16 26 15 32 14 32C13 32 12 28 12 26Z" fill="#3b2d22"/>
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <path d="M14 19C16 15 20 14 22 14C24 14 28 15 30 19C28 17 24 16 22 16C20 16 16 17 14 19Z" fill="#3b2d22"/>
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#e11d48" stroke-width="1" stroke-linecap="round"/>
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#ec4899"/>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg viewBox="0 0 44 44" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#cffafe"/>
+                                                <path d="M14 19C14 14 17 11 22 11C27 11 30 14 30 19C30 20 29 20 28 18C26 16 24 16 22 16C20 16 18 16 16 18C15 20 14 20 14 19Z" fill="#1e293b"/>
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <path d="M16 16C18 13 24 12 28 15C25 14 21 14 18 15Z" fill="#1e293b"/>
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#0284c7" stroke-width="1.2" stroke-linecap="round"/>
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#0284c7"/>
+                                            </svg>
+                                        }
+                                    </div>
+
+                                    <!-- Nome e Detalhes da Sessão -->
+                                    <div class="patient-info-meta">
+                                        <a href="/Pacientes/Details/@item.PacienteId" class="patient-name-link" title="Abrir prontuário do paciente">@item.PacienteNome</a>
+                                        <div class="patient-sub-details">
+                                            <span>@item.Terapia</span>
+                                            <span>•</span>
+                                            <span class="badge-room">@item.Sala</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status Badge e Ação Atender -->
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (item.Status == "Em atendimento")
+                                    {
+                                        <span class="status-badge-custom text-primary border border-primary-subtle" style="background: #e0f2fe;">
+                                            <span class="spinner-grow spinner-grow-sm text-primary me-1" style="width: 8px; height: 8px;" role="status"></span>Em atendimento
+                                        </span>
+                                        <a href="/Pacientes/Details/@item.PacienteId?aba=evolucao" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                            Continuar <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    }
+                                    else if (item.Status.Contains("Confirmado"))
+                                    {
+                                        <span class="status-badge-custom status-confirmed">
+                                            <i class="bi bi-check2-circle me-1"></i>Confirmado
+                                        </span>
+                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" title="Iniciar atendimento deste paciente">
+                                            <i class="bi bi-play-fill me-1"></i>Atender
+                                        </a>
+                                    }
+                                    else if (item.Status.Contains("Aguardando"))
+                                    {
+                                        <span class="status-badge-custom status-pending">
+                                            <i class="bi bi-hourglass-split me-1"></i>Aguardando
+                                        </span>
+                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-light border text-primary rounded-pill px-3 fw-bold">
+                                            <i class="bi bi-play-fill me-1"></i>Atender
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge-custom status-done">
+                                            @item.Status
+                                        </span>
+                                        <a href="/Pacientes/Details/@item.PacienteId" class="btn btn-sm btn-light border text-muted rounded-pill px-3 fw-bold">
+                                            Ver Prontuário
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 }
                 else
                 {
                     <div class="text-center py-5 text-muted">
-                        <i class="bi bi-cup-hot mb-3" style="font-size: 3rem;"></i>
-                        <h6 class="fw-bold">Nenhum atendimento pendente para hoje!</h6>
-                        <p class="small">Aproveite para organizar seus relatórios.</p>
+                        <i class="bi bi-calendar2-check mb-3 text-primary opacity-50" style="font-size: 3rem;"></i>
+                        <h6 class="fw-bold text-dark">Todos os atendimentos concluídos!</h6>
+                        <p class="small text-muted mb-3">Nenhum atendimento pendente para o restante de hoje.</p>
+                        <a href="/Agenda" class="btn btn-sm btn-primary rounded-pill px-3">Novo Agendamento</a>
                     </div>
                 }
+
+                <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-info-circle me-1 text-primary"></i> Clique em um paciente para abrir seu histórico clínico.</span>
+                    <a href="/Prontuarios" class="text-primary fw-bold text-decoration-none">Prontuários →</a>
+                </div>
             </div>
         </div>
 
-        <!-- COLUNA DIREITA: GRÁFICO -->
-        <div class="col-md-7">
-            <div class="dashboard-card">
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <!-- COLUNA DIREITA: STATUS DAS SESSÕES E RITMO SEMANAL -->
+        <div class="col-12 col-lg-6">
+            <div class="premium-card">
+                <!-- Cabeçalho com Abas para alternar visualização -->
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
                     <div>
-                        <h5 class="fw-bold text-dark mb-1">Status das Sessões</h5>
-                        <p class="text-muted mb-0 small fw-semibold">Mês de @ViewBag.NomeMes • Total: @ViewBag.TotalMes sessões</p>
+                        <h5 class="fw-bold text-dark mb-0">Atendimentos do Mês</h5>
+                        <small class="text-muted">Total de @Model.TotalSessoesMes sessões registradas em @Model.NomeMes</small>
                     </div>
-                    <div class="icon-box bg-light text-muted" style="width: 40px; height: 40px;">
-                        <i class="bi bi-pie-chart-fill"></i>
+
+                    <div class="d-flex gap-2">
+                        <button class="chart-tabs-btn active" id="tabStatusBtn" onclick="toggleChartView('status')">
+                            <i class="bi bi-pie-chart-fill me-1"></i>Status
+                        </button>
+                        <button class="chart-tabs-btn" id="tabRitmoBtn" onclick="toggleChartView('ritmo')">
+                            <i class="bi bi-bar-chart-fill me-1"></i>Ritmo Semanal
+                        </button>
                     </div>
                 </div>
-                
-                <!-- Onde o Gráfico será desenhado -->
-                <div style="height: 300px; width: 100%; display: flex; justify-content: center;">
-                    <canvas id="graficoSessoes"></canvas>
+
+                <!-- Visão 1: Donut de Status + Barras de Progresso -->
+                <div id="viewStatus" class="row align-items-center g-3 my-auto">
+                    <div class="col-12 col-md-6 text-center position-relative">
+                        <div style="height: 210px; width: 100%; position: relative;">
+                            <canvas id="graficoSessoesDonut"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <!-- Realizadas -->
+                        <div class="status-prog-item">
+                            <div class="status-prog-label">
+                                <span><span class="badge rounded-circle p-1 bg-success me-1"></span> Realizadas</span>
+                                <strong>@Model.RealizadasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.RealizadasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            </div>
+                            <div class="status-prog-bar">
+                                <div class="status-prog-fill bg-success" style="width: @(Model.TotalSessoesMes > 0 ? (Model.RealizadasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Agendadas -->
+                        <div class="status-prog-item">
+                            <div class="status-prog-label">
+                                <span><span class="badge rounded-circle p-1 bg-primary me-1"></span> Agendadas</span>
+                                <strong>@Model.AgendadasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.AgendadasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            </div>
+                            <div class="status-prog-bar">
+                                <div class="status-prog-fill bg-primary" style="width: @(Model.TotalSessoesMes > 0 ? (Model.AgendadasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Canceladas -->
+                        <div class="status-prog-item">
+                            <div class="status-prog-label">
+                                <span><span class="badge rounded-circle p-1 bg-danger me-1"></span> Canceladas</span>
+                                <strong>@Model.CanceladasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.CanceladasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            </div>
+                            <div class="status-prog-bar">
+                                <div class="status-prog-fill bg-danger" style="width: @(Model.TotalSessoesMes > 0 ? (Model.CanceladasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Faltas -->
+                        <div class="status-prog-item">
+                            <div class="status-prog-label">
+                                <span><span class="badge rounded-circle p-1 bg-warning me-1"></span> Faltas</span>
+                                <strong>@Model.FaltasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.FaltasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            </div>
+                            <div class="status-prog-bar">
+                                <div class="status-prog-fill bg-warning" style="width: @(Model.TotalSessoesMes > 0 ? (Model.FaltasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visão 2: Gráfico de Ritmo Semanal (Seg a Sex) -->
+                <div id="viewRitmo" class="my-auto d-none">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-muted">Distribuição dos atendimentos nesta semana:</span>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill">Segunda a Sexta</span>
+                    </div>
+                    <div style="height: 210px; width: 100%;">
+                        <canvas id="graficoRitmoSemanal"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between text-muted small">
+                    <span>Métrica atualizada automaticamente com as agendas.</span>
+                    <a href="/Relatorios" class="text-primary fw-bold text-decoration-none">Exportar dados →</a>
                 </div>
             </div>
         </div>
-        
+
     </div>
+
+    <!-- 5. BARRA DE AÇÕES RÁPIDAS (ATALHOS DA ROTINA CLÍNICA) -->
+    <div class="quick-actions-bar">
+        <div class="quick-actions-header">
+            <i class="bi bi-lightning-charge-fill text-warning"></i>
+            <span>Ações Rápidas da Clínica</span>
+        </div>
+
+        <div class="quick-actions-grid">
+            <!-- + Novo Paciente -->
+            <a href="/Pacientes" class="btn-quick-action">
+                <div class="quick-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <span>Novo Paciente</span>
+            </a>
+
+            <!-- + Novo Atendimento -->
+            <a href="/Agenda" class="btn-quick-action">
+                <div class="quick-icon">
+                    <i class="bi bi-calendar-plus-fill"></i>
+                </div>
+                <span>Novo Atendimento</span>
+            </a>
+
+            <!-- + Prontuário / Evolução -->
+            <a href="/Prontuarios" class="btn-quick-action">
+                <div class="quick-icon">
+                    <i class="bi bi-file-earmark-medical-fill"></i>
+                </div>
+                <span>Novo Prontuário</span>
+            </a>
+
+            <!-- + Nova Terapia -->
+            <a href="/Terapias" class="btn-quick-action">
+                <div class="quick-icon">
+                    <i class="bi bi-puzzle-fill"></i>
+                </div>
+                <span>Terapias & Áreas</span>
+            </a>
+
+            <!-- + Novo Lançamento -->
+            <a href="/Financeiro" class="btn-quick-action">
+                <div class="quick-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <span>Novo Lançamento</span>
+            </a>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
-    <!-- 1. Importa a biblioteca Chart.js -->
+    <!-- Importa Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- 2. Cria o Gráfico interativo -->
+
     <script>
+        let donutChartInstance = null;
+        let barChartInstance = null;
+
         document.addEventListener("DOMContentLoaded", function () {
-            const ctx = document.getElementById('graficoSessoes').getContext('2d');
-            
-            new Chart(ctx, {
+            // 1. Gráfico Doughnut Moderno
+            const ctxDonut = document.getElementById('graficoSessoesDonut').getContext('2d');
+            donutChartInstance = new Chart(ctxDonut, {
                 type: 'doughnut',
                 data: {
                     labels: ['Realizadas', 'Agendadas', 'Canceladas', 'Faltas'],
                     datasets: [{
                         data: [
-                            @(ViewBag.Realizadas ?? 0), 
-                            @(ViewBag.Agendadas ?? 0), 
-                            @(ViewBag.Canceladas ?? 0), 
-                            @(ViewBag.Faltas ?? 0)
+                            @Model.RealizadasMes,
+                            @Model.AgendadasMes,
+                            @Model.CanceladasMes,
+                            @Model.FaltasMes
                         ],
-                        backgroundColor: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b'],
-                        borderWidth: 0,
-                        hoverOffset: 5
+                        backgroundColor: ['#10b981', '#0284c7', '#ef4444', '#f59e0b'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right', labels: { font: { family: "'Segoe UI', sans-serif", size: 13, weight: '600' }, color: '#475569', padding: 20 } }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return ' ' + context.label + ': ' + context.raw + ' sessões';
+                                }
+                            }
+                        }
                     },
-                    cutout: '75%'
+                    cutout: '76%'
+                }
+            });
+
+            // 2. Gráfico de Ritmo Semanal (Barras)
+            const ctxBar = document.getElementById('graficoRitmoSemanal').getContext('2d');
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
+                    datasets: [{
+                        label: 'Atendimentos',
+                        data: [
+                            @Model.SemanaSeg,
+                            @Model.SemanaTer,
+                            @Model.SemanaQua,
+                            @Model.SemanaQui,
+                            @Model.SemanaSex
+                        ],
+                        backgroundColor: '#0284c7',
+                        hoverBackgroundColor: '#0062ff',
+                        borderRadius: 8,
+                        barThickness: 32
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return ' ' + context.raw + ' atendimentos';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' },
+                            ticks: { precision: 0, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 12 }, color: '#475569' }
+                        }
+                    }
                 }
             });
         });
+
+        // Alternar entre Donut e Ritmo Semanal
+        function toggleChartView(view) {
+            const viewStatus = document.getElementById('viewStatus');
+            const viewRitmo = document.getElementById('viewRitmo');
+            const tabStatusBtn = document.getElementById('tabStatusBtn');
+            const tabRitmoBtn = document.getElementById('tabRitmoBtn');
+
+            if (view === 'status') {
+                viewStatus.classList.remove('d-none');
+                viewRitmo.classList.add('d-none');
+                tabStatusBtn.classList.add('active');
+                tabRitmoBtn.classList.remove('active');
+            } else {
+                viewStatus.classList.add('d-none');
+                viewRitmo.classList.remove('d-none');
+                tabStatusBtn.classList.remove('active');
+                tabRitmoBtn.classList.add('active');
+                if (barChartInstance) {
+                    barChartInstance.resize();
+                }
+            }
+        }
     </script>
 }

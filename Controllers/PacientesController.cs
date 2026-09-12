@@ -4,10 +4,15 @@ using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.IO; 
+using System.Globalization;
 using Microsoft.AspNetCore.Http; 
 using Microsoft.AspNetCore.Hosting; 
+using Microsoft.EntityFrameworkCore;
 using NeuroSync.Models;
 using NeuroSync.Data;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace NeuroSync.Controllers
 {
@@ -36,37 +41,54 @@ namespace NeuroSync.Controllers
             return View(pacientes.OrderBy(p => p.Nome).ToList());
         }
 
-        // 2. TELA DE PRONTUÁRIO / PERFIL (Trazendo Agendamentos, Evoluções e Anexos)
-        public IActionResult Details(int? id)
+        // 2. TELA DE PRONTUÁRIO / PERFIL (Trazendo Agendamentos, Evoluções, Pareceres e Anexos)
+        public async Task<IActionResult> Details(int? id, string? aba = null)
         {
             if (id == null) return NotFound();
 
-            var paciente = _context.Pacientes.FirstOrDefault(m => m.IdPaciente == id);
+            var paciente = await _context.Pacientes.FirstOrDefaultAsync(m => m.IdPaciente == id);
             if (paciente == null) return NotFound();
 
             // Busca Evoluções
-            var evolucoes = _context.Evolucoes
-                                    .Where(e => e.PacienteId == id)
-                                    .OrderByDescending(e => e.DataRegistro)
-                                    .ToList();
+            var evolucoes = await _context.Evolucoes
+                                          .Where(e => e.PacienteId == id)
+                                          .OrderByDescending(e => e.DataRegistro)
+                                          .ToListAsync();
             
             ViewBag.Evolucoes = evolucoes;
-            ViewBag.UltimasEvolucoes = evolucoes; // Mantendo os dois nomes por segurança para a View
+            ViewBag.UltimasEvolucoes = evolucoes;
 
-            // Busca Agendamentos Futuros
-            var agendamentos = _context.Agendamentos
-                                       .Where(a => a.PacienteId == id && a.DataHora >= DateTime.Today)
-                                       .OrderBy(a => a.DataHora)
-                                       .ToList();
+            // Busca Todos os Agendamentos do Paciente
+            var todosAgendamentos = await _context.Agendamentos
+                                                 .Where(a => a.PacienteId == id)
+                                                 .OrderByDescending(a => a.DataHora)
+                                                 .ToListAsync();
             
-            ViewBag.Agendamentos = agendamentos;
-            ViewBag.ProximosAtendimentos = agendamentos;
+            ViewBag.TodosAgendamentos = todosAgendamentos;
+            ViewBag.Agendamentos = todosAgendamentos.Where(a => a.DataHora >= DateTime.Today).OrderBy(a => a.DataHora).ToList();
+            ViewBag.ProximosAtendimentos = ViewBag.Agendamentos;
+
+            // Busca Pareceres Técnicos Emitidos
+            var pareceres = await _context.PareceresTecnicos
+                                          .Where(p => p.PacienteId == id)
+                                          .OrderByDescending(p => p.DataEmissao)
+                                          .ToListAsync();
+            ViewBag.PareceresTecnicos = pareceres;
+
+            // Busca Cobranças do Paciente
+            var cobrancas = await _context.Cobrancas
+                                          .Where(c => c.PacienteId == id)
+                                          .OrderByDescending(c => c.DataVencimento)
+                                          .ToListAsync();
+            ViewBag.Cobrancas = cobrancas;
 
             // Busca Arquivos Anexos
-            ViewBag.Anexos = _context.Anexos
-                                     .Where(a => a.PacienteId == id)
-                                     .OrderByDescending(a => a.DataUpload)
-                                     .ToList();
+            ViewBag.Anexos = await _context.Anexos
+                                           .Where(a => a.PacienteId == id)
+                                           .OrderByDescending(a => a.DataUpload)
+                                           .ToListAsync();
+
+            ViewBag.AbaAtiva = string.IsNullOrWhiteSpace(aba) ? "resumo" : aba.ToLower().Trim();
 
             return View(paciente);
         }
@@ -81,7 +103,238 @@ namespace NeuroSync.Controllers
                 _context.Evolucoes.Add(novaEvolucao);
                 _context.SaveChanges();
             }
-            return RedirectToAction("Details", new { id = PacienteId });
+            return RedirectToAction("Details", new { id = PacienteId, aba = "evolucao" });
+        }
+
+        // ========================================================
+        // 3.1 SALVAR PARECER TÉCNICO
+        // ========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SalvarParecerTecnico(ParecerTecnico model)
+        {
+            if (model.PacienteId <= 0) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(model.Titulo))
+            {
+                model.Titulo = "Relatório de Avaliação Neuropsicopedagógica";
+            }
+
+            if (model.DataEmissao == default)
+            {
+                model.DataEmissao = DateTime.Now;
+            }
+
+            if (ModelState.IsValid)
+            {
+                if (model.IdParecer == 0)
+                {
+                    _context.PareceresTecnicos.Add(model);
+                }
+                else
+                {
+                    _context.PareceresTecnicos.Update(model);
+                }
+                await _context.SaveChangesAsync();
+
+                TempData["MensagemSucesso"] = "Parecer técnico gerado com sucesso! O documento já está disponível para consulta e emissão do PDF.";
+                return RedirectToAction("Details", new { id = model.PacienteId, aba = "parecer" });
+            }
+
+            TempData["MensagemErro"] = "Por favor, verifique os campos do parecer.";
+            return RedirectToAction("Details", new { id = model.PacienteId, aba = "parecer" });
+        }
+
+        // ========================================================
+        // 3.2 EMISSÃO DO PDF DO PARECER TÉCNICO COM LOGO
+        // ========================================================
+        public async Task<IActionResult> GerarParecerPdf(int id)
+        {
+            var parecer = await _context.PareceresTecnicos
+                                        .Include(p => p.Paciente)
+                                        .FirstOrDefaultAsync(p => p.IdParecer == id);
+
+            if (parecer == null || parecer.Paciente == null) return NotFound();
+
+            var paciente = parecer.Paciente;
+            var culturaBr = new CultureInfo("pt-BR");
+
+            // Cálculo seguro de idade
+            var idade = DateTime.Today.Year - paciente.DataNascimento.Year;
+            if (paciente.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
+
+            // Identificação do Responsável
+            string responsavel = !string.IsNullOrWhiteSpace(paciente.Responsavel) ? paciente.Responsavel :
+                                 !string.IsNullOrWhiteSpace(paciente.NomeMae) ? paciente.NomeMae :
+                                 !string.IsNullOrWhiteSpace(paciente.NomePai) ? paciente.NomePai : "Não informado";
+
+            // Imagem do Logo Principal
+            string logoPath = Path.Combine(_hostEnvironment.WebRootPath, "images", "logo-principal-cerebro-coracao 2.png");
+            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
+
+            var documento = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(32);
+                    page.DefaultTextStyle(x => x.FontSize(9.5f).FontColor(Color.FromHex("#1e293b")));
+
+                    // 1. CABEÇALHO DO LAUDO
+                    page.Header().Column(headerCol =>
+                    {
+                        headerCol.Item().Row(row =>
+                        {
+                            // Logo e Identificação Clínica
+                            row.RelativeItem(7).Row(bRow =>
+                            {
+                                if (logoBytes != null)
+                                {
+                                    bRow.ConstantItem(46).Height(46).Image(logoBytes).FitArea();
+                                    bRow.ConstantItem(10);
+                                }
+
+                                bRow.RelativeItem().Column(brandCol =>
+                                {
+                                    brandCol.Item().Row(logoRow =>
+                                    {
+                                        logoRow.AutoItem().Text("Neuro").FontSize(20).Bold().FontColor(Color.FromHex("#071A3A"));
+                                        logoRow.AutoItem().Text("Sync").FontSize(20).Bold().FontColor(Color.FromHex("#315BEF"));
+                                    });
+                                    brandCol.Item().Text("Clínica de Desenvolvimento e Neuropsicopedagogia").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                                    brandCol.Item().Text("Atendimento Clínico Multidisciplinar Especializado").FontSize(7.5f).FontColor(Colors.Grey.Medium);
+                                });
+                            });
+
+                            // Tipo e Emissão
+                            row.RelativeItem(5).AlignRight().Column(metaCol =>
+                            {
+                                metaCol.Item().Text("PARECER TÉCNICO").FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
+                                metaCol.Item().Text($"Registro Clínico: #P{parecer.IdParecer:D4}").FontSize(8.5f).FontColor(Color.FromHex("#315BEF")).Bold();
+                                metaCol.Item().Text($"Emissão: {parecer.DataEmissao:dd/MM/yyyy}").FontSize(8.5f).FontColor(Colors.Grey.Darken2);
+                            });
+                        });
+
+                        // Linha decorativa
+                        headerCol.Item().PaddingTop(8).LineHorizontal(2).LineColor(Color.FromHex("#315BEF"));
+                    });
+
+                    // 2. CONTEÚDO DO PARECER
+                    page.Content().PaddingTop(12).Column(contentCol =>
+                    {
+                        // 2.1 IDENTIFICAÇÃO DO PACIENTE (CARD ELEGANTE)
+                        contentCol.Item().Border(1).BorderColor(Color.FromHex("#e2e8f0")).Background(Color.FromHex("#f8fafc")).Padding(10).Column(pCol =>
+                        {
+                            pCol.Item().Row(pRow =>
+                            {
+                                pRow.RelativeItem(6).Text(t =>
+                                {
+                                    t.Span("Paciente: ").Bold().FontColor(Color.FromHex("#0f172a"));
+                                    t.Span(paciente.Nome).Bold().FontColor(Color.FromHex("#1e40af"));
+                                });
+
+                                pRow.RelativeItem(3).Text(t =>
+                                {
+                                    t.Span("Idade: ").Bold().FontColor(Color.FromHex("#0f172a"));
+                                    t.Span($"{idade} anos ({paciente.DataNascimento:dd/MM/yyyy})");
+                                });
+
+                                pRow.RelativeItem(3).AlignRight().Text(t =>
+                                {
+                                    t.Span("CPF: ").Bold().FontColor(Color.FromHex("#0f172a"));
+                                    t.Span(!string.IsNullOrWhiteSpace(paciente.Cpf) ? paciente.Cpf : "-");
+                                });
+                            });
+
+                            pCol.Item().PaddingTop(4).Row(pRow2 =>
+                            {
+                                pRow2.RelativeItem(6).Text(t =>
+                                {
+                                    t.Span("Responsável: ").Bold().FontColor(Color.FromHex("#0f172a"));
+                                    t.Span(responsavel);
+                                });
+
+                                pRow2.RelativeItem(6).AlignRight().Text(t =>
+                                {
+                                    t.Span("Profissional: ").Bold().FontColor(Color.FromHex("#0f172a"));
+                                    t.Span($"{parecer.ProfissionalNome} ({parecer.RegistroProfissional})");
+                                });
+                            });
+                        });
+
+                        // 2.2 TÍTULO CENTRAL DO DOCUMENTO
+                        contentCol.Item().PaddingTop(12).PaddingBottom(6).AlignCenter().Text(parecer.Titulo.ToUpper())
+                                  .FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
+
+                        // 2.3 SEÇÕES CLÍNICAS PADRONIZADAS (CONFORME FORMULÁRIO)
+                        Action<string, string, string?> renderSecao = (numero, titulo, texto) =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(texto))
+                            {
+                                contentCol.Item().PaddingTop(10).Column(sCol =>
+                                {
+                                    sCol.Item().Row(sRow =>
+                                    {
+                                        sRow.AutoItem().Text(numero).Bold().FontColor(Color.FromHex("#315BEF")).FontSize(10.5f);
+                                        sRow.ConstantItem(6);
+                                        sRow.AutoItem().Text(titulo.ToUpper()).Bold().FontColor(Color.FromHex("#0f172a")).FontSize(10f);
+                                    });
+                                    sCol.Item().PaddingTop(2).LineHorizontal(0.5f).LineColor(Color.FromHex("#cbd5e1"));
+                                    sCol.Item().PaddingTop(5).Text(texto).FontSize(9f).LineHeight(1.35f);
+                                });
+                            }
+                        };
+
+                        renderSecao("1.", "Motivo da Avaliação", parecer.MotivoAvaliacao);
+                        renderSecao("2.", "Procedimentos e Recursos Utilizados", parecer.ProcedimentosRecursos);
+                        renderSecao("3.", "Análise do Processo Avaliativo", parecer.AnaliseAvaliativa);
+                        renderSecao("4.", "Síntese Avaliativa e Diagnóstica", parecer.SinteseAvaliativa);
+                        renderSecao("5.", "Recomendações e Considerações Finais", parecer.RecomendacoesFinais);
+
+                        // 2.4 ASSINATURA DO PROFISSIONAL
+                        contentCol.Item().PaddingTop(30).AlignCenter().Column(sigCol =>
+                        {
+                            sigCol.Item().Width(260).LineHorizontal(1).LineColor(Colors.Grey.Darken1);
+                            sigCol.Item().PaddingTop(4).AlignCenter().Text(parecer.ProfissionalNome).Bold().FontSize(10.5f).FontColor(Color.FromHex("#071A3A"));
+                            sigCol.Item().AlignCenter().Text(parecer.RegistroProfissional ?? "Especialista em Desenvolvimento Humano").FontSize(9).FontColor(Colors.Grey.Darken2);
+                            sigCol.Item().PaddingTop(2).AlignCenter().Text($"Emitido em {parecer.DataEmissao.ToString("dd 'de' MMMM 'de' yyyy", culturaBr)}").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                        });
+
+                        // 2.5 AVISO DE SIGILO E CONFIDENCIALIDADE
+                        contentCol.Item().PaddingTop(18).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Background(Colors.Grey.Lighten5).Padding(8).Column(avisoCol =>
+                        {
+                            avisoCol.Item().Text(t =>
+                            {
+                                t.Span("CONFIDENCIAL: ").Bold().FontSize(7.5f).FontColor(Colors.Grey.Darken3);
+                                t.Span("Este documento é estritamente confidencial e de uso exclusivo para fins clínicos e terapêuticos, respaldado pelo sigilo profissional. É vedada sua reprodução para terceiros sem autorização prévia por escrito.").FontSize(7.5f).FontColor(Colors.Grey.Darken2);
+                            });
+                        });
+                    });
+
+                    // 3. RODAPÉ INSTITUCIONAL
+                    page.Footer().Column(footCol =>
+                    {
+                        footCol.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
+                        footCol.Item().PaddingTop(5).Row(footRow =>
+                        {
+                            footRow.RelativeItem().Text($"NeuroSync Gestão Clínica • Paciente: {paciente.Nome}").FontSize(7.5f).FontColor(Colors.Grey.Darken1);
+                            footRow.RelativeItem().AlignRight().Text(x =>
+                            {
+                                x.Span("Página ").FontSize(7.5f);
+                                x.CurrentPageNumber().FontSize(7.5f);
+                                x.Span(" de ").FontSize(7.5f);
+                                x.TotalPages().FontSize(7.5f);
+                            });
+                        });
+                    });
+                });
+            });
+
+            var pdfBytes = documento.GeneratePdf();
+            var nomeSanitizado = string.Join("_", paciente.Nome.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
+            string nomeArquivo = $"Parecer_Tecnico_{nomeSanitizado}_{parecer.IdParecer}.pdf";
+
+            return File(pdfBytes, "application/pdf", nomeArquivo);
         }
 
         // ========================================================

@@ -149,5 +149,30 @@ namespace NeuroSync.Controllers
             
             return RedirectToAction("Index");
         }
+
+        // 8. GET: Inicia o atendimento do paciente e abre o prontuário
+        [HttpGet]
+        public async Task<IActionResult> IniciarAtendimento(int? id, int? pacienteId)
+        {
+            int idPacienteDestino = pacienteId ?? 0;
+
+            if (id.HasValue && id.Value > 0)
+            {
+                var agendamento = await _context.Agendamentos.FindAsync(id.Value);
+                if (agendamento != null)
+                {
+                    agendamento.Status = "Em atendimento";
+                    await _context.SaveChangesAsync();
+                    idPacienteDestino = agendamento.PacienteId;
+                }
+            }
+
+            if (idPacienteDestino > 0)
+            {
+                return RedirectToAction("Details", "Pacientes", new { id = idPacienteDestino, aba = "evolucao" });
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -1,61 +1,146 @@
 @model NeuroSync.Models.Agendamento
-
 @{
     ViewData["Title"] = "Editar Sessão";
 }
 
-<div class="container mt-4 mb-5">
-    <h2 class="text-primary"><i class="bi bi-pencil-square"></i> Editar Sessão</h2>
-    <p class="text-muted">Altere o status, a data ou as observações do atendimento.</p>
-    <hr />
+<style>
+    .edit-session-wrapper {
+        max-width: 680px;
+        margin: 0 auto;
+    }
 
-    <div class="card shadow-sm border-0 mt-4" style="max-width: 600px;">
-        <div class="card-body p-4">
+    .edit-header-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 20px 24px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .edit-form-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 32px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035);
+    }
+
+    .status-highlight-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px 20px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 10px 14px;
+        border-color: #cbd5e1;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="edit-session-wrapper">
+
+        <!-- CABEÇALHO -->
+        <div class="edit-header-card">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 46px; height: 46px; border-radius: 14px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">Editar Atendimento</h4>
+                    <p class="text-muted small mb-0">Atualize os dados clínicos, horário e status da sessão.</p>
+                </div>
+            </div>
+            <a asp-action="Index" class="btn btn-sm btn-light border text-muted rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Voltar à Agenda
+            </a>
+        </div>
+
+        <!-- FORMULÁRIO -->
+        <div class="edit-form-card">
             <form asp-action="Edit" method="post">
-                <!-- O ID ESCONDIDO PARA O BANCO SABER QUAL ATUALIZAR -->
                 <input type="hidden" asp-for="IdAgendamento" />
 
-                <!-- Paciente (com Select2) -->
+                <!-- Paciente Selecionado -->
                 <div class="mb-4">
-                    <label asp-for="PacienteId" class="control-label fw-bold">Paciente *</label>
+                    <label asp-for="PacienteId" class="form-label fw-bold text-dark">Paciente <span class="text-danger">*</span></label>
                     <select asp-for="PacienteId" id="buscaPaciente" class="form-select" asp-items="ViewBag.Pacientes" required></select>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label asp-for="DataHora" class="control-label fw-bold">Data e Horário *</label>
-                        <input asp-for="DataHora" type="datetime-local" class="form-control" required />
+                <div class="row g-3 mb-4">
+                    <!-- Data e Horário -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="DataHora" class="form-label fw-bold text-dark">Data e Horário <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-calendar-event"></i></span>
+                            <input asp-for="DataHora" type="datetime-local" class="form-control border-start-0 ps-0" required />
+                        </div>
                     </div>
-                    
-                    <div class="col-md-6 mb-4">
-                        <label asp-for="TipoSessao" class="control-label fw-bold">Tipo de Sessão</label>
+
+                    <!-- Tipo de Sessão -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="TipoSessao" class="form-label fw-bold text-dark">Especialidade / Tipo de Sessão</label>
                         <select asp-for="TipoSessao" class="form-select">
                             <option value="Intervenção">Intervenção (Rotina)</option>
-                            <option value="Avaliação">Avaliação</option>
-                            <option value="Devolutiva">Devolutiva com os Pais</option>
+                            <option value="Avaliação">Avaliação Diagnóstica</option>
+                            <option value="Devolutiva">Devolutiva com a Família</option>
+                            <option value="Fonoaudiologia">Fonoaudiologia</option>
+                            <option value="Terapia Ocupacional">Terapia Ocupacional</option>
+                            <option value="Psicologia">Psicologia</option>
+                            <option value="Psicopedagogia">Psicopedagogia</option>
+                            <option value="Fisioterapia">Fisioterapia</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- A GRANDE NOVIDADE: CAMPO DE STATUS -->
-                <div class="mb-4 p-3 bg-light rounded border">
-                    <label asp-for="Status" class="control-label fw-bold text-primary">Status do Atendimento</label>
-                    <select asp-for="Status" class="form-select border-primary shadow-sm mt-1">
-                        <option value="Agendado">Agendado (Aguardando)</option>
-                        <option value="Realizado">Realizado (Paciente compareceu)</option>
-                        <option value="Falta">Falta (Não compareceu)</option>
-                        <option value="Cancelado">Cancelado (Avisou antes)</option>
+                <!-- CAMPO DE STATUS COM DESTAQUE CLÍNICO -->
+                <div class="status-highlight-box mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label asp-for="Status" class="form-label fw-bold text-dark mb-0">
+                            <i class="bi bi-tag-fill text-primary me-1"></i> Status do Atendimento
+                        </label>
+                        <small class="text-muted">Acompanhamento do comparecimento</small>
+                    </div>
+                    <select asp-for="Status" class="form-select fw-semibold" id="selectStatus" style="font-size: 1rem;">
+                        <option value="Confirmado" class="text-success fw-bold">✓ Confirmado (Presença confirmada)</option>
+                        <option value="Em atendimento" class="text-primary fw-bold">▶ Em atendimento (Paciente na sala)</option>
+                        <option value="Agendado" class="text-secondary">⏳ Agendado (Aguardando confirmação)</option>
+                        <option value="Realizado" class="text-success">✅ Realizado (Sessão concluída)</option>
+                        <option value="Falta" class="text-warning">⚠ Falta (Paciente não compareceu)</option>
+                        <option value="Cancelado" class="text-danger">❌ Cancelado (Avisou previamente)</option>
                     </select>
                 </div>
 
+                <!-- Observações -->
                 <div class="mb-4">
-                    <label asp-for="Observacoes" class="control-label fw-bold">Observações</label>
-                    <textarea asp-for="Observacoes" class="form-control" rows="3"></textarea>
+                    <label asp-for="Observacoes" class="form-label fw-bold text-dark">Observações Clínicas / Administrativas</label>
+                    <textarea asp-for="Observacoes" class="form-control" rows="3" placeholder="Anotações sobre a sessão, queixas ou avisos da família..."></textarea>
                 </div>
 
-                <div class="text-end mt-4">
-                    <a asp-action="Index" class="btn btn-outline-secondary me-2">Cancelar</a>
-                    <button type="submit" class="btn btn-warning fw-bold text-dark"><i class="bi bi-save"></i> Salvar Alterações</button>
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                    <!-- Link de Acesso ao Prontuário -->
+                    <a href="/Pacientes/Details/@Model.PacienteId" class="btn btn-outline-primary rounded-pill px-3 fw-bold btn-sm">
+                        <i class="bi bi-file-earmark-medical me-1"></i> Abrir Prontuário
+                    </a>
+
+                    <div class="d-flex gap-2">
+                        <a asp-action="Index" class="btn btn-light border text-muted rounded-pill px-4 fw-bold">Cancelar</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                            <i class="bi bi-check2 me-1"></i> Salvar Alterações
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

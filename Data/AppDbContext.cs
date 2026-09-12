@@ -19,6 +19,7 @@ namespace NeuroSync.Data
         public DbSet<Sessao> Sessoes { get; set; }
         public DbSet<Agenda> Agendas { get; set; }
         public DbSet<Pagamento> Pagamentos { get; set; }
+        public DbSet<ParecerTecnico> PareceresTecnicos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

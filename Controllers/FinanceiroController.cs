@@ -20,10 +20,12 @@ namespace NeuroSync.Controllers
     public class FinanceiroController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public FinanceiroController(AppDbContext context)
+        public FinanceiroController(AppDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
         }
 
         // ==========================================
@@ -370,6 +372,10 @@ namespace NeuroSync.Controllers
             var totalEmAberto = cobrancas.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
             var totalCancelado = cobrancas.Where(c => c.Status == "Cancelado").Sum(c => c.Valor);
 
+            // Carrega logo NeuroSync
+            string logoPath = Path.Combine(_hostEnvironment.WebRootPath, "images", "logo-principal-cerebro-coracao 2.png");
+            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
+
             var documento = Document.Create(container =>
             {
                 container.Page(page =>
@@ -384,18 +390,26 @@ namespace NeuroSync.Controllers
                         headerCol.Item().Row(row =>
                         {
                             // Logo e Marca NeuroSync
-                            row.RelativeItem(6).Column(brandCol =>
+                            row.RelativeItem(7).Row(brandRow =>
                             {
-                                brandCol.Item().Row(logoRow =>
+                                if (logoBytes != null)
                                 {
-                                    logoRow.AutoItem().Text("Neuro").FontSize(22).Bold().FontColor(Color.FromHex("#071A3A"));
-                                    logoRow.AutoItem().Text("Sync").FontSize(22).Bold().FontColor(Color.FromHex("#315BEF"));
+                                    brandRow.ConstantItem(44).Height(44).Image(logoBytes).FitArea();
+                                    brandRow.ConstantItem(10);
+                                }
+                                brandRow.RelativeItem().Column(brandCol =>
+                                {
+                                    brandCol.Item().Row(logoRow =>
+                                    {
+                                        logoRow.AutoItem().Text("Neuro").FontSize(22).Bold().FontColor(Color.FromHex("#071A3A"));
+                                        logoRow.AutoItem().Text("Sync").FontSize(22).Bold().FontColor(Color.FromHex("#315BEF"));
+                                    });
+                                    brandCol.Item().Text("Gestão Clínica e Prontuário Eletrônico").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
                                 });
-                                brandCol.Item().Text("Gestão Clínica e Prontuário Eletrônico").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
                             });
 
                             // Dados do Relatório / Emissão
-                            row.RelativeItem(6).AlignRight().Column(metaCol =>
+                            row.RelativeItem(5).AlignRight().Column(metaCol =>
                             {
                                 metaCol.Item().Text("DEMONSTRATIVO FINANCEIRO").FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
                                 metaCol.Item().Text($"Competência: {(string.IsNullOrEmpty(competencia) ? "Todas" : competencia)}").FontSize(9).FontColor(Colors.Grey.Darken2);

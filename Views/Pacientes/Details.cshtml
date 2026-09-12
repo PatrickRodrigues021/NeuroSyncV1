@@ -6,209 +6,942 @@
     // Cálculo seguro de idade
     var idade = DateTime.Today.Year - Model.DataNascimento.Year;
     if (Model.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
+
+    var abaAtiva = (ViewBag.AbaAtiva as string) ?? "resumo";
+    var todosAgendamentos = (ViewBag.TodosAgendamentos as List<NeuroSync.Models.Agendamento>) ?? new List<NeuroSync.Models.Agendamento>();
+    var pareceres = (ViewBag.PareceresTecnicos as List<NeuroSync.Models.ParecerTecnico>) ?? new List<NeuroSync.Models.ParecerTecnico>();
+    var cobrancas = (ViewBag.Cobrancas as List<NeuroSync.Models.Cobranca>) ?? new List<NeuroSync.Models.Cobranca>();
+    var evolucoes = (ViewBag.Evolucoes as List<NeuroSync.Models.Evolucao>) ?? new List<NeuroSync.Models.Evolucao>();
+    var anexos = (ViewBag.Anexos as List<NeuroSync.Models.Anexo>) ?? new List<NeuroSync.Models.Anexo>();
+
+    var respProntuario = "-";
+    if (!string.IsNullOrWhiteSpace(Model.Responsavel)) { respProntuario = Model.Responsavel; }
+    else if (!string.IsNullOrWhiteSpace(Model.NomeMae)) { respProntuario = Model.NomeMae; }
+    else if (!string.IsNullOrWhiteSpace(Model.NomePai)) { respProntuario = Model.NomePai; }
+
+    var culturaBr = new System.Globalization.CultureInfo("pt-BR");
 }
 
 <style>
     /* Cabeçalho Limpo */
     .prontuario-header { 
-        background: white; 
-        border-radius: 12px; 
-        padding: 20px; 
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+        background: #ffffff; 
+        border-radius: 16px; 
+        padding: 24px; 
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04); 
+        border: 1px solid rgba(226, 232, 240, 0.8);
         margin-bottom: 24px; 
         display: flex; 
         align-items: center; 
-    }
-    .info-divisor { 
-        border-left: 2px solid #e2e8f0; 
-        padding-left: 20px; 
-        margin-left: 20px; 
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
-    /* Menu Lateral Vertical (Exatamente como no seu print) */
+    .info-divisor { 
+        border-left: 2px solid #e2e8f0; 
+        padding-left: 18px; 
+        margin-left: 10px; 
+    }
+
+    /* Menu Lateral Vertical Moderno */
     .nav-pills-custom .nav-link {
-        color: #64748b;
+        color: #475569;
         font-weight: 600;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 5px;
+        font-size: 0.92rem;
+        padding: 13px 18px;
+        border-radius: 12px;
+        margin-bottom: 6px;
         text-align: left;
         background: transparent;
-        transition: 0.2s;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
+
+    .nav-pills-custom .nav-link:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+    }
+
     .nav-pills-custom .nav-link.active {
-        color: #4f46e5;
-        background-color: white;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        color: #2563eb;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+        border: 1px solid rgba(219, 234, 254, 0.9);
     }
     
-    .text-financeiro { color: #10b981 !important; }
+    .text-financeiro { color: #059669 !important; }
+    .nav-pills-custom .nav-link.text-financeiro.active {
+        color: #059669 !important;
+        border-color: rgba(167, 243, 208, 0.9);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
+    }
 
     /* Área de Conteúdo */
     .tab-content-area {
-        background: white;
-        border-radius: 12px;
+        background: #ffffff;
+        border-radius: 16px;
         padding: 32px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        min-height: 550px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        min-height: 580px;
+    }
+
+    .section-title {
+        font-size: 1.15rem;
+        font-weight: 750;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .badge-status-pill {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .card-kpi-subtle {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px;
+        transition: transform 0.2s;
+    }
+    .card-kpi-subtle:hover {
+        transform: translateY(-2px);
+    }
+
+    .form-label-custom {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 6px;
+    }
+
+    .form-textarea-custom {
+        border-radius: 12px;
+        border-color: #cbd5e1;
+        font-size: 0.93rem;
+        line-height: 1.5;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-textarea-custom:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
     }
 </style>
 
-<div class="pt-3">
-    <h3 class="fw-bold mb-4" style="color: var(--text-dark);">Prontuário do Paciente</h3>
+<div class="container-fluid py-3 px-3 px-md-4">
 
-    <!-- CABEÇALHO DO PACIENTE (Com tratativa para não dar erro no Responsável) -->
+    @if (TempData["MensagemSucesso"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0 bg-success bg-opacity-10 text-success fw-bold" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>@TempData["MensagemSucesso"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["MensagemErro"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0 bg-danger bg-opacity-10 text-danger fw-bold" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>@TempData["MensagemErro"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- CABEÇALHO DO PACIENTE -->
     <div class="prontuario-header">
         <div class="d-flex align-items-center">
-            <div class="me-3" style="width: 50px; height: 50px; border-radius: 50%; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+            <div class="me-3" style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; border: 1px solid #bfdbfe;">
                 @Model.Nome.Substring(0, 1).ToUpper()
             </div>
             <div>
-                <h5 class="fw-bold mb-0 text-dark">@Model.Nome</h5>
-                <small class="text-muted">@idade anos • Nascido em @Model.DataNascimento.ToString("dd/MM/yyyy")</small><br/>
-                <small class="text-muted">Responsável: 
-                @{
-                    var respProntuario = "-";
-                    if (!string.IsNullOrWhiteSpace(Model.Responsavel)) { respProntuario = Model.Responsavel; }
-                    else if (!string.IsNullOrWhiteSpace(Model.NomeMae)) { respProntuario = Model.NomeMae; }
-                    else if (!string.IsNullOrWhiteSpace(Model.NomePai)) { respProntuario = Model.NomePai; }
-                }
-                @respProntuario
-            </small>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h4 class="fw-bold mb-0 text-dark">@Model.Nome</h4>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-2 py-1 small">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i>Ativo
+                    </span>
+                </div>
+                <div class="text-muted small">
+                    <span class="fw-semibold text-secondary">@idade anos</span> • Nascido(a) em @Model.DataNascimento.ToString("dd/MM/yyyy") • Responsável: <span class="fw-semibold text-dark">@respProntuario</span>
+                </div>
             </div>
         </div>
         
-        <div class="info-divisor">
-            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Criado Em</small>
-            <span class="text-dark fw-bold small">@Model.CriadoEm.ToString("dd/MM/yyyy")</span>
-        </div>
-        
-        <div class="info-divisor">
-            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Status</small>
-            <span class="text-success fw-bold small"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Ativo</span>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <div class="info-divisor d-none d-md-block">
+                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.05em;">Criado Em</small>
+                <span class="text-dark fw-bold small">@Model.CriadoEm.ToString("dd/MM/yyyy")</span>
+            </div>
+            
+            <div class="info-divisor d-none d-lg-block">
+                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.05em;">Telefone</small>
+                <span class="text-dark fw-semibold small">@(!string.IsNullOrWhiteSpace(Model.Telefone) ? Model.Telefone : "-")</span>
+            </div>
+
+            <div class="ms-md-3 d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.IdPaciente" class="btn btn-outline-secondary rounded-pill px-3 btn-sm fw-semibold" title="Editar Informações Cadastrais">
+                    <i class="bi bi-pencil me-1"></i>Editar Dados
+                </a>
+                <a href="/Agenda/Create?pacienteId=@Model.IdPaciente" class="btn btn-primary rounded-pill px-3 btn-sm fw-semibold shadow-sm">
+                    <i class="bi bi-calendar-plus me-1"></i>Novo Atendimento
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- CORPO: MENU NA ESQUERDA E CONTEÚDO NA DIREITA -->
     <div class="row g-4">
         
-        <!-- COLUNA ESQUERDA: AS 7 ABAS ORIGINAIS -->
-        <div class="col-md-3">
+        <!-- COLUNA ESQUERDA: AS ABAS DO PRONTUÁRIO -->
+        <div class="col-lg-3 col-md-4">
             <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#resumo" type="button" role="tab">Resumo</button>
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#anamnese" type="button" role="tab">Anamnese</button>
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#evolucao" type="button" role="tab">Evolução</button>
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#atendimentos" type="button" role="tab">Atendimentos</button>
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#documentos" type="button" role="tab">Documentos</button>
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#anexos" type="button" role="tab"><i class="bi bi-paperclip"></i> Anexos</button>
-                <button class="nav-link text-financeiro fw-bold" data-bs-toggle="pill" data-bs-target="#financeiro" type="button" role="tab">$ Financeiro</button>
+                <button class="nav-link @(abaAtiva == "resumo" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#resumo" type="button" role="tab">
+                    <span><i class="bi bi-person-lines-fill me-2 text-primary"></i>Resumo</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "anamnese" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#anamnese" type="button" role="tab">
+                    <span><i class="bi bi-journal-medical me-2 text-info"></i>Anamnese</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "evolucao" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#evolucao" type="button" role="tab">
+                    <span><i class="bi bi-activity me-2 text-primary"></i>Evolução</span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2">@evolucoes.Count</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "atendimentos" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#atendimentos" type="button" role="tab">
+                    <span><i class="bi bi-calendar-week me-2 text-warning"></i>Atendimentos</span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2">@todosAgendamentos.Count</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "parecer" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#parecer" type="button" role="tab">
+                    <span><i class="bi bi-file-earmark-text me-2 text-primary"></i>Parecer Técnico</span>
+                    <span class="badge bg-primary text-white rounded-pill px-2">@pareceres.Count</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "documentos" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#documentos" type="button" role="tab">
+                    <span><i class="bi bi-file-earmark-richtext me-2 text-secondary"></i>Documentos</span>
+                </button>
+                <button class="nav-link @(abaAtiva == "anexos" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#anexos" type="button" role="tab">
+                    <span><i class="bi bi-paperclip me-2 text-muted"></i>Anexos</span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2">@anexos.Count</span>
+                </button>
+                <button class="nav-link text-financeiro @(abaAtiva == "financeiro" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#financeiro" type="button" role="tab">
+                    <span><i class="bi bi-cash-stack me-2"></i>Financeiro</span>
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">@cobrancas.Count</span>
+                </button>
             </div>
         </div>
 
         <!-- COLUNA DIREITA: CONTEÚDO DAS ABAS -->
-        <div class="col-md-9">
+        <div class="col-lg-9 col-md-8">
             <div class="tab-content tab-content-area" id="v-pills-tabContent">
                 
                 <!-- 1. RESUMO -->
-                <div class="tab-pane fade show active" id="resumo" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Visão Geral</h5>
-                    <p class="text-muted">Bem-vindo ao prontuário de <strong>@Model.Nome</strong>. Navegue pelas abas à esquerda para acessar o histórico clínico.</p>
+                <div class="tab-pane fade @(abaAtiva == "resumo" ? "show active" : "")" id="resumo" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-person-lines-fill text-primary"></i>
+                            <span>Ficha Geral e Resumo Clínico</span>
+                        </div>
+                        <a asp-action="Edit" asp-route-id="@Model.IdPaciente" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-pencil me-1"></i>Editar Cadastro
+                        </a>
+                    </div>
+
+                    <!-- 3 Cards de Indicadores do Paciente -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card-kpi-subtle">
+                                <div class="text-muted small fw-bold text-uppercase">Atendimentos Realizados</div>
+                                <div class="fs-4 fw-bold text-dark mt-1">@todosAgendamentos.Count(a => a.Status == "Realizado")</div>
+                                <div class="text-muted small mt-1">Total de sessões concluídas</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-kpi-subtle">
+                                <div class="text-muted small fw-bold text-uppercase">Próximo Agendamento</div>
+                                @{
+                                    var proxAg = todosAgendamentos.Where(a => a.DataHora >= DateTime.Today && a.Status != "Cancelado").OrderBy(a => a.DataHora).FirstOrDefault();
+                                }
+                                <div class="fs-5 fw-bold text-primary mt-1">@(proxAg != null ? proxAg.DataHora.ToString("dd/MM 'às' HH:mm") : "Nenhum")</div>
+                                <div class="text-muted small mt-1">@(proxAg != null ? proxAg.TipoSessao : "Sem agendamentos futuros")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card-kpi-subtle">
+                                <div class="text-muted small fw-bold text-uppercase">Pareceres Emitidos</div>
+                                <div class="fs-4 fw-bold text-dark mt-1">@pareceres.Count</div>
+                                <div class="text-muted small mt-1">Relatórios técnicos formais</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações Clínicas Centrais -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard2-pulse text-primary me-2"></i>Diagnóstico Principal / Hipótese</h6>
+                                <p class="text-secondary small mb-3">
+                                    @(!string.IsNullOrWhiteSpace(Model.DiagnosticoPrincipal) ? Model.DiagnosticoPrincipal : "Nenhum diagnóstico principal inserido até o momento.")
+                                </p>
+
+                                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-capsule text-danger me-2"></i>Medicamentos Contínuos</h6>
+                                <p class="text-secondary small mb-0">
+                                    @(!string.IsNullOrWhiteSpace(Model.MedicamentosContinuos) ? Model.MedicamentosContinuos : "Nenhum medicamento informado.")
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bullseye text-success me-2"></i>Metas Terapêuticas</h6>
+                                <div class="mb-3">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill mb-1 small">Curto Prazo</span>
+                                    <p class="text-secondary small mb-0">
+                                        @(!string.IsNullOrWhiteSpace(Model.MetasCurtoPrazo) ? Model.MetasCurtoPrazo : "Nenhuma meta de curto prazo cadastrada.")
+                                    </p>
+                                </div>
+                                <div>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle rounded-pill mb-1 small">Longo Prazo</span>
+                                    <p class="text-secondary small mb-0">
+                                        @(!string.IsNullOrWhiteSpace(Model.MetasLongoPrazo) ? Model.MetasLongoPrazo : "Nenhuma meta de longo prazo cadastrada.")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-4 border">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-telephone text-primary me-2"></i>Contatos e Localização</h6>
+                                <div class="row g-3 small">
+                                    <div class="col-md-3">
+                                        <span class="text-muted d-block">Telefone Principal</span>
+                                        <span class="fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.Telefone) ? Model.Telefone : "-")</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="text-muted d-block">E-mail</span>
+                                        <span class="fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.Email) ? Model.Email : "-")</span>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <span class="text-muted d-block">Endereço</span>
+                                        <span class="fw-bold text-dark">
+                                            @Model.Logradouro, @Model.Numero @(!string.IsNullOrWhiteSpace(Model.Complemento) ? $"({Model.Complemento})" : "") - @Model.Bairro, @Model.Cidade/@Model.Estado
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 2. ANAMNESE -->
-                <div class="tab-pane fade" id="anamnese" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Anamnese</h5>
-                    <div class="alert alert-light text-muted border">Formulário de anamnese estruturado será disponibilizado em breve.</div>
+                <div class="tab-pane fade @(abaAtiva == "anamnese" ? "show active" : "")" id="anamnese" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-journal-medical text-info"></i>
+                            <span>Anamnese & Histórico do Desenvolvimento</span>
+                        </div>
+                        <a asp-action="Edit" asp-route-id="@Model.IdPaciente" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-pencil me-1"></i>Atualizar Anamnese
+                        </a>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Histórico Escolar -->
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-mortarboard text-primary me-2"></i>Histórico Escolar</h6>
+                                <div class="small mb-2">
+                                    <span class="text-muted">Escola:</span>
+                                    <strong class="text-dark d-block">@(!string.IsNullOrWhiteSpace(Model.EscolaEstuda) ? Model.EscolaEstuda : "Não informada")</strong>
+                                </div>
+                                <div class="small mb-2">
+                                    <span class="text-muted">Série / Ano:</span>
+                                    <strong class="text-dark d-block">@(!string.IsNullOrWhiteSpace(Model.Serie) ? Model.Serie : "Não informado")</strong>
+                                </div>
+                                <div class="small mb-2">
+                                    <span class="text-muted">Professora Regente:</span>
+                                    <strong class="text-dark d-block">@(!string.IsNullOrWhiteSpace(Model.NomeProfessora) ? Model.NomeProfessora : "Não informado")</strong>
+                                </div>
+                                <div class="small">
+                                    <span class="text-muted">Pedagoga / Psicóloga Escolar:</span>
+                                    <strong class="text-dark d-block">@(!string.IsNullOrWhiteSpace(Model.NomePedagogaPsicologa) ? Model.NomePedagogaPsicologa : "Não informado")</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dados Familiares -->
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-people text-success me-2"></i>Filiação e Família</h6>
+                                <div class="mb-3 pb-2 border-bottom">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill mb-1">Mãe</span>
+                                    <div class="small fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.NomeMae) ? Model.NomeMae : "Não informada")</div>
+                                    <div class="text-muted small">Profissão: @(!string.IsNullOrWhiteSpace(Model.ProfissaoMae) ? Model.ProfissaoMae : "-") • Tel: @(!string.IsNullOrWhiteSpace(Model.TelefoneMae) ? Model.TelefoneMae : "-")</div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill mb-1">Pai</span>
+                                    <div class="small fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.NomePai) ? Model.NomePai : "Não informado")</div>
+                                    <div class="text-muted small">Profissão: @(!string.IsNullOrWhiteSpace(Model.ProfissaoPai) ? Model.ProfissaoPai : "-") • Tel: @(!string.IsNullOrWhiteSpace(Model.TelefonePai) ? Model.TelefonePai : "-")</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Plano Terapêutico e Queixa -->
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-4 border">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-card-checklist text-warning me-2"></i>Metas e Diretrizes Terapêuticas</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="small text-muted fw-bold mb-1">METAS A CURTO PRAZO:</div>
+                                        <div class="p-3 bg-white rounded-3 border text-secondary small">
+                                            @(!string.IsNullOrWhiteSpace(Model.MetasCurtoPrazo) ? Model.MetasCurtoPrazo : "Sem metas de curto prazo descritas na ficha de anamnese.")
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="small text-muted fw-bold mb-1">METAS A LONGO PRAZO:</div>
+                                        <div class="p-3 bg-white rounded-3 border text-secondary small">
+                                            @(!string.IsNullOrWhiteSpace(Model.MetasLongoPrazo) ? Model.MetasLongoPrazo : "Sem metas de longo prazo descritas na ficha de anamnese.")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. EVOLUÇÃO (LINHA DO TEMPO) -->
-                <div class="tab-pane fade" id="evolucao" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Evolução Clínica</h5>
+                <div class="tab-pane fade @(abaAtiva == "evolucao" ? "show active" : "")" id="evolucao" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-activity text-primary"></i>
+                            <span>Evolução Clínica e Registro de Sessões</span>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-2 small">
+                            <i class="bi bi-clock-history me-1"></i>@evolucoes.Count registros
+                        </span>
+                    </div>
                     
-                    <form asp-action="AdicionarEvolucao" method="post" class="mb-5 bg-light p-3 rounded-4">
+                    <!-- Formulário de Nova Anotação -->
+                    <form asp-action="AdicionarEvolucao" method="post" class="mb-4 bg-light p-3 p-md-4 rounded-4 border shadow-sm">
                         <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label-custom mb-0">
+                                <i class="bi bi-pencil-square text-primary me-1"></i>Registrar Nova Evolução Clínica:
+                            </label>
+                            <small class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
                         <div class="mb-3">
-                            <label class="fw-bold mb-2">Registrar nova anotação:</label>
-                            <textarea name="Anotacao" class="form-control" rows="3" required></textarea>
+                            <textarea name="Anotacao" class="form-control form-textarea-custom" rows="3" placeholder="Descreva os objetivos trabalhados, respostas do paciente aos estímulos, engajamento e condutas adotadas nesta sessão..." required></textarea>
                         </div>
                         <div class="text-end">
-                            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">Salvar Registro</button>
+                            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Salvar Registro Clínico
+                            </button>
                         </div>
                     </form>
 
-                    @if (ViewBag.Evolucoes != null)
+                    <!-- Timeline -->
+                    @if (evolucoes.Any())
                     {
-                        <div class="ps-3 border-start border-2 border-primary border-opacity-25">
-                            @foreach (var ev in ViewBag.Evolucoes)
+                        <div class="ps-3 border-start border-3 border-primary border-opacity-25 mt-4">
+                            @foreach (var ev in evolucoes)
                             {
                                 <div class="mb-4 position-relative">
-                                    <div class="position-absolute bg-primary rounded-circle" style="width: 12px; height: 12px; left: -23px; top: 5px;"></div>
-                                    <div class="small fw-bold text-primary mb-1">@ev.DataRegistro.ToString("dd/MM/yyyy 'às' HH:mm")</div>
-                                    <div class="text-dark bg-light p-3 rounded-3">@ev.Anotacao</div>
+                                    <div class="position-absolute bg-primary rounded-circle border border-white border-2 shadow-sm" style="width: 14px; height: 14px; left: -24px; top: 4px;"></div>
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="small fw-bold text-primary">
+                                            <i class="bi bi-calendar3 me-1"></i>@ev.DataRegistro.ToString("dd/MM/yyyy 'às' HH:mm")
+                                        </span>
+                                        <span class="badge bg-light text-muted border rounded-pill small">Registro Clínico</span>
+                                    </div>
+                                    <div class="text-dark bg-light p-3 rounded-4 border">
+                                        @ev.Anotacao
+                                    </div>
                                 </div>
                             }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-0">Nenhuma evolução clínica registrada ainda para este paciente.</p>
+                            <small>Utilize o campo acima para salvar as notas das sessões realizadas.</small>
                         </div>
                     }
                 </div>
 
                 <!-- 4. ATENDIMENTOS -->
-                <div class="tab-pane fade" id="atendimentos" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Próximos Atendimentos</h5>
-                    @if (ViewBag.Agendamentos != null)
+                <div class="tab-pane fade @(abaAtiva == "atendimentos" ? "show active" : "")" id="atendimentos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-calendar-week text-warning"></i>
+                            <span>Histórico e Próximos Atendimentos</span>
+                        </div>
+                        <a href="/Agenda/Create?pacienteId=@Model.IdPaciente" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                            <i class="bi bi-calendar-plus me-1"></i>Novo Agendamento
+                        </a>
+                    </div>
+
+                    @if (todosAgendamentos.Any())
                     {
-                        <div class="list-group list-group-flush">
-                            @foreach (var ag in ViewBag.Agendamentos)
-                            {
-                                <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-bottom">
-                                    <div>
-                                        <div class="fw-bold text-dark mb-1">@ag.DataHora.ToString("dd/MM/yyyy - HH:mm")</div>
-                                        <small class="text-muted">Tipo: @ag.TipoSessao</small>
-                                    </div>
-                                    <span class="badge bg-light text-dark border rounded-pill">@ag.Status</span>
-                                </div>
-                            }
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr class="small text-muted text-uppercase">
+                                        <th>Data & Horário</th>
+                                        <th>Tipo da Sessão</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ag in todosAgendamentos)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-dark">@ag.DataHora.ToString("dd/MM/yyyy")</div>
+                                                <small class="text-muted"><i class="bi bi-clock me-1"></i>@ag.DataHora.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold text-dark">@ag.TipoSessao</span>
+                                            </td>
+                                            <td>
+                                                @if (ag.Status == "Em atendimento")
+                                                {
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                                                        <span class="spinner-grow spinner-grow-sm me-1" style="width: 7px; height: 7px;" role="status"></span>Em atendimento
+                                                    </span>
+                                                }
+                                                else if (ag.Status == "Confirmado")
+                                                {
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">
+                                                        <i class="bi bi-check2-circle me-1"></i>Confirmado
+                                                    </span>
+                                                }
+                                                else if (ag.Status == "Realizado")
+                                                {
+                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-1">
+                                                        <i class="bi bi-check-all me-1"></i>Realizado
+                                                    </span>
+                                                }
+                                                else if (ag.Status == "Cancelado")
+                                                {
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                                                        <i class="bi bi-x-circle me-1"></i>Cancelado
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">
+                                                        <i class="bi bi-hourglass-split me-1"></i>@ag.Status
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    @if (ag.Status == "Em atendimento")
+                                                    {
+                                                        <a href="/Pacientes/Details/@Model.IdPaciente?aba=evolucao" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                                            Continuar <i class="bi bi-arrow-right ms-1"></i>
+                                                        </a>
+                                                    }
+                                                    else if (ag.Status != "Realizado" && ag.Status != "Cancelado")
+                                                    {
+                                                        <a href="/Agenda/IniciarAtendimento?id=@ag.IdAgendamento&pacienteId=@Model.IdPaciente" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" title="Iniciar Atendimento">
+                                                            <i class="bi bi-play-fill me-1"></i>Atender
+                                                        </a>
+                                                    }
+                                                    <a href="/Agenda/Edit/@ag.IdAgendamento" class="btn btn-sm btn-light border rounded-pill px-3 text-secondary" title="Editar Sessão">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-2">Nenhum atendimento agendado ou realizado para este paciente.</p>
+                            <a href="/Agenda/Create?pacienteId=@Model.IdPaciente" class="btn btn-primary btn-sm rounded-pill px-4">
+                                <i class="bi bi-calendar-plus me-1"></i>Agendar Primeira Sessão
+                            </a>
                         </div>
                     }
                 </div>
 
-                <!-- 5. DOCUMENTOS -->
-                <div class="tab-pane fade" id="documentos" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Geração de Documentos</h5>
-                    <div class="alert alert-light text-muted border">Módulo de atestados, recibos e declarações.</div>
+                <!-- 5. EMITIR PARECER TÉCNICO (NOVA ABA PRINCIPAL) -->
+                <div class="tab-pane fade @(abaAtiva == "parecer" ? "show active" : "")" id="parecer" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 flex-wrap gap-2">
+                        <div>
+                            <div class="section-title">
+                                <i class="bi bi-file-earmark-text text-primary"></i>
+                                <span>Emitir Parecer Técnico / Relatório Clínico</span>
+                            </div>
+                            <small class="text-muted">Emita e consulte laudos avaliativos formais com exportação em PDF timbrado com a marca da clínica.</small>
+                        </div>
+                        <button class="btn btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#formNovoParecer" aria-expanded="@(pareceres.Count == 0 ? "true" : "false")" aria-controls="formNovoParecer">
+                            <i class="bi bi-plus-lg me-1"></i>Novo Parecer Técnico
+                        </button>
+                    </div>
+
+                    <!-- TABELA DE PARECERES EMITIDOS -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-folder2-open text-primary me-2"></i>Pareceres Emitidos para @Model.Nome</h6>
+                        @if (pareceres.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle border rounded-4 overflow-hidden">
+                                    <thead class="table-light">
+                                        <tr class="small text-muted text-uppercase">
+                                            <th>Emissão</th>
+                                            <th>Título do Relatório</th>
+                                            <th>Profissional Responsável</th>
+                                            <th class="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var p in pareceres)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-bold text-dark">@p.DataEmissao.ToString("dd/MM/yyyy")</div>
+                                                    <small class="text-muted">ID #P@p.IdParecer.ToString("D4")</small>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold text-primary">@p.Titulo</div>
+                                                    <small class="text-muted">@(string.IsNullOrWhiteSpace(p.MotivoAvaliacao) ? "Avaliação clínica periódica" : (p.MotivoAvaliacao.Length > 70 ? p.MotivoAvaliacao.Substring(0, 70) + "..." : p.MotivoAvaliacao))</small>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-semibold text-dark">@p.ProfissionalNome</div>
+                                                    <small class="text-muted">@(!string.IsNullOrWhiteSpace(p.RegistroProfissional) ? p.RegistroProfissional : "Especialista")</small>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="/Pacientes/GerarParecerPdf/@p.IdParecer" target="_blank" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold shadow-sm" title="Baixar Parecer Técnico em PDF">
+                                                        <i class="bi bi-file-earmark-pdf-fill me-1"></i>Baixar PDF
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-4 bg-light rounded-4 border text-center text-muted mb-4">
+                                <i class="bi bi-file-earmark-diff fs-2 text-primary opacity-50 d-block mb-2"></i>
+                                <p class="mb-1 fw-semibold text-dark">Nenhum parecer técnico emitido ainda para este paciente.</p>
+                                <small>Preencha os campos do formulário abaixo para gerar o primeiro laudo estruturado com PDF formal.</small>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- FORMULÁRIO DE EMISSÃO (CONFORME IMAGEM DE REFERÊNCIA) -->
+                    <div class="collapse @(pareceres.Count == 0 ? "show" : "")" id="formNovoParecer">
+                        <div class="card border border-primary-subtle rounded-4 p-4 shadow-sm bg-white mb-4">
+                            <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                                        <i class="bi bi-file-earmark-medical"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-0">Novo Parecer Técnico</h5>
+                                        <small class="text-muted">Preencha os dados clínicos para geração e emissão do PDF</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 small">NeuroSync Laudos</span>
+                            </div>
+
+                            <form asp-action="SalvarParecerTecnico" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
+
+                                <!-- 1. TÍTULO -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom">1. Título do Relatório / Laudo</label>
+                                    <input type="text" name="Titulo" class="form-control form-control-lg rounded-3 fw-bold text-dark" value="Relatório de Avaliação Neuropsicopedagógica" required />
+                                </div>
+
+                                <!-- 2. MOTIVO DA AVALIAÇÃO -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom">2. Motivo da Avaliação</label>
+                                    <textarea name="MotivoAvaliacao" class="form-control form-textarea-custom" rows="3" placeholder="Descreva a queixa principal, motivo do encaminhamento (escola, neuropediatra, iniciativa familiar) e metas da investigação clínica..."></textarea>
+                                </div>
+
+                                <!-- 3. PROCEDIMENTOS E RECURSOS UTILIZADOS -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom">3. Procedimentos e Recursos Utilizados</label>
+                                    <textarea name="ProcedimentosRecursos" class="form-control form-textarea-custom" rows="3" placeholder="Ex: Bateria neuropsicológica, escalas padronizadas, observação lúdica orientada, sessões com o paciente, entrevistas com responsáveis e contato com a equipe pedagógica escolar..."></textarea>
+                                </div>
+
+                                <!-- 4. ANÁLISE DO PROCESSO AVALIATIVO -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom">4. Análise do Processo Avaliativo</label>
+                                    <textarea name="AnaliseAvaliativa" class="form-control form-textarea-custom" rows="4" placeholder="Descreva pormenorizadamente o desempenho das funções cognitivas, atenção concentrada e sustentada, memória operacional, funções executivas, linguagem, praxias, raciocínio lógico e aspectos comportamentais/afetivos..."></textarea>
+                                </div>
+
+                                <!-- 5. SÍNTESE AVALIATIVA E DIAGNÓSTICA -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom">5. Síntese Avaliativa e Diagnóstica</label>
+                                    <textarea name="SinteseAvaliativa" class="form-control form-textarea-custom" rows="3" placeholder="Conclusão diagnóstica ou indicativa, síntese do perfil neuropsicopedagógico e hipóteses funcionais levantadas..."></textarea>
+                                </div>
+
+                                <!-- 6. RECOMENDAÇÕES E CONSIDERAÇÕES FINAIS -->
+                                <div class="mb-4">
+                                    <label class="form-label-custom">6. Recomendações e Considerações Finais</label>
+                                    <textarea name="RecomendacoesFinais" class="form-control form-textarea-custom" rows="3" placeholder="Orientações e adaptações curriculares para a escola, orientações de rotina familiar, frequência de atendimentos terapêuticos e encaminhamentos médicos ou complementares..."></textarea>
+                                </div>
+
+                                <!-- DADOS DO PROFISSIONAL RESPONSÁVEL -->
+                                <div class="row g-3 p-3 bg-light rounded-4 border mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Nome do Profissional Responsável</label>
+                                        <input type="text" name="ProfissionalNome" class="form-control rounded-3" value="Dra. Mariana Silva" required />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Registro Profissional / Conselho</label>
+                                        <input type="text" name="RegistroProfissional" class="form-control rounded-3" value="ABNp 1420/SP" />
+                                    </div>
+                                </div>
+
+                                <!-- AVISO DE CONFIDENCIALIDADE -->
+                                <div class="alert alert-light border rounded-3 p-3 d-flex align-items-center gap-3 mb-4 text-muted small">
+                                    <i class="bi bi-shield-lock-fill fs-4 text-primary"></i>
+                                    <div>
+                                        <strong>Termo de Confidencialidade e Sigilo Ético:</strong> Este documento é estritamente confidencial e de uso exclusivo para fins clínicos e terapêuticos, respaldado pelo sigilo profissional. É vedada sua reprodução para terceiros sem autorização prévia por escrito.
+                                    </div>
+                                </div>
+
+                                <!-- BOTÃO DE ENVIO -->
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#formNovoParecer">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-file-earmark-check-fill me-2"></i>Salvar e Emitir Relatório
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 6. ANEXOS (UPLOAD) -->
-                <div class="tab-pane fade" id="anexos" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4">Anexos e Exames</h5>
-                    <form asp-action="UploadArquivo" enctype="multipart/form-data" method="post" class="mb-4 d-flex gap-3 align-items-end bg-light p-3 rounded-4">
+                <!-- 6. DOCUMENTOS (ATESTADOS E DECLARAÇÕES RÁPIDAS) -->
+                <div class="tab-pane fade @(abaAtiva == "documentos" ? "show active" : "")" id="documentos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-file-earmark-richtext text-secondary"></i>
+                            <span>Central de Documentos Rápidos</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-4 h-100 bg-light d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-file-earmark-check fs-3 text-primary"></i>
+                                        <h6 class="fw-bold mb-0 text-dark">Declaração de Acompanhamento Terapêutico</h6>
+                                    </div>
+                                    <p class="text-muted small">Declaração formal comprovando que o paciente @Model.Nome realiza acompanhamento clínico nesta instituição.</p>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="window.print()">
+                                        <i class="bi bi-printer me-1"></i>Imprimir Declaração
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-4 h-100 bg-light d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-file-earmark-medical fs-3 text-success"></i>
+                                        <h6 class="fw-bold mb-0 text-dark">Atestado de Comparecimento à Sessão</h6>
+                                    </div>
+                                    <p class="text-muted small">Comprovante padrão de presença do paciente e seu responsável legal para apresentação escolar ou funcional.</p>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-success btn-sm rounded-pill px-3" onclick="window.print()">
+                                        <i class="bi bi-printer me-1"></i>Imprimir Atestado
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="p-3 bg-white border border-primary-subtle rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block">Laudos & Pareceres Técnicos Formais</strong>
+                                        <small class="text-muted">Acesse a aba "Parecer Técnico" para emitir relatórios com o logo timbrado e estrutura completa.</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.querySelector('button[data-bs-target=\'#parecer\']').click()">
+                                    Ir para Pareceres <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. ANEXOS (UPLOAD) -->
+                <div class="tab-pane fade @(abaAtiva == "anexos" ? "show active" : "")" id="anexos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-paperclip text-muted"></i>
+                            <span>Anexos, Laudos Externos e Exames</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="UploadArquivo" enctype="multipart/form-data" method="post" class="mb-4 d-flex gap-3 align-items-end bg-light p-3 p-md-4 rounded-4 border shadow-sm">
                         <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
                         <div class="flex-grow-1">
-                            <label class="form-label fw-bold small">Selecione o arquivo</label>
-                            <input type="file" name="arquivoUpload" class="form-control bg-white" required />
+                            <label class="form-label-custom">Selecione o arquivo (PDF, Imagens, Relatórios externos):</label>
+                            <input type="file" name="arquivoUpload" class="form-control bg-white rounded-3" required />
                         </div>
-                        <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">Enviar</button>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i>Enviar Arquivo
+                        </button>
                     </form>
                     
-                    @if (ViewBag.Anexos != null)
+                    @if (anexos.Any())
                     {
                         <div class="list-group">
-                            @foreach (var anexo in ViewBag.Anexos)
+                            @foreach (var anexo in anexos)
                             {
-                                <a href="@anexo.CaminhoArquivo" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 rounded-3 mb-2 border">
-                                    <span class="fw-bold text-dark"><i class="bi bi-file-earmark-text text-primary me-3 fs-5"></i> @anexo.NomeArquivo</span>
-                                    <small class="text-muted bg-light px-3 py-1 rounded-pill">@anexo.DataUpload.ToString("dd/MM/yyyy")</small>
+                                <a href="@anexo.CaminhoArquivo" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3 rounded-4 mb-2 border shadow-sm">
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-right: 14px;">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark mb-0">@anexo.NomeArquivo</div>
+                                            <small class="text-muted">Enviado em @anexo.DataUpload.ToString("dd/MM/yyyy 'às' HH:mm")</small>
+                                        </div>
+                                    </div>
+                                    <span class="btn btn-sm btn-light border rounded-pill px-3 text-primary fw-semibold">
+                                        <i class="bi bi-download me-1"></i>Abrir
+                                    </span>
                                 </a>
                             }
                         </div>
                     }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-0">Nenhum anexo ou exame inserido até o momento.</p>
+                            <small>Utilize o campo acima para fazer upload de laudos médicos ou atividades digitalizadas.</small>
+                        </div>
+                    }
                 </div>
 
-                <!-- 7. FINANCEIRO -->
-                <div class="tab-pane fade" id="financeiro" role="tabpanel">
-                    <h5 class="fw-bold border-bottom pb-3 mb-4 text-success">$ Extrato Financeiro</h5>
-                    <div class="alert alert-success bg-success bg-opacity-10 text-success border-success-subtle">
-                        Integração financeira do paciente em construção...
+                <!-- 8. FINANCEIRO -->
+                <div class="tab-pane fade @(abaAtiva == "financeiro" ? "show active" : "")" id="financeiro" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 flex-wrap gap-2">
+                        <div class="section-title">
+                            <i class="bi bi-cash-stack text-success"></i>
+                            <span>Extrato Financeiro do Paciente</span>
+                        </div>
+                        <a href="/Financeiro/ExportarPdf?pacienteId=@Model.IdPaciente" target="_blank" class="btn btn-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i>Demonstrativo em PDF
+                        </a>
                     </div>
+
+                    <!-- Indicadores Financeiros do Paciente -->
+                    @{
+                        var totalFaturado = cobrancas.Sum(c => c.Valor);
+                        var totalPago = cobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor);
+                        var totalEmAberto = cobrancas.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
+                    }
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-4 border">
+                                <small class="text-muted fw-bold text-uppercase">Total Contratado</small>
+                                <div class="fs-4 fw-bold text-dark mt-1">@totalFaturado.ToString("C", culturaBr)</div>
+                                <small class="text-muted">@cobrancas.Count cobrança(s)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-success bg-opacity-10 border border-success-subtle rounded-4">
+                                <small class="text-success fw-bold text-uppercase">Valores Liquidados</small>
+                                <div class="fs-4 fw-bold text-success mt-1">@totalPago.ToString("C", culturaBr)</div>
+                                <small class="text-success">Cobranças pagas</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-warning bg-opacity-10 border border-warning-subtle rounded-4">
+                                <small class="text-warning-emphasis fw-bold text-uppercase">Valores em Aberto</small>
+                                <div class="fs-4 fw-bold text-warning-emphasis mt-1">@totalEmAberto.ToString("C", culturaBr)</div>
+                                <small class="text-warning-emphasis">Pendentes / Atrasadas</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (cobrancas.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr class="small text-muted text-uppercase">
+                                        <th>Vencimento</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th>Data Pagamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var c in cobrancas)
+                                    {
+                                        <tr>
+                                            <td>@c.DataVencimento.ToString("dd/MM/yyyy")</td>
+                                            <td class="fw-bold text-dark">@c.Descricao</td>
+                                            <td class="fw-bold text-dark">@c.Valor.ToString("C", culturaBr)</td>
+                                            <td>
+                                                @if (c.Status == "Pago")
+                                                {
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">Pago</span>
+                                                }
+                                                else if (c.Status == "Atrasado")
+                                                {
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">Atrasado</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pendente</span>
+                                                }
+                                            </td>
+                                            <td>@(c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-wallet2 fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-0">Nenhuma movimentação financeira encontrada para este paciente.</p>
+                        </div>
+                    }
                 </div>
 
             </div>
