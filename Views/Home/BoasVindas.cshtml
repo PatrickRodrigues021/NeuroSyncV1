@@ -1,0 +1,1077 @@
+@model NeuroSync.Models.ResumoDoDiaViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resumo do Dia - NeuroSync</title>
+    <link rel="icon" type="image/png" href="~/images/logo-principal-cerebro-coracao 2.png" />
+    
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #e8f4fd 0%, #f3f8fd 40%, #eaf4fd 75%, #dff0fd 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow-x: hidden;
+            padding: 24px 36px;
+        }
+
+        /* Elementos decorativos de fundo suaves */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            right: -80px;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.09) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen-container {
+            max-width: 1260px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeInPage 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @@keyframes fadeInPage {
+            0% {
+                opacity: 0;
+                transform: translateY(12px) scale(0.995);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* --- BARRA SUPERIOR --- */
+        .top-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo-img {
+            height: 46px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(2, 132, 199, 0.25));
+        }
+
+        .brand-text {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #0284c7;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text span {
+            color: #0284c7;
+        }
+
+        .top-date-badge {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #64748b;
+            font-size: 0.84rem;
+            text-align: right;
+        }
+
+        .top-date-badge i {
+            font-size: 1.35rem;
+            color: #0284c7;
+        }
+
+        .top-date-text-day {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .top-date-text-time {
+            color: #64748b;
+            font-size: 0.82rem;
+        }
+
+        /* --- SEÇÃO HERO --- */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 8px 10px 16px 10px;
+        }
+
+        .hero-left-art {
+            flex: 0 0 310px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-left-art::before {
+            content: "";
+            position: absolute;
+            width: 270px;
+            height: 270px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-left-art img {
+            width: 300px;
+            height: auto;
+            max-height: 290px;
+            object-fit: contain;
+            filter: drop-shadow(0 14px 32px rgba(2, 132, 199, 0.26));
+            animation: gentleFloat 4s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
+
+        @@keyframes gentleFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .hero-center-content {
+            flex: 1;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-greeting {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #0b223d;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: #0284c7;
+            margin-bottom: 6px;
+        }
+
+        .hero-tagline {
+            font-size: 0.94rem;
+            color: #64748b;
+            margin-bottom: 22px;
+            font-weight: 400;
+        }
+
+        .btn-dashboard-go {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0284c7 0%, #0062ff 100%);
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 14px 34px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 24px rgba(0, 98, 255, 0.35);
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-dashboard-go:hover {
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(0, 98, 255, 0.45);
+        }
+
+        .btn-dashboard-go:active {
+            transform: translateY(0);
+        }
+
+        .redirect-notice {
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .countdown-pill {
+            display: inline-block;
+            font-weight: 700;
+            color: #0284c7;
+        }
+
+        /* Espaçador à direita no hero para equilibrar com o logo à esquerda */
+        .hero-right-spacer {
+            flex: 0 0 310px;
+            pointer-events: none;
+        }
+
+        /* Personagem posicionada em tamanho grande, estendendo-se por trás dos cards */
+        .character-backdrop {
+            position: absolute;
+            right: 0px;
+            top: 28px;
+            width: 420px;
+            z-index: 1; /* Fica atrás dos cards da direita (z-index: 3) */
+            pointer-events: none;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .character-backdrop img {
+            width: 400px;
+            height: auto;
+            max-height: 520px;
+            object-fit: contain;
+            filter: drop-shadow(0 18px 36px rgba(0, 50, 120, 0.15));
+        }
+
+        /* --- 4 CARDS DE INDICADORES (KPIS) --- */
+        .kpi-row {
+            position: relative;
+            z-index: 3; /* Sobrepostos na frente da personagem */
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.035);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .kpi-icon-badge {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+            flex-shrink: 0;
+        }
+
+        .badge-blue { background: #e0f2fe; color: #0284c7; }
+        .badge-green { background: #dcfce7; color: #10b981; }
+        .badge-purple { background: #f3e8ff; color: #a855f7; }
+        .badge-violet { background: #fae8ff; color: #c026d3; }
+
+        .kpi-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .kpi-number {
+            font-size: 1.95rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .kpi-label {
+            font-size: 0.86rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .kpi-subtext-green {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #10b981;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .kpi-subtext-purple {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #a855f7;
+        }
+
+        .kpi-link-blue {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #0284c7;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .kpi-link-blue:hover {
+            color: #0062ff;
+        }
+
+        /* --- SEÇÃO DE 2 CARDS CENTRAIS --- */
+        .middle-cards-row {
+            position: relative;
+            z-index: 3; /* Sobrepostos na frente da personagem */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .content-card {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 22px 24px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.035);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .content-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .card-header-title i {
+            color: #0284c7;
+            font-size: 1.2rem;
+        }
+
+        .card-header-link {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #0284c7;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .card-header-link:hover {
+            color: #0062ff;
+        }
+
+        /* Lista de Próximos Atendimentos */
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .appointment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .appointment-time {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #334155;
+            width: 58px;
+            flex-shrink: 0;
+        }
+
+        .appointment-patient-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            margin-left: 8px;
+        }
+
+        .avatar-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .appointment-patient-name {
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .appointment-patient-sub {
+            font-size: 0.81rem;
+            color: #64748b;
+        }
+
+        .badge-confirmed {
+            background: #e6f9f0;
+            color: #059669;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 50px;
+            letter-spacing: 0.2px;
+        }
+
+        /* Banner informativo interno */
+        .bottom-card-info-banner {
+            background: #eff6ff;
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #0369a1;
+            font-size: 0.84rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .bottom-card-info-banner:hover {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .bottom-card-info-banner i.info-icon {
+            color: #0284c7;
+            font-size: 1rem;
+            margin-right: 8px;
+        }
+
+        /* Card Momentos Especiais */
+        .birthday-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .birthday-banner-icon {
+            font-size: 1.6rem;
+            color: #6366f1;
+            line-height: 1;
+        }
+
+        .birthday-banner-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #4f46e5;
+            line-height: 1.3;
+        }
+
+        .birthday-banner-subtitle {
+            font-size: 0.84rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .birthday-split-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .birthday-patients-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .birthday-patient-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .birthday-patient-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .birthday-patient-sub {
+            font-size: 0.81rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .birthday-cake-art {
+            flex: 0 0 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .birthday-cake-art img {
+            width: 180px;
+            height: auto;
+            max-height: 175px;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 22px rgba(168, 85, 247, 0.22));
+            animation: cakeFloat 3s ease-in-out infinite alternate;
+        }
+
+        @@keyframes cakeFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        /* --- FAIXA DE MENSAGEM MOTIVADORA --- */
+        .motivation-strip {
+            position: relative;
+            z-index: 3;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.035);
+        }
+
+        .motivation-sphere-art {
+            flex: 0 0 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .motivation-sphere-art img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 18px rgba(2, 132, 199, 0.25));
+        }
+
+        .motivation-text-content {
+            flex: 1;
+        }
+
+        .motivation-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+
+        .motivation-desc {
+            font-size: 0.88rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .motivation-leaves-art {
+            flex: 0 0 170px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .motivation-leaves-art img {
+            width: 165px;
+            height: auto;
+            max-height: 52px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(14, 165, 233, 0.12));
+        }
+
+        /* Barra de progresso sutil */
+        .timer-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0284c7, #6366f1);
+            width: 0%;
+            z-index: 9999;
+            transition: width 0.1s linear;
+        }
+
+        /* Responsividade */
+        @@media (max-width: 1100px) {
+            .character-backdrop {
+                opacity: 0.25;
+                right: -30px;
+            }
+        }
+
+        @@media (max-width: 950px) {
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .middle-cards-row {
+                grid-template-columns: 1fr;
+            }
+            .hero-left-art {
+                display: none;
+            }
+            .hero-right-spacer {
+                display: none;
+            }
+            .character-backdrop {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+            .top-date-badge {
+                display: none;
+            }
+            .hero-greeting {
+                font-size: 1.75rem;
+            }
+            .motivation-leaves-art {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Linha de progresso no topo da tela -->
+    <div class="timer-progress-bar" id="progressBar"></div>
+
+    <div class="screen-container">
+
+        <!-- 1. BARRA SUPERIOR -->
+        <header class="top-navbar">
+            <a href="@Url.Action("Index", "Home")" class="brand-logo-area">
+                <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="NeuroSync Logo" class="brand-logo-img" />
+                <span class="brand-text">Neuro<span>Sync</span></span>
+            </a>
+
+            <div class="top-date-badge">
+                <i class="bi bi-calendar3"></i>
+                <div>
+                    <div class="top-date-text-day">@Model.DataFormatada</div>
+                    <div class="top-date-text-time">@Model.HoraFormatada</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. SEÇÃO HERO DE BOAS-VINDAS -->
+        <section class="hero-section">
+            <!-- Esquerda: Cérebro / Coração com folhas ampliado -->
+            <div class="hero-left-art">
+                <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="Cérebro e Coração" />
+            </div>
+
+            <!-- Centro: Saudação, botão e contador -->
+            <div class="hero-center-content">
+                <h1 class="hero-greeting">@Model.Saudacao, @Model.NomeProfissional! 👋</h1>
+                <div class="hero-subtitle">Vamos começar mais um dia de cuidado e evolução.</div>
+                <p class="hero-tagline">Cada sessão é um passo importante no desenvolvimento de cada paciente.</p>
+
+                <a href="@Url.Action("Index", "Home")" class="btn-dashboard-go" id="btnDashboard">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Ir para o Dashboard</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+                <div class="redirect-notice">
+                    <span>Você será redirecionada automaticamente em</span>
+                    <span class="countdown-pill" id="contadorSegundos">25</span>
+                    <span>segundos.</span>
+                </div>
+            </div>
+
+            <!-- Espaçador à direita para manter o centro alinhado -->
+            <div class="hero-right-spacer"></div>
+        </section>
+
+        <!-- Personagem em tamanho grande, posicionada atrás dos cards da direita -->
+        <div class="character-backdrop">
+            <img src="~/images/personagem-tablet-fundo-transparente.png" alt="Terapeuta com tablet" />
+        </div>
+
+        <!-- 3. LINHA DE 4 CARDS DE INDICADORES (KPIS) -->
+        <section class="kpi-row">
+            <!-- Card 1: Atendimentos hoje -->
+            <div class="kpi-card">
+                <div class="kpi-icon-badge badge-blue">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-number">@Model.TotalAtendimentosHoje</div>
+                    <div class="kpi-label">Atendimentos hoje</div>
+                    <div class="kpi-subtext-green">
+                        <i class="bi bi-arrow-up-short fs-6"></i> @Model.DiferencaOntemTexto
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Confirmados -->
+            <div class="kpi-card">
+                <div class="kpi-icon-badge badge-green">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-number">@Model.ConfirmadosCount</div>
+                    <div class="kpi-label">Confirmados</div>
+                    <div class="kpi-subtext-green">
+                        @Model.ConfirmadosPercentual% do total
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Aguardando confirmação -->
+            <div class="kpi-card">
+                <div class="kpi-icon-badge badge-purple">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-number">@Model.AguardandoCount</div>
+                    <div class="kpi-label">Aguardando confirmação</div>
+                    <div class="kpi-subtext-purple">
+                        @Model.AguardandoPercentual% do total
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Aniversariantes este mês -->
+            <div class="kpi-card">
+                <div class="kpi-icon-badge badge-violet">
+                    <i class="bi bi-gift"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-number">@Model.AniversariantesMesCount</div>
+                    <div class="kpi-label">Aniversariantes este mês</div>
+                    <a href="/Pacientes" class="kpi-link-blue">
+                        Ver detalhes <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. SEÇÃO CENTRAL COM 2 CARTÕES (PRÓXIMOS ATENDIMENTOS E MOMENTOS ESPECIAIS) -->
+        <section class="middle-cards-row">
+            
+            <!-- Cartão Esquerdo: Próximos atendimentos -->
+            <div class="content-card">
+                <div>
+                    <div class="content-card-header">
+                        <div class="card-header-title">
+                            <i class="bi bi-calendar-check"></i>
+                            <span>Próximos atendimentos</span>
+                        </div>
+                        <a href="/Agenda" class="card-header-link">
+                            Ver agenda completa <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="appointment-list">
+                        @foreach (var item in Model.ProximosAtendimentos)
+                        {
+                            <div class="appointment-item">
+                                <div class="appointment-time">@item.Horario</div>
+                                <div class="appointment-patient-box">
+                                    <div class="avatar-circle">
+                                        @if (item.GeneroOuAvatar == "girl")
+                                        {
+                                            <!-- Avatar Menina Ilustrado -->
+                                            <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#d1fae5"/>
+                                                <!-- Cabelo longo castanho -->
+                                                <path d="M12 26C12 16 16 11 22 11C28 11 32 16 32 26C32 28 31 32 30 32C29 32 28 26 28 24C28 24 25 24 22 24C19 24 16 24 16 24C16 26 15 32 14 32C13 32 12 28 12 26Z" fill="#3b2d22"/>
+                                                <!-- Rosto -->
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <!-- Franja -->
+                                                <path d="M14 19C16 15 20 14 22 14C24 14 28 15 30 19C28 17 24 16 22 16C20 16 16 17 14 19Z" fill="#3b2d22"/>
+                                                <!-- Olhos e sorriso -->
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#e11d48" stroke-width="1" stroke-linecap="round"/>
+                                                <!-- Camisa -->
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#ec4899"/>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <!-- Avatar Menino Ilustrado -->
+                                            <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#cffafe"/>
+                                                <!-- Cabelo curto escuro -->
+                                                <path d="M14 19C14 14 17 11 22 11C27 11 30 14 30 19C30 20 29 20 28 18C26 16 24 16 22 16C20 16 18 16 16 18C15 20 14 20 14 19Z" fill="#1e293b"/>
+                                                <!-- Rosto -->
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <!-- Topete -->
+                                                <path d="M16 16C18 13 24 12 28 15C25 14 21 14 18 15Z" fill="#1e293b"/>
+                                                <!-- Olhos e sorriso -->
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#0284c7" stroke-width="1.2" stroke-linecap="round"/>
+                                                <!-- Camisa -->
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#0284c7"/>
+                                            </svg>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="appointment-patient-name">@item.NomePaciente</div>
+                                        <div class="appointment-patient-sub">@item.Detalhes</div>
+                                    </div>
+                                </div>
+                                <span class="badge-confirmed">@item.Status</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <a href="/Agenda" class="bottom-card-info-banner">
+                    <div>
+                        <i class="bi bi-info-circle-fill info-icon"></i>
+                        <span>Você tem mais @Model.MaisAtendimentosHojeCount atendimentos agendados para hoje.</span>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <!-- Cartão Direito: Momentos especiais -->
+            <div class="content-card">
+                <div>
+                    <div class="content-card-header">
+                        <div class="card-header-title">
+                            <i class="bi bi-gift"></i>
+                            <span>Momentos especiais</span>
+                        </div>
+                        <a href="/Pacientes" class="card-header-link">
+                            Ver todos os aniversários <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- Faixa comemorativa dentro do card -->
+                    <div class="birthday-banner">
+                        <div class="birthday-banner-icon">
+                            <i class="bi bi-balloon-heart-fill"></i>
+                        </div>
+                        <div>
+                            <div class="birthday-banner-title">@Model.AniversariantesMesCount pacientes fazem aniversário este mês!</div>
+                            <div class="birthday-banner-subtitle">Vamos tornar esse dia ainda mais especial. 💙</div>
+                        </div>
+                    </div>
+
+                    <div class="birthday-split-content">
+                        <!-- Lista de aniversariantes -->
+                        <div class="birthday-patients-col">
+                            @foreach (var niver in Model.Aniversariantes)
+                            {
+                                <div class="birthday-patient-item">
+                                    <div class="avatar-circle">
+                                        @if (niver.GeneroOuAvatar == "girl")
+                                        {
+                                            <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#fae8ff"/>
+                                                <path d="M12 26C12 16 16 11 22 11C28 11 32 16 32 26C32 28 31 32 30 32C29 32 28 26 28 24C28 24 25 24 22 24C19 24 16 24 16 24C16 26 15 32 14 32C13 32 12 28 12 26Z" fill="#3b2d22"/>
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <path d="M14 19C16 15 20 14 22 14C24 14 28 15 30 19C28 17 24 16 22 16C20 16 16 17 14 19Z" fill="#3b2d22"/>
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#e11d48" stroke-width="1" stroke-linecap="round"/>
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#c026d3"/>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="22" cy="22" r="22" fill="#cffafe"/>
+                                                <path d="M14 19C14 14 17 11 22 11C27 11 30 14 30 19C30 20 29 20 28 18C26 16 24 16 22 16C20 16 18 16 16 18C15 20 14 20 14 19Z" fill="#1e293b"/>
+                                                <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
+                                                <path d="M16 16C18 13 24 12 28 15C25 14 21 14 18 15Z" fill="#1e293b"/>
+                                                <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
+                                                <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
+                                                <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#0284c7" stroke-width="1.2" stroke-linecap="round"/>
+                                                <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#0284c7"/>
+                                            </svg>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="birthday-patient-name">@niver.NomePaciente</div>
+                                        <div class="birthday-patient-sub">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span>@niver.Detalhes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Ilustração do Bolo com fundo transparente ampliado -->
+                        <div class="birthday-cake-art">
+                            <img src="~/images/bolo-fundo-transparente.png" alt="Bolo de Aniversário" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. FAIXA DE MENSAGEM MOTIVADORA -->
+        <footer class="motivation-strip">
+            <!-- Esquerda: Esfera 3D Cérebro / Coração -->
+            <div class="motivation-sphere-art">
+                <img src="~/images/coracao-brain-esfera.png" alt="Emblema NeuroSync" />
+            </div>
+
+            <!-- Centro: Texto Motivador -->
+            <div class="motivation-text-content">
+                <h4 class="motivation-title">Seu foco faz a diferença!</h4>
+                <p class="motivation-desc">Cada sessão, cada evolução e cada conquista são passos importantes no desenvolvimento dos seus pacientes.</p>
+            </div>
+
+            <!-- Direita: Folhas Decorativas -->
+            <div class="motivation-leaves-art">
+                <img src="~/images/folhas-decorativas.png" alt="Folhas Decorativas" />
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Script de Contagem Regressiva e Redirecionamento (25 segundos) -->
+    <script>
+        (function () {
+            const totalSegundos = 25;
+            let segundosRestantes = totalSegundos;
+            const contadorEl = document.getElementById('contadorSegundos');
+            const progressBar = document.getElementById('progressBar');
+            const dashboardUrl = '@Url.Action("Index", "Home")';
+
+            const interval = setInterval(function () {
+                segundosRestantes--;
+                if (contadorEl) {
+                    contadorEl.textContent = segundosRestantes;
+                }
+
+                // Atualiza barra de progresso no topo
+                const percentualConcluido = ((totalSegundos - segundosRestantes) / totalSegundos) * 100;
+                if (progressBar) {
+                    progressBar.style.width = percentualConcluido + '%';
+                }
+
+                if (segundosRestantes <= 0) {
+                    clearInterval(interval);
+                    window.location.href = dashboardUrl;
+                }
+            }, 1000);
+
+            // Redirecionamento imediato no clique do botão
+            const btn = document.getElementById('btnDashboard');
+            if (btn) {
+                btn.addEventListener('click', function (e) {
+                    clearInterval(interval);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
+

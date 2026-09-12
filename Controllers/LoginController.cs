@@ -25,8 +25,8 @@ namespace NeuroSync.Controllers
                 // Gera o "crachá" (Cookie) e libera a entrada
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
                 
-                // Manda o usuário para o Dashboard
-                return RedirectToAction("Index", "Home");
+                // Manda o usuário para a tela de Boas-Vindas e Resumo do Dia
+                return RedirectToAction("BoasVindas", "Home");
             }
             
             // Se errar a senha, mostra mensagem de erro na tela
