@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Collections.Generic;
 
+
+//teste
 namespace NeuroSync.Controllers
 {
     [Authorize]
