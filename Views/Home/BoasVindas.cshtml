@@ -34,10 +34,10 @@
             color: #1e293b;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             position: relative;
             overflow-x: hidden;
-            padding: 24px 36px;
+            padding: clamp(14px, 2.5vw, 32px);
         }
 
         /* Elementos decorativos de fundo suaves */
@@ -75,7 +75,7 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: clamp(12px, 1.8vh, 20px);
             animation: fadeInPage 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
@@ -158,11 +158,13 @@
             align-items: center;
             justify-content: space-between;
             position: relative;
-            padding: 8px 10px 16px 10px;
+            padding: 6px 10px 14px 10px;
+            gap: 14px;
         }
 
         .hero-left-art {
-            flex: 0 0 310px;
+            flex: 0 1 260px;
+            max-width: 260px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -172,8 +174,8 @@
         .hero-left-art::before {
             content: "";
             position: absolute;
-            width: 270px;
-            height: 270px;
+            width: 220px;
+            height: 220px;
             background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
             border-radius: 50%;
             z-index: 0;
@@ -181,9 +183,10 @@
         }
 
         .hero-left-art img {
-            width: 300px;
+            width: 100%;
+            max-width: 240px;
             height: auto;
-            max-height: 290px;
+            max-height: 240px;
             object-fit: contain;
             filter: drop-shadow(0 14px 32px rgba(2, 132, 199, 0.26));
             animation: gentleFloat 4s ease-in-out infinite alternate;
@@ -197,34 +200,34 @@
         }
 
         .hero-center-content {
-            flex: 1;
+            flex: 1 1 540px;
             text-align: center;
-            max-width: 600px;
+            max-width: 580px;
             margin: 0 auto;
-            padding: 0 15px;
+            padding: 0 12px;
             position: relative;
             z-index: 2;
         }
 
         .hero-greeting {
-            font-size: 2.3rem;
+            font-size: clamp(1.6rem, 2.2vw, 2.2rem);
             font-weight: 800;
             color: #0b223d;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
 
         .hero-subtitle {
-            font-size: 1.12rem;
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
             font-weight: 700;
             color: #0284c7;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .hero-tagline {
-            font-size: 0.94rem;
+            font-size: clamp(0.85rem, 0.95vw, 0.94rem);
             color: #64748b;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
             font-weight: 400;
         }
 
@@ -237,7 +240,7 @@
             color: #ffffff;
             font-size: 1.05rem;
             font-weight: 700;
-            padding: 14px 34px;
+            padding: 12px 32px;
             border-radius: 50px;
             text-decoration: none;
             box-shadow: 0 10px 24px rgba(0, 98, 255, 0.35);
@@ -274,26 +277,28 @@
 
         /* Espaçador à direita no hero para equilibrar com o logo à esquerda */
         .hero-right-spacer {
-            flex: 0 0 310px;
+            flex: 0 1 260px;
+            max-width: 260px;
             pointer-events: none;
         }
 
-        /* Personagem posicionada em tamanho grande, estendendo-se por trás dos cards */
+        /* Personagem posicionada elegantemente como plano de fundo sem cobrir textos */
         .character-backdrop {
             position: absolute;
             right: 0px;
-            top: 28px;
-            width: 420px;
+            top: 20px;
+            width: 360px;
             z-index: 1; /* Fica atrás dos cards da direita (z-index: 3) */
             pointer-events: none;
             display: flex;
             justify-content: flex-end;
+            transition: all 0.3s ease;
         }
 
         .character-backdrop img {
-            width: 400px;
+            width: 340px;
             height: auto;
-            max-height: 520px;
+            max-height: 480px;
             object-fit: contain;
             filter: drop-shadow(0 18px 36px rgba(0, 50, 120, 0.15));
         }
@@ -693,11 +698,28 @@
             transition: width 0.1s linear;
         }
 
-        /* Responsividade */
+        /* Responsividade Avançada */
+        @@media (max-width: 1400px) {
+            .character-backdrop {
+                width: 300px;
+                opacity: 0.18;
+                right: -20px;
+            }
+            .character-backdrop img {
+                width: 280px;
+            }
+        }
+
         @@media (max-width: 1100px) {
             .character-backdrop {
-                opacity: 0.25;
-                right: -30px;
+                display: none;
+            }
+            .hero-left-art, .hero-right-spacer {
+                flex: 0 1 180px;
+                max-width: 180px;
+            }
+            .hero-left-art img {
+                max-height: 190px;
             }
         }
 
@@ -721,7 +743,7 @@
 
         @@media (max-width: 640px) {
             body {
-                padding: 16px;
+                padding: 12px;
             }
             .kpi-row {
                 grid-template-columns: 1fr;
@@ -730,10 +752,88 @@
                 display: none;
             }
             .hero-greeting {
-                font-size: 1.75rem;
+                font-size: 1.5rem;
             }
             .motivation-leaves-art {
                 display: none;
+            }
+        }
+
+        /* Adaptação para monitores com altura compacta (< 850px ou zoom 125%/150%) */
+        @@media (max-height: 850px) {
+            .screen-container {
+                gap: 10px;
+            }
+            .hero-section {
+                padding: 2px 10px 8px 10px;
+            }
+            .hero-left-art img {
+                max-height: 170px;
+                max-width: 170px;
+            }
+            .hero-left-art::before {
+                width: 160px;
+                height: 160px;
+            }
+            .hero-greeting {
+                font-size: 1.65rem;
+                margin-bottom: 2px;
+            }
+            .hero-subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 2px;
+            }
+            .hero-tagline {
+                margin-bottom: 12px;
+                font-size: 0.85rem;
+            }
+            .btn-dashboard-go {
+                padding: 8px 24px;
+                font-size: 0.92rem;
+            }
+            .redirect-notice {
+                margin-top: 8px;
+                font-size: 0.8rem;
+            }
+            .kpi-card {
+                padding: 12px 16px;
+                border-radius: 16px;
+                gap: 12px;
+            }
+            .kpi-icon-badge {
+                width: 44px;
+                height: 44px;
+                font-size: 1.25rem;
+            }
+            .kpi-number {
+                font-size: 1.5rem;
+            }
+            .content-card {
+                padding: 14px 18px;
+                border-radius: 18px;
+            }
+            .content-card-header {
+                margin-bottom: 10px;
+            }
+            .birthday-cake-art img {
+                max-height: 110px;
+                width: auto;
+            }
+            .motivation-strip {
+                padding: 8px 20px;
+                border-radius: 16px;
+            }
+            .motivation-sphere-art {
+                height: 50px;
+                flex: 0 0 50px;
+            }
+            .motivation-sphere-art img {
+                width: 50px;
+                height: 50px;
+            }
+            .character-backdrop {
+                opacity: 0.12;
+                top: 10px;
             }
         }
     </style>

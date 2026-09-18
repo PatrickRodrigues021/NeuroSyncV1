@@ -4,61 +4,591 @@
     ViewData["Title"] = "Nova Cobrança";
 }
 
-<div class="container mt-4 mb-5">
-    <h2 class="text-warning text-darken-2"><i class="bi bi-cash-coin"></i> Lançar Cobrança</h2>
-    <p class="text-muted">Gere uma nova cobrança de mensalidade ou sessão avulsa.</p>
-    <hr />
+<style>
+    /* Estilos Modernos da Tela de Nova Cobrança */
+    .finance-create-wrapper {
+        padding-top: 0.5rem;
+        padding-bottom: 3rem;
+    }
 
-    <div class="card shadow-sm border-0 mt-4" style="max-width: 600px;">
-        <div class="card-body p-4">
-            <form asp-action="Create" method="post">
-                
-                <!-- Seleção do Paciente -->
-                <div class="mb-4">
-                    <label asp-for="PacienteId" class="control-label fw-bold">Paciente (Pagador) *</label>
-                    <select asp-for="PacienteId" id="buscaPaciente" class="form-select" asp-items="ViewBag.Pacientes" required>
-                        <option value="">-- Buscar paciente... --</option>
-                    </select>
+    /* Cabeçalho da Página */
+    .page-header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #2563EB 0%, #0284C7 100%);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    .page-subtitle {
+        color: #64748B;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    /* Cartão Principal do Formulário */
+    .card-modern-form {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: clamp(20px, 3vw, 36px);
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .form-section-title i {
+        color: #2563EB;
+        font-size: 1.15rem;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #475569;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-custom, .form-select-custom {
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 12px 16px;
+        background-color: #F8FAFC;
+        font-size: 0.95rem;
+        color: #1E293B;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .input-custom:focus, .form-select-custom:focus {
+        border-color: #2563EB;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    /* Input com Prefixo de Moeda (R$) */
+    .currency-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .currency-prefix {
+        position: absolute;
+        left: 16px;
+        font-weight: 700;
+        color: #64748B;
+        font-size: 1rem;
+        pointer-events: none;
+    }
+
+    .input-currency {
+        padding-left: 46px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    /* Chips de Atalho Rápido */
+    .quick-chips-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .quick-chip-btn {
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        border-radius: 50px;
+        padding: 5px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .quick-chip-btn:hover {
+        background: #E0F2FE;
+        border-color: #BAE6FD;
+        color: #0284C7;
+        transform: translateY(-1px);
+    }
+
+    /* Cartão Lateral de Preview */
+    .invoice-preview-card {
+        background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: 24px;
+        position: sticky;
+        top: 24px;
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed #CBD5E1;
+    }
+
+    .preview-badge-status {
+        background: #FEF3C7;
+        color: #92400E;
+        border: 1px solid #FCD34D;
+        font-size: 0.76rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 50px;
+    }
+
+    .preview-value-box {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+        margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .preview-value-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .preview-value-amount {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #059669;
+        line-height: 1.1;
+    }
+
+    .preview-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 0.86rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .preview-info-label {
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    .preview-info-val {
+        color: #0F172A;
+        font-weight: 700;
+        text-align: right;
+        max-width: 60%;
+        word-break: break-word;
+    }
+
+    /* Cartão de Dica */
+    .info-tip-card {
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        font-size: 0.84rem;
+        color: #1E40AF;
+        line-height: 1.45;
+    }
+
+    .info-tip-card i {
+        font-size: 1.25rem;
+        color: #2563EB;
+        flex-shrink: 0;
+    }
+
+    /* Estilização Customizada do Select2 */
+    .select2-container--default .select2-selection--single {
+        border-radius: 12px !important;
+        border: 1px solid #E2E8F0 !important;
+        height: 48px !important;
+        background-color: #F8FAFC !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1E293B !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        line-height: 48px !important;
+        padding-left: 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+    .select2-dropdown {
+        border-radius: 14px !important;
+        border: 1px solid #CBD5E1 !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+        overflow: hidden !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border-radius: 8px !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 8px 12px !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #2563EB !important;
+    }
+</style>
+
+<div class="finance-create-wrapper">
+
+    <!-- CABEÇALHO -->
+    <div class="page-header-box">
+        <div>
+            <div class="page-title">
+                <div class="page-title-icon">
+                    <i class="bi bi-wallet2"></i>
                 </div>
-
-                <!-- Descrição da Cobrança -->
-                <div class="mb-4">
-                    <label asp-for="Descricao" class="control-label fw-bold">Descrição da Cobrança *</label>
-                    <input asp-for="Descricao" class="form-control" placeholder="Ex: Mensalidade de Agosto ou Sessão Avulsa 30/08" required />
-                </div>
-
-                <div class="row">
-                    <!-- Valor -->
-                    <div class="col-md-6 mb-4">
-                        <label asp-for="Valor" class="control-label fw-bold">Valor (R$) *</label>
-                        <input asp-for="Valor" type="number" step="0.01" class="form-control" placeholder="150,00" required />
-                    </div>
-                    
-                    <!-- Data de Vencimento -->
-                    <div class="col-md-6 mb-4">
-                        <label asp-for="DataVencimento" class="control-label fw-bold">Data de Vencimento *</label>
-                        <input asp-for="DataVencimento" type="date" class="form-control" required />
-                    </div>
-                </div>
-
-                <!-- Status inicial sempre é Pendente -->
-                <input type="hidden" asp-for="Status" value="Pendente" />
-
-                <div class="text-end mt-4">
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary me-2">Cancelar</a>
-                    <button type="submit" class="btn btn-warning fw-bold text-dark"><i class="bi bi-check-lg"></i> Gerar Cobrança</button>
-                </div>
-            </form>
+                <span>Nova Cobrança</span>
+            </div>
+            <p class="page-subtitle">Cadastre uma nova fatura, mensalidade ou sessão avulsa para controle financeiro.</p>
         </div>
+
+        <a href="/Financeiro" class="btn btn-light fw-bold text-muted rounded-pill px-4 border shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar ao Financeiro
+        </a>
     </div>
+
+    <form asp-action="Create" method="post" id="formCobranca">
+        <div class="row g-4">
+            
+            <!-- COLUNA ESQUERDA: FORMULÁRIO -->
+            <div class="col-12 col-lg-8">
+                <div class="card-modern-form">
+                    
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger fw-bold rounded-3 mb-4"></div>
+
+                    <!-- ========================================== -->
+                    <!-- SEÇÃO 1: PACIENTE (PAGADOR)                -->
+                    <!-- ========================================== -->
+                    <div class="form-section-title">
+                        <i class="bi bi-person-fill"></i>
+                        <span>Paciente & Responsável</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="PacienteId" class="form-label-custom">Paciente (Pagador) *</label>
+                        <select asp-for="PacienteId" id="buscaPaciente" class="form-select-custom" asp-items="ViewBag.Pacientes" required>
+                            <option value="">-- Selecione ou digite o nome do paciente... --</option>
+                        </select>
+                        <span class="text-muted small mt-1 d-block">
+                            <i class="bi bi-info-circle me-1"></i> A cobrança será vinculada ao prontuário e histórico deste paciente.
+                        </span>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- SEÇÃO 2: DETALHES DA COBRANÇA              -->
+                    <!-- ========================================== -->
+                    <div class="form-section-title mt-4">
+                        <i class="bi bi-receipt"></i>
+                        <span>Detalhes da Fatura</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Descricao" class="form-label-custom">Descrição da Cobrança *</label>
+                        <input asp-for="Descricao" id="inputDescricao" class="input-custom" placeholder="Ex: Mensalidade de Setembro ou Sessão Avulsa 18/09" required />
+                        
+                        <!-- Sugestões Rápidas -->
+                        <div class="quick-chips-wrapper">
+                            <span class="text-muted small align-self-center me-1" style="font-size: 0.75rem;">Sugestões:</span>
+                            <button type="button" class="quick-chip-btn" onclick="setDescricao('Mensalidade de ' + obterMesAtual())">
+                                <i class="bi bi-calendar-check"></i> Mensalidade do Mês
+                            </button>
+                            <button type="button" class="quick-chip-btn" onclick="setDescricao('Sessão Avulsa de Terapia')">
+                                <i class="bi bi-puzzle"></i> Sessão Avulsa
+                            </button>
+                            <button type="button" class="quick-chip-btn" onclick="setDescricao('Avaliação Neuropsicológica')">
+                                <i class="bi bi-activity"></i> Avaliação Neuro
+                            </button>
+                            <button type="button" class="quick-chip-btn" onclick="setDescricao('Pacote de 4 Sessões')">
+                                <i class="bi bi-collection"></i> Pacote 4 Sessões
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- SEÇÃO 3: VALOR E VENCIMENTO               -->
+                    <!-- ========================================== -->
+                    <div class="form-section-title mt-4">
+                        <i class="bi bi-currency-dollar"></i>
+                        <span>Valores & Prazos</span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <!-- Valor -->
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Valor" class="form-label-custom">Valor Total (R$) *</label>
+                            <div class="currency-input-group">
+                                <span class="currency-prefix">R$</span>
+                                <input asp-for="Valor" id="inputValor" type="number" step="0.01" min="0.01" class="input-custom input-currency" placeholder="150,00" required />
+                            </div>
+                            
+                            <!-- Chips de valores rápidos -->
+                            <div class="quick-chips-wrapper">
+                                <button type="button" class="quick-chip-btn" onclick="setValor(120)">R$ 120</button>
+                                <button type="button" class="quick-chip-btn" onclick="setValor(150)">R$ 150</button>
+                                <button type="button" class="quick-chip-btn" onclick="setValor(200)">R$ 200</button>
+                                <button type="button" class="quick-chip-btn" onclick="setValor(450)">R$ 450</button>
+                                <button type="button" class="quick-chip-btn" onclick="setValor(600)">R$ 600</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data de Vencimento -->
+                        <div class="col-12 col-md-6">
+                            <label asp-for="DataVencimento" class="form-label-custom">Data de Vencimento *</label>
+                            <input asp-for="DataVencimento" id="inputDataVencimento" type="date" class="input-custom" required />
+                            
+                            <!-- Chips de prazos rápidos -->
+                            <div class="quick-chips-wrapper">
+                                <button type="button" class="quick-chip-btn" onclick="setDataVencimento(0)">Hoje</button>
+                                <button type="button" class="quick-chip-btn" onclick="setDataVencimento(7)">+7 dias</button>
+                                <button type="button" class="quick-chip-btn" onclick="setDataVencimento(15)">+15 dias</button>
+                                <button type="button" class="quick-chip-btn" onclick="setDataFimMes()">Fim do Mês</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Inicial: Sempre Pendente -->
+                    <input type="hidden" asp-for="Status" value="Pendente" />
+
+                    <!-- BARRINHA DE BOTÕES DE AÇÃO -->
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                        <a href="/Financeiro" class="btn btn-light fw-bold text-muted px-4 py-2 rounded-pill border">
+                            Cancelar
+                        </a>
+
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" style="background-color: #2563EB; border-color: #2563EB;">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Gerar Cobrança</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: PREVIEW DA FATURA / RECIBO -->
+            <div class="col-12 col-lg-4">
+                <div class="invoice-preview-card">
+                    
+                    <div class="preview-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="Logo" style="height: 28px;" />
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Neuro<span class="text-primary">Sync</span></span>
+                        </div>
+                        <span class="preview-badge-status">
+                            <i class="bi bi-clock-history me-1"></i>Pendente
+                        </span>
+                    </div>
+
+                    <div class="preview-value-box">
+                        <div class="preview-value-label">Valor a Receber</div>
+                        <div class="preview-value-amount" id="previewValor">R$ 0,00</div>
+                    </div>
+
+                    <div>
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Paciente</span>
+                            <span class="preview-info-val text-primary" id="previewPaciente">—</span>
+                        </div>
+
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Descrição</span>
+                            <span class="preview-info-val" id="previewDescricao">—</span>
+                        </div>
+
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Vencimento</span>
+                            <span class="preview-info-val text-danger" id="previewDataVencimento">—</span>
+                        </div>
+
+                        <div class="preview-info-row border-0">
+                            <span class="preview-info-label">Status Inicial</span>
+                            <span class="preview-info-val text-warning fw-bold">Aguardando Baixa</span>
+                        </div>
+                    </div>
+
+                    <!-- Dica Informativa -->
+                    <div class="info-tip-card">
+                        <i class="bi bi-shield-check"></i>
+                        <div>
+                            <strong>Controle Integrado:</strong>
+                            Após gerar a cobrança, você poderá dar baixa manual a qualquer momento ou vinculá-la aos relatórios mensais da clínica.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </form>
+
 </div>
 
 @section Scripts {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
     <script>
         $(document).ready(function() {
-            $('#buscaPaciente').select2({ width: '100%' });
+            // Inicializa Select2 no campo de busca de pacientes
+            $('#buscaPaciente').select2({
+                placeholder: "Buscar paciente...",
+                width: '100%',
+                dropdownParent: $('#formCobranca')
+            });
+
+            // Define data padrão de hoje no input se estiver vazio
+            const campoData = document.getElementById('inputDataVencimento');
+            if (!campoData.value) {
+                setDataVencimento(7); // Padrão: +7 dias
+            }
+
+            // Atualiza preview em tempo real
+            $('#buscaPaciente').on('change', atualizarPreview);
+            $('#inputDescricao').on('input', atualizarPreview);
+            $('#inputValor').on('input', atualizarPreview);
+            $('#inputDataVencimento').on('change', atualizarPreview);
+
+            atualizarPreview();
         });
+
+        // Função de Atualização do Preview
+        function atualizarPreview() {
+            // Paciente
+            const pacienteSelect = document.getElementById('buscaPaciente');
+            const textoPaciente = pacienteSelect.options[pacienteSelect.selectedIndex]?.text || '';
+            const previewPaciente = document.getElementById('previewPaciente');
+            previewPaciente.textContent = (textoPaciente && !textoPaciente.includes('--')) ? textoPaciente : 'Não selecionado';
+
+            // Descrição
+            const desc = document.getElementById('inputDescricao').value.trim();
+            document.getElementById('previewDescricao').textContent = desc || 'Sem descrição';
+
+            // Valor
+            const val = parseFloat(document.getElementById('inputValor').value);
+            const previewValor = document.getElementById('previewValor');
+            if (!isNaN(val) && val > 0) {
+                previewValor.textContent = val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            } else {
+                previewValor.textContent = 'R$ 0,00';
+            }
+
+            // Data
+            const dataVal = document.getElementById('inputDataVencimento').value;
+            const previewData = document.getElementById('previewDataVencimento');
+            if (dataVal) {
+                const partes = dataVal.split('-');
+                if (partes.length === 3) {
+                    previewData.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                } else {
+                    previewData.textContent = dataVal;
+                }
+            } else {
+                previewData.textContent = 'Não informada';
+            }
+        }
+
+        // Funções de preenchimento rápido
+        function setDescricao(texto) {
+            document.getElementById('inputDescricao').value = texto;
+            atualizarPreview();
+        }
+
+        function setValor(valor) {
+            document.getElementById('inputValor').value = valor.toFixed(2);
+            atualizarPreview();
+        }
+
+        function setDataVencimento(diasAdicionais) {
+            const data = new Date();
+            data.setDate(data.getDate() + diasAdicionais);
+            document.getElementById('inputDataVencimento').value = formatarDataInput(data);
+            atualizarPreview();
+        }
+
+        function setDataFimMes() {
+            const data = new Date();
+            const ultimoDia = new Date(data.getFullYear(), data.getMonth() + 1, 0);
+            document.getElementById('inputDataVencimento').value = formatarDataInput(ultimoDia);
+            atualizarPreview();
+        }
+
+        function formatarDataInput(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        function obterMesAtual() {
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            return meses[new Date().getMonth()];
+        }
     </script>
 }

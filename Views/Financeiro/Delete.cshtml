@@ -4,35 +4,328 @@
     ViewData["Title"] = "Excluir Cobrança";
 }
 
-<div class="container mt-5 mb-5 d-flex justify-content-center">
-    <div class="card shadow border-danger" style="max-width: 500px; width: 100%;">
-        <div class="card-header bg-danger text-white py-3">
-            <h4 class="mb-0"><i class="bi bi-trash-fill me-2"></i> Confirmar Exclusão</h4>
-        </div>
-        <div class="card-body p-4">
-            <h5 class="text-center mb-4">Tem certeza de que deseja apagar esta cobrança?</h5>
-            
-            <!-- Resumo da Cobrança -->
-            <div class="bg-light p-3 rounded mb-4">
-                <p class="mb-1"><strong>Paciente:</strong> @(Model.Paciente != null ? Model.Paciente.Nome : "Excluído")</p>
-                <p class="mb-1"><strong>Descrição:</strong> @Model.Descricao</p>
-                <p class="mb-1"><strong>Vencimento:</strong> @Model.DataVencimento.ToString("dd/MM/yyyy")</p>
-                <p class="mb-0"><strong>Status Atual:</strong> 
-                    <span class="text-danger fw-bold">@Model.Status</span>
-                </p>
-            </div>
-            
-            <p class="text-danger small text-center mb-4">
-                <strong>Atenção:</strong> Esta ação é irreversível. O registro financeiro será completamente removido do sistema.
-            </p>
+<style>
+    /* Estilos Modernos da Tela de Exclusão */
+    .finance-delete-wrapper {
+        padding-top: 0.5rem;
+        padding-bottom: 3rem;
+    }
 
-            <form asp-action="Delete" method="post" class="d-flex justify-content-between">
-                <!-- O ID escondido -->
-                <input type="hidden" asp-for="IdCobranca" />
-                
-                <a asp-action="Index" class="btn btn-secondary px-4 fw-bold">Voltar</a>
-                <button type="submit" class="btn btn-danger px-4 fw-bold"><i class="bi bi-trash"></i> Sim, Apagar</button>
-            </form>
+    /* Cabeçalho da Página */
+    .page-header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title-icon-danger {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25);
+    }
+
+    .page-subtitle {
+        color: #64748B;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    /* Cartão Principal */
+    .card-modern-form {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: clamp(20px, 3vw, 36px);
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .form-section-title i {
+        color: #DC2626;
+        font-size: 1.15rem;
+    }
+
+    /* Box de Resumo da Cobrança */
+    .delete-summary-box {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .summary-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #EDF2F7;
+    }
+
+    .summary-item-row:last-child {
+        border-bottom: none;
+        padding-top: 14px;
+        margin-top: 8px;
+        border-top: 1px dashed #CBD5E1;
+    }
+
+    .summary-label {
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    .summary-value {
+        color: #0F172A;
+        font-weight: 700;
+    }
+
+    /* Cartão Lateral de Recibo */
+    .invoice-preview-card {
+        background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: 24px;
+        position: sticky;
+        top: 24px;
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed #CBD5E1;
+    }
+
+    .preview-value-box {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .preview-value-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .preview-value-amount {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #DC2626;
+        line-height: 1.1;
+    }
+
+    /* Card Alternativo para Reabertura */
+    .reopen-suggestion-card {
+        background: #FFFBEB;
+        border: 1px solid #FDE68A;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 18px;
+    }
+</style>
+
+<div class="finance-delete-wrapper">
+
+    <!-- CABEÇALHO -->
+    <div class="page-header-box">
+        <div>
+            <div class="page-title">
+                <div class="page-title-icon-danger">
+                    <i class="bi bi-trash3-fill"></i>
+                </div>
+                <span>Excluir Cobrança</span>
+            </div>
+            <p class="page-subtitle">Confirme a exclusão definitiva deste registro financeiro.</p>
         </div>
+
+        <a href="/Financeiro" class="btn btn-light fw-bold text-muted rounded-pill px-4 border shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar ao Financeiro
+        </a>
     </div>
+
+    <form asp-action="Delete" method="post" id="formDelete">
+        <input type="hidden" asp-for="IdCobranca" />
+
+        <div class="row g-4">
+            
+            <!-- COLUNA ESQUERDA: CONFIRMAÇÃO DE EXCLUSÃO -->
+            <div class="col-12 col-lg-8">
+                <div class="card-modern-form">
+                    
+                    <!-- Alerta de Segurança -->
+                    <div class="alert alert-danger border-danger-subtle bg-danger-subtle text-danger rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
+                        <i class="bi bi-exclamation-octagon-fill fs-2 flex-shrink-0"></i>
+                        <div>
+                            <strong class="d-block mb-1">Atenção: Ação Irreversível</strong>
+                            <span>Tem certeza de que deseja apagar esta cobrança? O registro será permanentemente excluído do banco de dados e removido dos relatórios financeiros.</span>
+                        </div>
+                    </div>
+
+                    <!-- Dados da Cobrança -->
+                    <div class="form-section-title">
+                        <i class="bi bi-receipt"></i>
+                        <span>Dados do Registro a ser Excluído</span>
+                    </div>
+
+                    <div class="delete-summary-box">
+                        <div class="summary-item-row">
+                            <span class="summary-label">Paciente</span>
+                            <span class="summary-value text-primary">@(Model.Paciente != null ? Model.Paciente.Nome : "Não informado")</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label">Descrição</span>
+                            <span class="summary-value">@Model.Descricao</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label">Data de Vencimento</span>
+                            <span class="summary-value">@Model.DataVencimento.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label">Status Atual</span>
+                            <span class="summary-value">
+                                @if (Model.Status == "Pago")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Pago</span>
+                                }
+                                else if (Model.Status == "Atrasado")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Atrasado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1">Pendente</span>
+                                }
+                            </span>
+                        </div>
+                        @if (Model.DataPagamento.HasValue)
+                        {
+                            <div class="summary-item-row">
+                                <span class="summary-label">Data de Pagamento</span>
+                                <span class="summary-value text-success">@Model.DataPagamento.Value.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        }
+                        <div class="summary-item-row">
+                            <span class="summary-label fs-6">Valor da Cobrança</span>
+                            <span class="summary-value text-danger fs-5">@Model.Valor.ToString("C")</span>
+                        </div>
+                    </div>
+
+                    <!-- BARRINHA DE BOTÕES DE AÇÃO -->
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                        <a href="/Financeiro" class="btn btn-light fw-bold text-muted px-4 py-2 rounded-pill border">
+                            Cancelar e Voltar
+                        </a>
+
+                        <button type="submit" class="btn btn-danger fw-bold px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" style="background-color: #DC2626; border-color: #DC2626;">
+                            <i class="bi bi-trash3-fill"></i>
+                            <span>Sim, Excluir Cobrança</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: RECIBO E OPÇÃO DE REABERTURA -->
+            <div class="col-12 col-lg-4">
+                <div class="invoice-preview-card">
+                    
+                    <div class="preview-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="Logo" style="height: 28px;" />
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Neuro<span class="text-primary">Sync</span></span>
+                        </div>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-bold">
+                            <i class="bi bi-trash3 me-1"></i>Removendo
+                        </span>
+                    </div>
+
+                    <div class="preview-value-box">
+                        <div class="preview-value-label">Valor a Excluir</div>
+                        <div class="preview-value-amount">@Model.Valor.ToString("C")</div>
+                    </div>
+
+                    <div class="small">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Paciente</span>
+                            <span class="fw-bold text-dark text-end">@(Model.Paciente != null ? Model.Paciente.Nome : "Não informado")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Descrição</span>
+                            <span class="fw-bold text-dark text-end">@Model.Descricao</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Status</span>
+                            <span class="fw-bold text-end">@Model.Status</span>
+                        </div>
+                    </div>
+
+                    <!-- SUGESTÃO DE REABRIR SE JÁ ESTIVER PAGA -->
+                    @if (Model.Status == "Pago")
+                    {
+                        <div class="reopen-suggestion-card">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-lightbulb-fill text-warning fs-5"></i>
+                                <strong class="text-dark small">Deseja apenas corrigir a baixa?</strong>
+                            </div>
+                            <p class="small text-secondary mb-3" style="font-size: 0.82rem; line-height: 1.4;">
+                                Esta cobrança já consta como <strong>Paga</strong>. Se você quer apenas desfazer o pagamento sem perder o registro, reabra-a para <strong>Pendente</strong>.
+                            </p>
+                            <a href="/Financeiro/Reabrir/@Model.IdCobranca" class="btn btn-outline-warning text-dark fw-bold rounded-pill w-100 btn-sm shadow-sm">
+                                <i class="bi bi-arrow-counterclockwise me-1 text-warning"></i> Reabrir para Pendente
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </form>
+
 </div>

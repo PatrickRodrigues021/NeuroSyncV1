@@ -49,23 +49,90 @@
         .input-group-text-dark { background-color: var(--navy-light); border: 1px solid rgba(255,255,255,0.1); color: #8ba3cb; border-right: none; }
         .form-control.input-dark { border-left: none; }
         .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+
+        /* Estilos Responsivos de Login */
+        .login-page, .login-row {
+            min-height: 100vh;
+        }
+
+        .login-sidebar {
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .login-sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .login-sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .login-content {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #mapa-clinica {
+            height: clamp(120px, 16vh, 180px);
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Adaptação para monitores com altura reduzida (< 850px ou zoom 125%/150%) */
+        @@media (max-height: 850px) {
+            .login-sidebar {
+                padding: clamp(1rem, 2.5vh, 2rem) !important;
+            }
+            .login-logo-img {
+                height: 70px !important;
+                margin-bottom: 0.5rem !important;
+            }
+            .login-header-text {
+                margin-bottom: 1.25rem !important;
+                font-size: 0.95rem !important;
+            }
+            .login-form-area {
+                margin-bottom: 1.5rem !important;
+            }
+            .login-form-area .mb-4 {
+                margin-bottom: 0.85rem !important;
+            }
+            .login-footer-security {
+                margin-bottom: 0.85rem !important;
+                padding-bottom: 0.85rem !important;
+            }
+        }
+
+        @@media (max-width: 1200px) {
+            .login-content h1 {
+                font-size: 2.2rem !important;
+            }
+            .login-content p {
+                font-size: 1.05rem !important;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid p-0 login-page">
-        <div class="row g-0 login-page">
+        <div class="row g-0 login-page login-row">
 
             <!-- ========================================== -->
             <!-- COLUNA ESQUERDA: LOGIN                     -->
             <!-- ========================================== -->
-            <div class="col-12 col-lg-4 bg-navy d-flex flex-column justify-content-between p-4 p-md-5 shadow-lg position-relative z-3 login-sidebar">
+            <div class="col-12 col-lg-5 col-xl-4 bg-navy d-flex flex-column justify-content-between p-4 p-md-5 shadow-lg position-relative z-3 login-sidebar">
                 
                 <div class="text-center">
-                    <div class="d-flex flex-column align-items-center mb-4 mt-3">
+                    <div class="d-flex flex-column align-items-center mb-3 mt-2">
                         <img src="~/images/logo-principal-cerebro-coracao 2.png"
                              alt="Logo NeuroSync"
-                             class="mb-3"
-                             style="height: 110px;
+                             class="mb-3 login-logo-img"
+                             style="height: 100px;
                                     width: auto;
                                     object-fit: contain;
                                     filter: drop-shadow(0 0 12px rgba(22, 196, 200, 0.45));" />
@@ -75,7 +142,7 @@
                         </h2>
                     </div>
 
-                    <p class="text-white-50 mb-5 mx-auto"
+                    <p class="text-white-50 mb-4 mx-auto login-header-text"
                        style="max-width: 400px;
                               font-size: 1.05rem;
                               line-height: 1.55;">
@@ -83,7 +150,7 @@
                     </p>
                 </div>
 
-                <div class="mb-5">
+                <div class="mb-4 login-form-area">
                     <form method="post" action="/Login/Entrar">
                         @if (ViewBag.Erro != null)
                         {
@@ -96,7 +163,7 @@
                             <label class="form-label text-white fw-bold small mb-2">E-mail ou usuário</label>
                             <div class="input-group">
                                 <span class="input-group-text input-group-text-dark rounded-start-3"><i class="bi bi-person"></i></span>
-                                <input type="text" name="usuario" class="form-control input-dark py-2 rounded-end-3" placeholder="Digite seu e-mail ou usuário">
+                                <input type="text" name="usuario" class="form-control input-dark py-2 rounded-end-3" placeholder="Digite seu e-mail ou usuário" required>
                             </div>
                         </div>
                         
@@ -111,7 +178,8 @@
                                        id="senha"
                                        name="senha"
                                        class="form-control input-dark py-2"
-                                       placeholder="Digite sua senha">
+                                       placeholder="Digite sua senha"
+                                       required>
 
                                 <button type="button"
                                         id="alternarSenha"
@@ -137,28 +205,25 @@
                             <i class="bi bi-arrow-right"></i>
                         </button>
                         
-                        <div class="text-center mt-4">
+                        <div class="text-center mt-3">
                             <a href="#" class="text-cyan text-decoration-none small fw-bold">Esqueci minha senha</a>
                         </div>
                     </form>
 
-                    <!-- ========================================== -->
-                    <!-- MAPA DA CLÍNICA ADICIONADO AQUI            -->
-                    <!-- ========================================== -->
-                    <div class="mt-4 border-top border-secondary pt-4">
+                    <!-- MAPA DA CLÍNICA -->
+                    <div class="mt-4 border-top border-secondary pt-3">
                         <label class="form-label text-white fw-bold small mb-2"><i class="bi bi-geo-alt-fill text-cyan"></i> Onde estamos</label>
-                        <div id="mapa-clinica" style="height: 180px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);"></div>
+                        <div id="mapa-clinica"></div>
                     </div>
-                    <!-- ========================================== -->
 
                 </div>
 
-                <div class="text-white-50 small mb-3">
-                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary pb-4">
+                <div class="text-white-50 small mb-2">
+                    <div class="d-flex align-items-center mb-3 border-bottom border-secondary pb-3 login-footer-security">
                         <i class="bi bi-shield-check text-cyan fs-2 me-3"></i>
-                        <span style="font-size: 0.9rem;">Seus dados protegidos<br>com segurança e conformidade</span>
+                        <span style="font-size: 0.88rem;">Seus dados protegidos<br>com segurança e conformidade</span>
                     </div>
-                    <div style="font-size: 0.8rem;" class="opacity-75">
+                    <div style="font-size: 0.78rem;" class="opacity-75">
                         <p class="mb-1">© 2026 NeuroSync • Todos os direitos reservados</p>
                         <p class="mb-0">Versão 1.0.0</p>
                     </div>
@@ -166,24 +231,24 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- COLUNA DIREITA (A Sua Solução de Fundo)    -->
+            <!-- COLUNA DIREITA (Ilustração e Apresentação)  -->
             <!-- ========================================== -->
-            <div class="col-lg-8 d-none d-lg-flex flex-column login-content"
-             style="background-color: #f4f6fa;">
+            <div class="col-lg-7 col-xl-8 d-none d-lg-flex flex-column login-content justify-content-between"
+                 style="background-color: #f4f6fa;">
                 
-                <div class="p-5 flex-shrink-0">
-                    <h1 class="fw-bolder mb-3" style="font-size: 2.8rem; color: var(--navy);">
+                <div class="p-4 p-xl-5 flex-shrink-0">
+                    <h1 class="fw-bolder mb-3" style="font-size: clamp(2rem, 2.6vw, 2.8rem); color: var(--navy);">
                         Gestão inteligente. <span class="text-cyan">Cuidado integrado.</span>
                     </h1>
-                    <p class="text-muted mb-0" style="font-size: 1.15rem; max-width: 900px; font-weight: 500;">
+                    <p class="text-muted mb-0" style="font-size: clamp(1rem, 1.1vw, 1.15rem); max-width: 900px; font-weight: 500;">
                         Um sistema completo de Gestão Clínica e Prontuário Eletrônico do Paciente (PEP), 
                         projetado com foco em clínicas de terapias e neurodesenvolvimento.
                     </p>
                 </div>
 
-                <div class="flex-grow-1 d-flex justify-content-center align-items-center w-100 pb-4 login-image-area">
+                <div class="flex-grow-1 d-flex justify-content-center align-items-end w-100 pb-3 login-image-area overflow-hidden">
                     <img src="/images/Background-tela-login.png" 
-                         style="max-height: 100%; width: 100%; object-fit: contain; object-position: center top;" 
+                         style="max-height: 90%; width: auto; max-width: 95%; object-fit: contain; object-position: center bottom;" 
                          alt="Ilustração NeuroSync" />
                 </div>
                 

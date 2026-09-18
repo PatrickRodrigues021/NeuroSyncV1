@@ -19,6 +19,54 @@ namespace NeuroSync.Controllers
             _context = context;
         }
 
+        private async Task<string> ObterNomeExibicaoAsync()
+        {
+            string? nomeCompleto = null;
+
+            // 1. Tenta buscar pelo ID no Claim
+            var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(claimId, out int idUsuario))
+            {
+                var usuario = await _context.Usuarios.FindAsync(idUsuario);
+                if (usuario != null && !string.IsNullOrWhiteSpace(usuario.Nome))
+                {
+                    nomeCompleto = usuario.Nome;
+                }
+            }
+
+            // 2. Se não achou, tenta pelo Name do Claim
+            if (string.IsNullOrWhiteSpace(nomeCompleto) && User?.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(User.Identity.Name) && User.Identity.Name != "admin")
+            {
+                nomeCompleto = User.Identity.Name;
+            }
+
+            // 3. Se ainda não achou, busca o primeiro usuário cadastrado no banco
+            if (string.IsNullOrWhiteSpace(nomeCompleto))
+            {
+                var primeiroUsuario = await _context.Usuarios.FirstOrDefaultAsync();
+                if (primeiroUsuario != null && !string.IsNullOrWhiteSpace(primeiroUsuario.Nome))
+                {
+                    nomeCompleto = primeiroUsuario.Nome;
+                }
+            }
+
+            return ExtrairPrimeiroNome(nomeCompleto);
+        }
+
+        public static string ExtrairPrimeiroNome(string? nomeCompleto)
+        {
+            if (string.IsNullOrWhiteSpace(nomeCompleto)) return "Usuário";
+            var partes = nomeCompleto.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length == 0) return "Usuário";
+
+            var titulos = new[] { "dr.", "dra.", "dr", "dra", "prof.", "profa.", "prof", "profa" };
+            if (titulos.Contains(partes[0].ToLower()) && partes.Length > 1)
+            {
+                return $"{partes[0]} {partes[1]}";
+            }
+            return partes[0];
+        }
+
         public async Task<IActionResult> Index()
         {
             var agora = DateTime.Now;
@@ -28,13 +76,9 @@ namespace NeuroSync.Controllers
             var inicioDoMes = new DateTime(hoje.Year, hoje.Month, 1);
             var fimDoMes = inicioDoMes.AddMonths(1).AddDays(-1);
 
-            // Nome e saudação
+            // Nome e saudação dinâmicos baseados no usuário logado
             var saudacao = agora.Hour < 12 ? "Bom dia" : (agora.Hour < 18 ? "Boa tarde" : "Boa noite");
-            string nomeExibicao = "Dra. Mariana";
-            if (User?.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(User.Identity.Name) && User.Identity.Name != "admin")
-            {
-                nomeExibicao = User.Identity.Name;
-            }
+            string nomeExibicao = await ObterNomeExibicaoAsync();
 
             var model = new DashboardViewModel
             {
@@ -201,12 +245,8 @@ namespace NeuroSync.Controllers
 
             var saudacao = agora.Hour < 12 ? "Bom dia" : (agora.Hour < 18 ? "Boa tarde" : "Boa noite");
 
-            // Identificar nome exibido
-            string nomeExibicao = "Dra. Mariana";
-            if (User?.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(User.Identity.Name) && User.Identity.Name != "admin")
-            {
-                nomeExibicao = User.Identity.Name;
-            }
+            // Identificar nome exibido dinamicamente
+            string nomeExibicao = await ObterNomeExibicaoAsync();
 
             var model = new ResumoDoDiaViewModel
             {
