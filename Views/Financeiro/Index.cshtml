@@ -295,6 +295,17 @@
 
 <div class="financeiro-container">
 
+    @if (TempData["MensagemSucesso"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center justify-content-between py-3 px-4" role="alert" style="background-color: #ECFDF5; color: #065F46;">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+                <span class="fw-semibold">@TempData["MensagemSucesso"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- CABEÇALHO COM TÍTULO E AÇÕES (EXCEL, PDF, NOVA COBRANÇA) -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
@@ -583,12 +594,20 @@
                                     @(item.DataPagamento.HasValue ? item.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")
                                 </td>
                                 <td class="text-end pe-4">
-                                    <div class="d-inline-flex gap-1">
+                                    <div class="d-inline-flex gap-1 align-items-center">
                                         @if (item.Status != "Pago")
                                         {
-                                            <a asp-action="Baixa" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-success rounded-pill px-3" title="Registrar Pagamento">
+                                            <a asp-action="Baixa" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" title="Registrar Pagamento">
                                                 <i class="bi bi-check2-circle me-1"></i> Baixar
                                             </a>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold" 
+                                                    title="Reabrir cobrança (Voltar para Pendente)" 
+                                                    onclick="abrirModalReabrir(@item.IdCobranca, '@(item.Paciente != null ? item.Paciente.Nome.Replace("'", "\\'") : "Paciente")', '@item.Valor.ToString("C")')">
+                                                <i class="bi bi-arrow-counterclockwise me-1 text-warning"></i> Reabrir
+                                            </button>
                                         }
                                         <a asp-action="Delete" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" title="Excluir cobrança">
                                             <i class="bi bi-trash"></i>
@@ -731,5 +750,70 @@
             });
 
         });
+
+        // Função de abertura do modal de reabertura de cobrança
+        function abrirModalReabrir(id, nomePaciente, valor) {
+            document.getElementById('reabrirIdCobranca').value = id;
+            document.getElementById('reabrirNomePaciente').textContent = nomePaciente;
+            document.getElementById('reabrirValorCobranca').textContent = valor;
+            const modalEl = document.getElementById('modalReabrir');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
     </script>
 }
+
+<!-- MODAL DE CONFIRMAÇÃO PARA REABRIR COBRANÇA (PAGO -> PENDENTE) -->
+<div class="modal fade" id="modalReabrir" tabindex="-1" aria-labelledby="modalReabrirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-warning-subtle text-dark p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-25 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-arrow-counterclockwise fs-4 text-dark"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalReabrirLabel">Reabrir Cobrança</h5>
+                        <small class="text-muted">Reverter status de Pago para Pendente</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <form method="post" action="/Financeiro/Reabrir" id="formReabrir">
+                <input type="hidden" name="id" id="reabrirIdCobranca" value="" />
+                
+                <div class="modal-body p-4 pt-3">
+                    <p class="text-secondary mb-3">
+                        Tem certeza de que deseja reabrir esta cobrança?
+                    </p>
+                    
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between mb-1 small text-muted">
+                            <span>Paciente:</span>
+                            <strong class="text-dark" id="reabrirNomePaciente">—</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>Valor:</span>
+                            <strong class="text-success" id="reabrirValorCobranca">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-0 bg-warning-subtle text-dark small mb-0 rounded-3 d-flex gap-2">
+                        <i class="bi bi-info-circle-fill text-warning flex-shrink-0 mt-1"></i>
+                        <div>
+                            A data de pagamento será removida e o valor deixará de constar como receita liquidada até uma nova baixa.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reabrir Cobrança
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

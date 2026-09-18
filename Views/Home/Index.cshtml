@@ -60,11 +60,12 @@
         border-radius: 20px;
         border: 1px solid rgba(226, 232, 240, 0.85);
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035);
-        padding: 22px 24px;
+        padding: clamp(16px, 2vw, 24px);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         height: 100%;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     .premium-card:hover {
@@ -80,13 +81,13 @@
     }
 
     .kpi-icon-box {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.6rem;
+        font-size: 1.5rem;
         flex-shrink: 0;
     }
 
@@ -96,7 +97,7 @@
     .icon-rose   { background: #ffe4e6; color: #e11d48; }
 
     .kpi-title {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -105,7 +106,7 @@
     }
 
     .kpi-value {
-        font-size: 2rem;
+        font-size: clamp(1.6rem, 2vw, 2rem);
         font-weight: 800;
         color: #0b223d;
         line-height: 1.1;
@@ -113,7 +114,7 @@
     }
 
     .kpi-subtext {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         font-weight: 600;
     }
 
@@ -123,19 +124,19 @@
         border-radius: 16px;
         border: 1px solid rgba(226, 232, 240, 0.85);
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.025);
-        padding: 12px 24px;
+        padding: 12px 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 16px;
+        gap: 14px;
     }
 
     .metric-pill-item {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 0.88rem;
+        font-size: clamp(0.8rem, 0.9vw, 0.88rem);
         color: #64748b;
     }
 
@@ -159,12 +160,14 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 14px;
+        padding: 10px 14px;
         border-radius: 14px;
         border: 1px solid #f1f5f9;
         background: #f8fafc;
         margin-bottom: 10px;
         transition: all 0.2s ease;
+        gap: 10px;
+        min-width: 0;
     }
 
     .appointment-item-card:hover {
@@ -176,18 +179,18 @@
     .appointment-time-badge {
         background: #e0f2fe;
         color: #0369a1;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 800;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 10px;
         text-align: center;
         flex-shrink: 0;
-        min-width: 68px;
+        min-width: 60px;
     }
 
     .patient-avatar-circle {
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -200,13 +203,19 @@
         display: flex;
         flex-direction: column;
         gap: 2px;
+        min-width: 0;
+        overflow: hidden;
     }
 
     .patient-name-link {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         font-weight: 700;
         color: #0b223d;
         text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
     }
 
     .patient-name-link:hover {
@@ -214,11 +223,14 @@
     }
 
     .patient-sub-details {
-        font-size: 0.81rem;
+        font-size: 0.8rem;
         color: #64748b;
         display: flex;
         align-items: center;
         gap: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .patient-sub-details span.badge-room {
@@ -228,15 +240,17 @@
         font-size: 0.72rem;
         padding: 2px 7px;
         border-radius: 6px;
+        flex-shrink: 0;
     }
 
     .status-badge-custom {
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 700;
-        padding: 6px 14px;
+        padding: 5px 11px;
         border-radius: 50px;
         letter-spacing: 0.2px;
         white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .status-confirmed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
@@ -266,7 +280,7 @@
 
     .quick-actions-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 14px;
     }
 
@@ -374,7 +388,7 @@
     <!-- 2. OS 4 CARDS CLÍNICOS PRINCIPAIS -->
     <div class="row g-4">
         <!-- 1. Atendimentos Hoje -->
-        <div class="col-12 col-sm-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xxl-3">
             <div class="premium-card">
                 <div class="kpi-stat-card">
                     <div class="kpi-icon-box icon-blue">
@@ -394,7 +408,7 @@
         </div>
 
         <!-- 2. Confirmados -->
-        <div class="col-12 col-sm-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xxl-3">
             <div class="premium-card">
                 <div class="kpi-stat-card">
                     <div class="kpi-icon-box icon-green">
@@ -412,7 +426,7 @@
         </div>
 
         <!-- 3. Aguardando Confirmação -->
-        <div class="col-12 col-sm-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xxl-3">
             <div class="premium-card">
                 <div class="kpi-stat-card">
                     <div class="kpi-icon-box icon-amber">
@@ -430,7 +444,7 @@
         </div>
 
         <!-- 4. Pendências -->
-        <div class="col-12 col-sm-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xxl-3">
             <div class="premium-card">
                 <div class="kpi-stat-card">
                     <div class="kpi-icon-box icon-rose">
@@ -458,7 +472,7 @@
             <span>Pacientes Ativos: <strong>@Model.TotalPacientesAtivos</strong></span>
         </div>
 
-        <div class="vr d-none d-md-block opacity-25"></div>
+        <div class="vr d-none d-xl-block opacity-25"></div>
 
         <!-- Receita do Mês -->
         <div class="metric-pill-item">
@@ -468,7 +482,7 @@
             <span>Receita de @Model.NomeMes: <strong class="text-success">@Model.ReceitaMes.ToString("C")</strong></span>
         </div>
 
-        <div class="vr d-none d-md-block opacity-25"></div>
+        <div class="vr d-none d-xl-block opacity-25"></div>
 
         <!-- Sessões no Mês -->
         <div class="metric-pill-item">
@@ -478,7 +492,7 @@
             <span>Sessões Realizadas: <strong>@Model.SessoesRealizadasMes</strong></span>
         </div>
 
-        <div class="vr d-none d-md-block opacity-25"></div>
+        <div class="vr d-none d-xl-block opacity-25"></div>
 
         <!-- Aniversariantes -->
         <div class="metric-pill-item">
@@ -497,7 +511,7 @@
     <div class="row g-4">
         
         <!-- COLUNA ESQUERDA: PRÓXIMOS ATENDIMENTOS CLÍNICOS -->
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-xxl-6">
             <div class="premium-card">
                 <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
                     <div class="d-flex align-items-center gap-2">
@@ -517,7 +531,7 @@
                         @foreach (var item in Model.ProximosAtendimentos)
                         {
                             <div class="appointment-item-card">
-                                <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-2 gap-sm-3 min-w-0" style="min-width: 0; flex: 1 1 auto;">
                                     <!-- Horário -->
                                     <div class="appointment-time-badge">
                                         @item.Horario
@@ -527,7 +541,7 @@
                                     <div class="patient-avatar-circle">
                                         @if (item.AvatarGenero == "girl")
                                         {
-                                            <svg viewBox="0 0 44 44" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <svg viewBox="0 0 44 44" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <circle cx="22" cy="22" r="22" fill="#d1fae5"/>
                                                 <path d="M12 26C12 16 16 11 22 11C28 11 32 16 32 26C32 28 31 32 30 32C29 32 28 26 28 24C28 24 25 24 22 24C19 24 16 24 16 24C16 26 15 32 14 32C13 32 12 28 12 26Z" fill="#3b2d22"/>
                                                 <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
@@ -540,7 +554,7 @@
                                         }
                                         else
                                         {
-                                            <svg viewBox="0 0 44 44" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <svg viewBox="0 0 44 44" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <circle cx="22" cy="22" r="22" fill="#cffafe"/>
                                                 <path d="M14 19C14 14 17 11 22 11C27 11 30 14 30 19C30 20 29 20 28 18C26 16 24 16 22 16C20 16 18 16 16 18C15 20 14 20 14 19Z" fill="#1e293b"/>
                                                 <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
@@ -565,13 +579,13 @@
                                 </div>
 
                                 <!-- Status Badge e Ação Atender -->
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-shrink-0">
                                     @if (item.Status == "Em atendimento")
                                     {
                                         <span class="status-badge-custom text-primary border border-primary-subtle" style="background: #e0f2fe;">
                                             <span class="spinner-grow spinner-grow-sm text-primary me-1" style="width: 8px; height: 8px;" role="status"></span>Em atendimento
                                         </span>
-                                        <a href="/Pacientes/Details/@item.PacienteId?aba=evolucao" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                        <a href="/Pacientes/Details/@item.PacienteId?aba=evolucao" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3 fw-bold">
                                             Continuar <i class="bi bi-arrow-right ms-1"></i>
                                         </a>
                                     }
@@ -580,7 +594,7 @@
                                         <span class="status-badge-custom status-confirmed">
                                             <i class="bi bi-check2-circle me-1"></i>Confirmado
                                         </span>
-                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" title="Iniciar atendimento deste paciente">
+                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-primary rounded-pill px-2 px-sm-3 fw-bold shadow-sm" title="Iniciar atendimento deste paciente">
                                             <i class="bi bi-play-fill me-1"></i>Atender
                                         </a>
                                     }
@@ -589,7 +603,7 @@
                                         <span class="status-badge-custom status-pending">
                                             <i class="bi bi-hourglass-split me-1"></i>Aguardando
                                         </span>
-                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-light border text-primary rounded-pill px-3 fw-bold">
+                                        <a href="/Agenda/IniciarAtendimento?id=@item.AgendamentoId&pacienteId=@item.PacienteId" class="btn btn-sm btn-light border text-primary rounded-pill px-2 px-sm-3 fw-bold">
                                             <i class="bi bi-play-fill me-1"></i>Atender
                                         </a>
                                     }
@@ -598,7 +612,7 @@
                                         <span class="status-badge-custom status-done">
                                             @item.Status
                                         </span>
-                                        <a href="/Pacientes/Details/@item.PacienteId" class="btn btn-sm btn-light border text-muted rounded-pill px-3 fw-bold">
+                                        <a href="/Pacientes/Details/@item.PacienteId" class="btn btn-sm btn-light border text-muted rounded-pill px-2 px-sm-3 fw-bold">
                                             Ver Prontuário
                                         </a>
                                     }
@@ -625,7 +639,7 @@
         </div>
 
         <!-- COLUNA DIREITA: STATUS DAS SESSÕES E RITMO SEMANAL -->
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-xxl-6">
             <div class="premium-card">
                 <!-- Cabeçalho com Abas para alternar visualização -->
                 <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
@@ -728,7 +742,7 @@
 
         <div class="quick-actions-grid">
             <!-- + Novo Paciente -->
-            <a href="/Pacientes" class="btn-quick-action">
+            <a href="/Pacientes/Create" class="btn-quick-action">
                 <div class="quick-icon">
                     <i class="bi bi-person-plus-fill"></i>
                 </div>
@@ -736,35 +750,19 @@
             </a>
 
             <!-- + Novo Atendimento -->
-            <a href="/Agenda" class="btn-quick-action">
+            <a href="/Agenda/Create" class="btn-quick-action">
                 <div class="quick-icon">
                     <i class="bi bi-calendar-plus-fill"></i>
                 </div>
                 <span>Novo Atendimento</span>
             </a>
 
-            <!-- + Prontuário / Evolução -->
-            <a href="/Prontuarios" class="btn-quick-action">
-                <div class="quick-icon">
-                    <i class="bi bi-file-earmark-medical-fill"></i>
-                </div>
-                <span>Novo Prontuário</span>
-            </a>
-
-            <!-- + Nova Terapia -->
-            <a href="/Terapias" class="btn-quick-action">
-                <div class="quick-icon">
-                    <i class="bi bi-puzzle-fill"></i>
-                </div>
-                <span>Terapias & Áreas</span>
-            </a>
-
-            <!-- + Novo Lançamento -->
-            <a href="/Financeiro" class="btn-quick-action">
+            <!-- + Nova Cobrança -->
+            <a href="/Financeiro/Create" class="btn-quick-action">
                 <div class="quick-icon">
                     <i class="bi bi-currency-dollar"></i>
                 </div>
-                <span>Novo Lançamento</span>
+                <span>Nova Cobrança</span>
             </a>
         </div>
     </div>

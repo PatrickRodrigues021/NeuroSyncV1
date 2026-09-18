@@ -58,7 +58,54 @@ using (var scope = app.Services.CreateScope())
             registro_profissional TEXT,
             FOREIGN KEY (id_paciente) REFERENCES paciente (id_paciente) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS usuario (
+            id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL,
+            senha TEXT NOT NULL,
+            criado_em TEXT NOT NULL
+        );
     ");
+
+    var conn = db.Database.GetDbConnection();
+    if (conn.State != System.Data.ConnectionState.Open) conn.Open();
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = "PRAGMA table_info(evolucao);";
+        var colunasExistentes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                colunasExistentes.Add(reader.GetString(1));
+            }
+        }
+
+        if (!colunasExistentes.Contains("tipo_evolucao"))
+        {
+            cmd.CommandText = "ALTER TABLE evolucao ADD COLUMN tipo_evolucao TEXT DEFAULT 'Sessão Terapêutica';";
+            cmd.ExecuteNonQuery();
+        }
+
+        if (!colunasExistentes.Contains("profissional_nome"))
+        {
+            cmd.CommandText = "ALTER TABLE evolucao ADD COLUMN profissional_nome TEXT;";
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    if (!db.Usuarios.Any())
+    {
+        db.Usuarios.Add(new NeuroSync.Models.Usuario
+        {
+            Nome = "Mariana Silva",
+            Email = "admin",
+            Senha = "admin123",
+            CriadoEm = DateTime.Now
+        });
+        db.SaveChanges();
+    }
 }
 
 app.Run();

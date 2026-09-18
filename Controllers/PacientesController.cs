@@ -95,15 +95,238 @@ namespace NeuroSync.Controllers
 
         // 3. SALVAR EVOLUÇÃO
         [HttpPost]
-        public IActionResult AdicionarEvolucao(int PacienteId, string Anotacao)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdicionarEvolucao(int PacienteId, string Anotacao, string? TipoEvolucao, string? ProfissionalNome)
         {
-            if (!string.IsNullOrEmpty(Anotacao))
+            if (!string.IsNullOrWhiteSpace(Anotacao))
             {
-                var novaEvolucao = new Evolucao { PacienteId = PacienteId, Anotacao = Anotacao, DataRegistro = DateTime.Now };
+                var tipo = !string.IsNullOrWhiteSpace(TipoEvolucao) ? TipoEvolucao.Trim() : "Sessão Terapêutica";
+                var profissional = !string.IsNullOrWhiteSpace(ProfissionalNome)
+                    ? ProfissionalNome.Trim()
+                    : (User.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(User.Identity.Name) ? User.Identity.Name : "Profissional Clínico");
+
+                var novaEvolucao = new Evolucao
+                {
+                    PacienteId = PacienteId,
+                    Anotacao = Anotacao.Trim(),
+                    TipoEvolucao = tipo,
+                    ProfissionalNome = profissional,
+                    DataRegistro = DateTime.Now
+                };
                 _context.Evolucoes.Add(novaEvolucao);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+                TempData["MensagemSucesso"] = "Evolução clínica registrada com sucesso!";
+                TempData["MensagemSucessoEvolucao"] = "Evolução clínica registrada com sucesso!";
             }
             return RedirectToAction("Details", new { id = PacienteId, aba = "evolucao" });
+        }
+
+        // ========================================================
+        // 3.01 VISUALIZAR DETALHES DA EVOLUÇÃO
+        // ========================================================
+        public async Task<IActionResult> VisualizarEvolucao(int id)
+        {
+            var evolucao = await _context.Evolucoes
+                                         .Include(e => e.Paciente)
+                                         .FirstOrDefaultAsync(e => e.IdEvolucao == id);
+
+            if (evolucao == null || evolucao.Paciente == null) return NotFound();
+
+            return View(evolucao);
+        }
+
+        // ========================================================
+        // 3.02 IMPRIMIR EVOLUÇÃO (FOLHA TIMBRADA WEB)
+        // ========================================================
+        public async Task<IActionResult> ImprimirEvolucao(int id)
+        {
+            var evolucao = await _context.Evolucoes
+                                         .Include(e => e.Paciente)
+                                         .FirstOrDefaultAsync(e => e.IdEvolucao == id);
+
+            if (evolucao == null || evolucao.Paciente == null) return NotFound();
+
+            return View(evolucao);
+        }
+
+        // ========================================================
+        // 3.03 EMISSÃO DO PDF DA EVOLUÇÃO CLÍNICA COM LOGO (QuestPDF)
+        // ========================================================
+        public async Task<IActionResult> GerarEvolucaoPdf(int id)
+        {
+            var evolucao = await _context.Evolucoes
+                                         .Include(e => e.Paciente)
+                                         .FirstOrDefaultAsync(e => e.IdEvolucao == id);
+
+            if (evolucao == null || evolucao.Paciente == null) return NotFound();
+
+            var paciente = evolucao.Paciente;
+            var culturaBr = new CultureInfo("pt-BR");
+
+            // Cálculo seguro de idade
+            var idade = DateTime.Today.Year - paciente.DataNascimento.Year;
+            if (paciente.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
+
+            // Identificação do Responsável
+            string responsavel = !string.IsNullOrWhiteSpace(paciente.Responsavel) ? paciente.Responsavel :
+                                 !string.IsNullOrWhiteSpace(paciente.NomeMae) ? paciente.NomeMae :
+                                 !string.IsNullOrWhiteSpace(paciente.NomePai) ? paciente.NomePai : "Não informado";
+
+            // Imagem do Logo Principal
+            string logoPath = Path.Combine(_hostEnvironment.WebRootPath, "images", "logo-principal-cerebro-coracao 2.png");
+            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
+
+            var documento = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(32);
+                    page.DefaultTextStyle(x => x.FontSize(9.5f).FontColor(Color.FromHex("#1e293b")));
+
+                    // 1. CABEÇALHO TIMBRADO
+                    page.Header().Column(headerCol =>
+                    {
+                        headerCol.Item().Row(row =>
+                        {
+                            row.RelativeItem(7).Row(bRow =>
+                            {
+                                if (logoBytes != null)
+                                {
+                                    bRow.ConstantItem(46).Height(46).Image(logoBytes).FitArea();
+                                    bRow.ConstantItem(10);
+                                }
+
+                                bRow.RelativeItem().Column(brandCol =>
+                                {
+                                    brandCol.Item().Row(logoRow =>
+                                    {
+                                        logoRow.AutoItem().Text("Neuro").FontSize(20).Bold().FontColor(Color.FromHex("#071A3A"));
+                                        logoRow.AutoItem().Text("Sync").FontSize(20).Bold().FontColor(Color.FromHex("#315BEF"));
+                                    });
+                                    brandCol.Item().Text("Clínica de Desenvolvimento e Neuropsicopedagogia").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                                    brandCol.Item().Text("Atendimento Clínico Multidisciplinar Especializado").FontSize(7.5f).FontColor(Colors.Grey.Medium);
+                                });
+                            });
+
+                            row.RelativeItem(5).AlignRight().Column(metaCol =>
+                            {
+                                metaCol.Item().Text("REGISTRO DE EVOLUÇÃO").FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
+                                metaCol.Item().Text($"Registro: #EV{evolucao.IdEvolucao:D4}").FontSize(8.5f).FontColor(Color.FromHex("#315BEF")).Bold();
+                                metaCol.Item().Text($"Data: {evolucao.DataRegistro:dd/MM/yyyy 'às' HH:mm}").FontSize(8.5f).FontColor(Colors.Grey.Darken2);
+                            });
+                        });
+
+                        headerCol.Item().PaddingTop(8).LineHorizontal(2).LineColor(Color.FromHex("#315BEF"));
+                    });
+
+                    // 2. CORPO DO DOCUMENTO
+                    page.Content().PaddingTop(16).Column(col =>
+                    {
+                        // 2.1 Identificação do Paciente
+                        col.Item().Background(Color.FromHex("#F8FAFC")).Border(1).BorderColor(Color.FromHex("#E2E8F0")).Padding(12).Column(pCol =>
+                        {
+                            pCol.Item().Text("IDENTIFICAÇÃO DO PACIENTE").FontSize(8.5f).Bold().FontColor(Color.FromHex("#315BEF"));
+                            pCol.Item().PaddingTop(4).Row(r =>
+                            {
+                                r.RelativeItem(6).Text(t =>
+                                {
+                                    t.Span("Nome do Paciente: ").Bold();
+                                    t.Span(paciente.Nome);
+                                });
+                                r.RelativeItem(3).Text(t =>
+                                {
+                                    t.Span("Idade: ").Bold();
+                                    t.Span($"{idade} anos");
+                                });
+                                r.RelativeItem(3).Text(t =>
+                                {
+                                    t.Span("Prontuário: ").Bold();
+                                    t.Span($"#{paciente.IdPaciente:D4}");
+                                });
+                            });
+
+                            pCol.Item().PaddingTop(4).Row(r =>
+                            {
+                                r.RelativeItem(6).Text(t =>
+                                {
+                                    t.Span("Responsável: ").Bold();
+                                    t.Span(responsavel);
+                                });
+                                r.RelativeItem(6).Text(t =>
+                                {
+                                    t.Span("Diagnóstico/CID: ").Bold();
+                                    t.Span(!string.IsNullOrWhiteSpace(paciente.DiagnosticoPrincipal) ? paciente.DiagnosticoPrincipal : "Em investigação");
+                                });
+                            });
+                        });
+
+                        // 2.2 Dados do Atendimento
+                        col.Item().PaddingTop(12).Background(Color.FromHex("#EFF6FF")).Border(1).BorderColor(Color.FromHex("#BFDBFE")).Padding(10).Row(r =>
+                        {
+                            r.RelativeItem(4).Text(t =>
+                            {
+                                t.Span("Tipo de Atendimento: ").Bold();
+                                t.Span(!string.IsNullOrWhiteSpace(evolucao.TipoEvolucao) ? evolucao.TipoEvolucao : "Sessão Terapêutica");
+                            });
+                            r.RelativeItem(4).Text(t =>
+                            {
+                                t.Span("Data e Horário: ").Bold();
+                                t.Span(evolucao.DataRegistro.ToString("dd/MM/yyyy HH:mm", culturaBr));
+                            });
+                            r.RelativeItem(4).Text(t =>
+                            {
+                                t.Span("Profissional: ").Bold();
+                                t.Span(!string.IsNullOrWhiteSpace(evolucao.ProfissionalNome) ? evolucao.ProfissionalNome : "Especialista Clínico");
+                            });
+                        });
+
+                        // 2.3 Conteúdo da Evolução
+                        col.Item().PaddingTop(16).Column(relatoCol =>
+                        {
+                            relatoCol.Item().Row(r =>
+                            {
+                                r.AutoItem().Text("DESCRIÇÃO DA SESSÃO & CONDUTAS ADOTADAS").FontSize(10).Bold().FontColor(Color.FromHex("#071A3A"));
+                            });
+                            relatoCol.Item().PaddingTop(2).LineHorizontal(1).LineColor(Color.FromHex("#CBD5E1"));
+
+                            relatoCol.Item().PaddingTop(10).Text(evolucao.Anotacao)
+                                .FontSize(10)
+                                .FontColor(Color.FromHex("#0f172a"));
+                        });
+
+                        // 2.4 Campo de Assinatura
+                        col.Item().PaddingTop(40).AlignCenter().Column(signCol =>
+                        {
+                            signCol.Item().Width(240).LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                            signCol.Item().PaddingTop(4).Text(!string.IsNullOrWhiteSpace(evolucao.ProfissionalNome) ? evolucao.ProfissionalNome : "Profissional Responsável")
+                                .Bold().FontSize(9.5f);
+                            signCol.Item().Text("NeuroSync - Gestão Clínica Multidisciplinar")
+                                .FontSize(7.5f).FontColor(Colors.Grey.Darken1);
+                        });
+                    });
+
+                    // 3. RODAPÉ TIMBRADO
+                    page.Footer().Column(fCol =>
+                    {
+                        fCol.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten1);
+                        fCol.Item().PaddingTop(4).Row(r =>
+                        {
+                            r.RelativeItem(8).Text("NeuroSync Gestão Clínica • Registro Eletrônico de Saúde do Paciente").FontSize(7.5f).FontColor(Colors.Grey.Darken1);
+                            r.RelativeItem(4).AlignRight().Text(x =>
+                            {
+                                x.Span("Página ").FontSize(7.5f);
+                                x.CurrentPageNumber().FontSize(7.5f);
+                                x.Span(" de ").FontSize(7.5f);
+                                x.TotalPages().FontSize(7.5f);
+                            });
+                        });
+                    });
+                });
+            });
+
+            byte[] pdfBytes = documento.GeneratePdf();
+            return File(pdfBytes, "application/pdf", $"Evolucao-{paciente.Nome.Replace(" ", "_")}-{evolucao.DataRegistro:yyyyMMdd}.pdf");
         }
 
         // ========================================================
@@ -398,25 +621,28 @@ namespace NeuroSync.Controllers
         }
 
         // 6. EDITAR PACIENTE E ANAMNESE
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int? id, string aba = "resumo")
         {
             if (id == null) return NotFound();
             var paciente = _context.Pacientes.Find(id);
             if (paciente == null) return NotFound();
+            ViewBag.AbaAtiva = string.IsNullOrEmpty(aba) ? "resumo" : aba.ToLower();
             return View(paciente);
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, Paciente paciente)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Paciente paciente, string abaAtiva = "resumo")
         {
             if (id != paciente.IdPaciente) return NotFound();
             
             if (ModelState.IsValid) 
             { 
                 _context.Update(paciente); 
-                _context.SaveChanges(); 
-                return RedirectToAction("Details", new { id = paciente.IdPaciente }); 
+                await _context.SaveChangesAsync(); 
+                return RedirectToAction("Details", new { id = paciente.IdPaciente, aba = !string.IsNullOrEmpty(abaAtiva) ? abaAtiva : "resumo" }); 
             }
+            ViewBag.AbaAtiva = abaAtiva;
             return View(paciente);
         }
 

@@ -4,46 +4,433 @@
     ViewData["Title"] = "Registrar Pagamento";
 }
 
-<div class="container mt-5 mb-5 d-flex justify-content-center">
-    <div class="card shadow border-success" style="max-width: 500px; width: 100%;">
-        <div class="card-header bg-success text-white py-3">
-            <h4 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i> Registrar Pagamento</h4>
-        </div>
-        <div class="card-body p-4">
-            <h5 class="text-center mb-4">Confirmar o recebimento deste valor?</h5>
+<style>
+    /* Estilos Modernos da Tela de Baixa / Pagamento */
+    .finance-baixa-wrapper {
+        padding-top: 0.5rem;
+        padding-bottom: 3rem;
+    }
 
-            <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3"></div>
+    /* Esconde barra de validação vazia */
+    .validation-summary-valid {
+        display: none !important;
+    }
 
-            @if (ViewBag.SessaoPendente == true)
-            {
-                <div class="alert alert-warning fw-bold">
-                    <i class="bi bi-exclamation-triangle"></i> Esta cobrança está vinculada a uma sessão que ainda não foi marcada como <strong>"Realizado"</strong> na Agenda. Atualize o status da sessão antes de confirmar o pagamento.
+    /* Cabeçalho da Página */
+    .page-header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title-icon-success {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .page-subtitle {
+        color: #64748B;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    /* Cartão Principal */
+    .card-modern-form {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: clamp(20px, 3vw, 36px);
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+        letter-spacing: -0.2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .form-section-title i {
+        color: #059669;
+        font-size: 1.15rem;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #475569;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-custom {
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 12px 16px;
+        background-color: #F8FAFC;
+        font-size: 0.95rem;
+        color: #1E293B;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .input-custom:focus {
+        border-color: #059669;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        outline: none;
+    }
+
+    /* Chips de Atalho Rápido para Data */
+    .quick-chips-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .quick-chip-btn {
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        border-radius: 50px;
+        padding: 5px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .quick-chip-btn:hover {
+        background: #DCFCE7;
+        border-color: #86EFAC;
+        color: #15803D;
+        transform: translateY(-1px);
+    }
+
+    /* Box de Resumo da Fatura */
+    .payment-summary-box {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .summary-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #EDF2F7;
+    }
+
+    .summary-item-row:last-child {
+        border-bottom: none;
+        padding-top: 14px;
+        margin-top: 8px;
+        border-top: 1px dashed #CBD5E1;
+    }
+
+    .summary-label {
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    .summary-value {
+        color: #0F172A;
+        font-weight: 700;
+    }
+
+    /* Cartão Lateral de Recibo */
+    .invoice-preview-card {
+        background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.035);
+        padding: 24px;
+        position: sticky;
+        top: 24px;
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed #CBD5E1;
+    }
+
+    .preview-value-box {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .preview-value-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .preview-value-amount {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #059669;
+        line-height: 1.1;
+    }
+
+    /* Dica Informativa */
+    .info-tip-card {
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        font-size: 0.84rem;
+        color: #166534;
+        line-height: 1.45;
+    }
+
+    .info-tip-card i {
+        font-size: 1.25rem;
+        color: #059669;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="finance-baixa-wrapper">
+
+    <!-- CABEÇALHO -->
+    <div class="page-header-box">
+        <div>
+            <div class="page-title">
+                <div class="page-title-icon-success">
+                    <i class="bi bi-check2-circle"></i>
                 </div>
-            }
+                <span>Registrar Pagamento</span>
+            </div>
+            <p class="page-subtitle">Confirme o recebimento desta cobrança para liquidá-la no fluxo financeiro da clínica.</p>
+        </div>
+
+        <a href="/Financeiro" class="btn btn-light fw-bold text-muted rounded-pill px-4 border shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar ao Financeiro
+        </a>
+    </div>
+
+    <form asp-action="Baixa" method="post" id="formBaixa">
+        <input type="hidden" asp-for="IdCobranca" />
+
+        <div class="row g-4">
             
-            <!-- Resumo do Boleto -->
-            <div class="bg-light p-3 rounded mb-4 border">
-                <p class="mb-1"><strong>Paciente:</strong> @(Model.Paciente != null ? Model.Paciente.Nome : "Excluído")</p>
-                <p class="mb-1"><strong>Descrição:</strong> @Model.Descricao</p>
-                <p class="mb-1"><strong>Vencimento:</strong> @Model.DataVencimento.ToString("dd/MM/yyyy")</p>
-                <p class="mb-0 fs-5 text-success fw-bold"><strong>Valor:</strong> @Model.Valor.ToString("C")</p>
+            <!-- COLUNA ESQUERDA: FORMULÁRIO DE CONFIRMAÇÃO -->
+            <div class="col-12 col-lg-8">
+                <div class="card-modern-form">
+                    
+                    @* Só exibe o alerta de erro se houver realmente algum erro de validação *@
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3 mb-4"></div>
+                    }
+
+                    @if (ViewBag.SessaoPendente == true)
+                    {
+                        <div class="alert alert-warning border-warning rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-3 flex-shrink-0"></i>
+                            <div class="small">
+                                <strong>Sessão em aberto:</strong> Esta cobrança está vinculada a uma sessão na Agenda que ainda não foi marcada como <strong>"Realizado"</strong>. Recomendamos atualizar o atendimento na Agenda antes de confirmar o recebimento.
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Resumo Rápido da Cobrança -->
+                    <div class="form-section-title">
+                        <i class="bi bi-receipt"></i>
+                        <span>Dados da Cobrança</span>
+                    </div>
+
+                    <div class="payment-summary-box">
+                        <div class="summary-item-row">
+                            <span class="summary-label">Paciente</span>
+                            <span class="summary-value text-primary">@(Model.Paciente != null ? Model.Paciente.Nome : "Não informado")</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label">Descrição</span>
+                            <span class="summary-value">@Model.Descricao</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label">Vencimento</span>
+                            <span class="summary-value">@Model.DataVencimento.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="summary-item-row">
+                            <span class="summary-label fs-6">Valor Total</span>
+                            <span class="summary-value text-success fs-5">@Model.Valor.ToString("C")</span>
+                        </div>
+                    </div>
+
+                    <!-- Seção da Data de Pagamento -->
+                    <div class="form-section-title mt-4">
+                        <i class="bi bi-calendar2-check"></i>
+                        <span>Liquidação Financeira</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="DataPagamento" class="form-label-custom">Data do Recebimento *</label>
+                        <input asp-for="DataPagamento" id="inputDataPagamento" type="date" class="input-custom" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        
+                        <!-- Chips de datas rápidas -->
+                        <div class="quick-chips-wrapper">
+                            <button type="button" class="quick-chip-btn" onclick="setDataPagamentoHoje()">
+                                <i class="bi bi-check2"></i> Recebido Hoje
+                            </button>
+                            <button type="button" class="quick-chip-btn" onclick="setDataPagamentoOntem()">
+                                <i class="bi bi-clock-history"></i> Recebido Ontem
+                            </button>
+                            <button type="button" class="quick-chip-btn" onclick="setDataPagamentoVencimento('@Model.DataVencimento.ToString("yyyy-MM-dd")')">
+                                <i class="bi bi-calendar-event"></i> Na Data do Vencimento
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BARRINHA DE BOTÕES DE AÇÃO -->
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                        <a href="/Financeiro" class="btn btn-light fw-bold text-muted px-4 py-2 rounded-pill border">
+                            Cancelar
+                        </a>
+
+                        <button type="submit" class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" 
+                                style="background-color: #059669; border-color: #059669;" @(ViewBag.SessaoPendente == true ? "disabled" : "")>
+                            <i class="bi bi-check2-circle"></i>
+                            <span>Confirmar Pagamento</span>
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
-            <form asp-action="Baixa" method="post">
-                <!-- O ID da cobrança escondido -->
-                <input type="hidden" asp-for="IdCobranca" />
-                
-                <!-- Campo para confirmar o dia que o dinheiro entrou -->
-                <div class="mb-4">
-                    <label asp-for="DataPagamento" class="control-label fw-bold">Data do Pagamento *</label>
-                    <input asp-for="DataPagamento" type="date" class="form-control" required />
-                </div>
+            <!-- COLUNA DIREITA: RECIBO VISUAL -->
+            <div class="col-12 col-lg-4">
+                <div class="invoice-preview-card">
+                    
+                    <div class="preview-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="Logo" style="height: 28px;" />
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Neuro<span class="text-primary">Sync</span></span>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold">
+                            <i class="bi bi-check2 me-1"></i>Liquidando
+                        </span>
+                    </div>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <a asp-action="Index" class="btn btn-outline-secondary px-4 fw-bold">Cancelar</a>
-                    <button type="submit" class="btn btn-success px-4 fw-bold" @(ViewBag.SessaoPendente == true ? "disabled" : "")><i class="bi bi-cash"></i> Confirmar Pagamento</button>
+                    <div class="preview-value-box">
+                        <div class="preview-value-label">Valor Confirmado</div>
+                        <div class="preview-value-amount">@Model.Valor.ToString("C")</div>
+                    </div>
+
+                    <div class="small">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Paciente</span>
+                            <span class="fw-bold text-dark text-end">@(Model.Paciente != null ? Model.Paciente.Nome : "Não informado")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Descrição</span>
+                            <span class="fw-bold text-dark text-end">@Model.Descricao</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Status Anterior</span>
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2">@Model.Status</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Novo Status</span>
+                            <span class="badge bg-success text-white rounded-pill px-2">Pago</span>
+                        </div>
+                    </div>
+
+                    <!-- Dica Informativa -->
+                    <div class="info-tip-card">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <div>
+                            <strong>Atualização Imediata:</strong>
+                            Ao confirmar, esta fatura será registrada como <strong>Paga</strong> e somada automaticamente à receita realizada de @DateTime.Today.ToString("MMMM").
+                        </div>
+                    </div>
+
                 </div>
-            </form>
+            </div>
+
         </div>
-    </div>
+    </form>
+
 </div>
+
+@section Scripts {
+    <script>
+        function setDataPagamentoHoje() {
+            const hoje = new Date();
+            document.getElementById('inputDataPagamento').value = formatarDataInput(hoje);
+        }
+
+        function setDataPagamentoOntem() {
+            const ontem = new Date();
+            ontem.setDate(ontem.getDate() - 1);
+            document.getElementById('inputDataPagamento').value = formatarDataInput(ontem);
+        }
+
+        function setDataPagamentoVencimento(dataVenc) {
+            document.getElementById('inputDataPagamento').value = dataVenc;
+        }
+
+        function formatarDataInput(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+    </script>
+}

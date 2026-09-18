@@ -298,6 +298,34 @@ namespace NeuroSync.Controllers
         }
 
         // ==========================================
+        // 7.1 REABRIR COBRANÇA (Pago -> Pendente)
+        // ==========================================
+        [HttpPost]
+        public IActionResult Reabrir(int id)
+        {
+            var cobranca = _context.Cobrancas.Find(id);
+            if (cobranca != null)
+            {
+                cobranca.Status = "Pendente";
+                cobranca.DataPagamento = null;
+                _context.SaveChanges();
+                TempData["MensagemSucesso"] = "Cobrança reaberta com sucesso! O status foi revertido para Pendente.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Reabrir(int? id)
+        {
+            if (id.HasValue)
+            {
+                return Reabrir(id.Value);
+            }
+            return RedirectToAction("Index");
+        }
+
+        // ==========================================
         // 8. EXPORTAÇÃO EXCEL (.xlsx) 
         // ==========================================
         public IActionResult ExportarExcel(int? pacienteId, string? status, string? competencia)

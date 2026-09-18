@@ -1,0 +1,556 @@
+@model NeuroSync.Models.ConfiguracoesViewModel
+@{
+    ViewData["Title"] = "Configurações da Conta";
+}
+
+<style>
+    .config-header {
+        margin-bottom: 24px;
+    }
+
+    .config-title-group h2 {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+        letter-spacing: -0.02em;
+    }
+
+    .config-title-group p {
+        color: #64748b;
+        font-size: 0.92rem;
+        margin-bottom: 0;
+    }
+
+    .card-settings {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .card-settings:hover {
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .card-settings-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 18px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-settings-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .icon-blue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .icon-amber {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    .icon-cyan {
+        background: #ecfeff;
+        color: #0891b2;
+    }
+
+    .card-settings-header h5 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .card-settings-header span {
+        font-size: 0.84rem;
+        color: #64748b;
+    }
+
+    .form-label-custom {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .form-control-custom {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .preview-greeting-box {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .preview-greeting-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #0284c7;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .preview-greeting-text h6 {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        color: #0369a1;
+        margin-bottom: 2px;
+    }
+
+    .preview-greeting-phrase {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0b223d;
+        margin: 0;
+    }
+
+    .profile-avatar-banner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: 14px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .avatar-large-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .info-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .info-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-list-label {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .info-list-val {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .btn-toggle-eye {
+        border-top-right-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
+        border-color: #cbd5e1;
+        background: #f8fafc;
+        color: #64748b;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <!-- CABEÇALHO -->
+    <div class="config-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="config-title-group">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1 rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i> Acesso Clínico
+                </span>
+            </div>
+            <h2>Configurações da Conta &amp; Sistema</h2>
+            <p>Gerencie suas informações de perfil, credenciais de acesso e preferências de exibição.</p>
+        </div>
+    </div>
+
+    <!-- MENSAGENS DE SUCESSO / ERRO -->
+    @if (TempData["SucessoPerfil"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>@TempData["SucessoPerfil"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErroPerfil"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@TempData["ErroPerfil"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["SucessoSenha"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-shield-fill-check fs-5"></i>
+            <div>@TempData["SucessoSenha"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErroSenha"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@TempData["ErroSenha"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- ========================================== -->
+        <!-- COLUNA PRINCIPAL: PERFIL E SENHA           -->
+        <!-- ========================================== -->
+        <div class="col-12 col-lg-7">
+
+            <!-- CARD 1: DADOS DO PERFIL -->
+            <div class="card-settings">
+                <div class="card-settings-header">
+                    <div class="card-settings-icon icon-blue">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Dados Pessoais &amp; Identificação</h5>
+                        <span>Atualize o seu nome e o login de acesso ao sistema de forma independente.</span>
+                    </div>
+                </div>
+
+                <div class="profile-avatar-banner">
+                    <div class="avatar-large-circle" id="avatarPreview">
+                        @(string.IsNullOrEmpty(Model.PrimeiroNome) ? "U" : Model.PrimeiroNome.Substring(0, 1).ToUpper())
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark fs-5" id="bannerNomeDisplay">@Model.Nome</div>
+                        <div class="text-muted small">Login de acesso: <span class="fw-semibold text-primary" id="bannerEmailDisplay">@Model.Email</span></div>
+                    </div>
+                </div>
+
+                <form action="/Configuracoes/AtualizarPerfil" method="post" id="formAtualizarPerfil">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="IdUsuario" value="@Model.IdUsuario" />
+
+                    <div class="mb-3">
+                        <label for="inputNome" class="form-label-custom">Nome Completo ou Nome Profissional</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text"
+                                   name="Nome"
+                                   id="inputNome"
+                                   class="form-control form-control-custom rounded-end-2 border-start-0"
+                                   value="@Model.Nome"
+                                   placeholder="Ex: Mariana Silva ou Dra. Mariana"
+                                   required />
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            Você pode utilizar seu nome comum ou com título (ex: <i>Mariana Silva</i>, <i>Dr. Patrick</i>, etc.).
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label-custom">E-mail ou Usuário de Acesso (Login)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                <i class="bi bi-at"></i>
+                            </span>
+                            <input type="text"
+                                   name="Email"
+                                   id="inputEmail"
+                                   class="form-control form-control-custom rounded-end-2 border-start-0"
+                                   value="@Model.Email"
+                                   placeholder="Ex: admin ou seu-email@clinica.com"
+                                   required />
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            Identificador digitado no formulário de login para entrar no sistema.
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW DA SAUDAÇÃO -->
+                    <div class="preview-greeting-box">
+                        <div class="preview-greeting-icon">
+                            <i class="bi bi-chat-quote-fill"></i>
+                        </div>
+                        <div class="preview-greeting-text">
+                            <h6>Demonstração da Saudação no Sistema</h6>
+                            <p class="preview-greeting-phrase">
+                                Olá, <span id="previewNome" class="text-primary">@Model.PrimeiroNome</span>! 👋
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm">
+                            <i class="bi bi-check2-circle me-1"></i> Salvar Dados do Perfil
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- CARD 2: ALTERAÇÃO DE SENHA -->
+            <div class="card-settings">
+                <div class="card-settings-header">
+                    <div class="card-settings-icon icon-amber">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Segurança &amp; Alteração de Senha</h5>
+                        <span>Altere sua senha de acesso a qualquer momento caso deseje.</span>
+                    </div>
+                </div>
+
+                <form action="/Configuracoes/AlterarSenha" method="post" id="formAlterarSenha">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="inputSenhaAtual" class="form-label-custom">Senha Atual</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                <i class="bi bi-key"></i>
+                            </span>
+                            <input type="password"
+                                   name="SenhaAtual"
+                                   id="inputSenhaAtual"
+                                   class="form-control form-control-custom border-start-0 border-end-0"
+                                   placeholder="Digite sua senha atual"
+                                   required />
+                            <button class="btn btn-outline-secondary btn-toggle-eye" type="button" onclick="toggleSenhaVisibility('inputSenhaAtual', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="inputNovaSenha" class="form-label-custom">Nova Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password"
+                                       name="NovaSenha"
+                                       id="inputNovaSenha"
+                                       class="form-control form-control-custom border-start-0 border-end-0"
+                                       placeholder="Mínimo 6 caracteres"
+                                       minlength="6"
+                                       required />
+                                <button class="btn btn-outline-secondary btn-toggle-eye" type="button" onclick="toggleSenhaVisibility('inputNovaSenha', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="inputConfirmaSenha" class="form-label-custom">Confirmar Nova Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                    <i class="bi bi-check-circle"></i>
+                                </span>
+                                <input type="password"
+                                       name="ConfirmarNovaSenha"
+                                       id="inputConfirmaSenha"
+                                       class="form-control form-control-custom border-start-0 border-end-0"
+                                       placeholder="Repita a nova senha"
+                                       minlength="6"
+                                       required />
+                                <button class="btn btn-outline-secondary btn-toggle-eye" type="button" onclick="toggleSenhaVisibility('inputConfirmaSenha', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-warning fw-bold px-4 py-2 rounded-pill shadow-sm text-dark">
+                            <i class="bi bi-arrow-repeat me-1"></i> Atualizar Senha
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- COLUNA LATERAL: STATUS E INFORMAÇÕES       -->
+        <!-- ========================================== -->
+        <div class="col-12 col-lg-5">
+
+            <!-- CARD INFORMAÇÕES DA CONTA -->
+            <div class="card-settings">
+                <div class="card-settings-header">
+                    <div class="card-settings-icon icon-cyan">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Status do Acesso &amp; Sistema</h5>
+                        <span>Resumo do perfil técnico e ambiente ativo.</span>
+                    </div>
+                </div>
+
+                <div class="info-list-item">
+                    <span class="info-list-label">Nível de Permissão</span>
+                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-1 rounded-pill">
+                        Administrador Clínico
+                    </span>
+                </div>
+
+                <div class="info-list-item">
+                    <span class="info-list-label">Banco de Dados</span>
+                    <span class="info-list-val">SQLite Local (`neurosync.db`)</span>
+                </div>
+
+                <div class="info-list-item">
+                    <span class="info-list-label">Status da Conexão</span>
+                    <span class="info-list-val text-success">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.6rem;"></i> Conectado e Operacional
+                    </span>
+                </div>
+
+                <div class="info-list-item">
+                    <span class="info-list-label">Versão do Sistema</span>
+                    <span class="info-list-val">NeuroSync v1.0 Pro</span>
+                </div>
+
+                <div class="info-list-item">
+                    <span class="info-list-label">Criado Em</span>
+                    <span class="info-list-val">@Model.CriadoEm.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+            </div>
+
+            <!-- CARD DICA PROFISSIONAL -->
+            <div class="card-settings border-primary border-opacity-25" style="background: #f8fafc;">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle p-2 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;">
+                        <i class="bi bi-lightbulb-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Como o nome é exibido?</h6>
+                        <p class="text-muted small mb-0" style="line-height: 1.5;">
+                            O nome cadastrado alimenta automaticamente a tela de <strong>Boas-Vindas</strong>, o topo do <strong>Dashboard Clínico</strong> e a identificação na barra lateral. O sistema extrai seu nome inicial com inteligência clínica para manter saudações humanizadas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Função para mostrar/ocultar senha
+        function toggleSenhaVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Preview dinâmico do nome e saudação enquanto digita
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputNome = document.getElementById('inputNome');
+            const inputEmail = document.getElementById('inputEmail');
+            const previewNome = document.getElementById('previewNome');
+            const bannerNomeDisplay = document.getElementById('bannerNomeDisplay');
+            const bannerEmailDisplay = document.getElementById('bannerEmailDisplay');
+            const avatarPreview = document.getElementById('avatarPreview');
+
+            function extrairNomeInicial(nome) {
+                if (!nome || !nome.trim()) return 'Usuário';
+                const partes = nome.trim().split(/\s+/);
+                const titulos = ['dr.', 'dra.', 'dr', 'dra', 'prof.', 'profa.', 'prof', 'profa'];
+                if (titulos.includes(partes[0].toLowerCase()) && partes.length > 1) {
+                    return partes[0] + ' ' + partes[1];
+                }
+                return partes[0];
+            }
+
+            if (inputNome) {
+                inputNome.addEventListener('input', function () {
+                    const valor = this.value;
+                    const primeiroNome = extrairNomeInicial(valor);
+
+                    if (previewNome) {
+                        previewNome.textContent = primeiroNome;
+                    }
+                    if (bannerNomeDisplay) {
+                        bannerNomeDisplay.textContent = valor.trim() || 'Usuário';
+                    }
+                    if (avatarPreview) {
+                        avatarPreview.textContent = primeiroNome.charAt(0).toUpperCase();
+                    }
+                });
+            }
+
+            if (inputEmail && bannerEmailDisplay) {
+                inputEmail.addEventListener('input', function () {
+                    bannerEmailDisplay.textContent = this.value.trim() || 'admin';
+                });
+            }
+        });
+    </script>
+}

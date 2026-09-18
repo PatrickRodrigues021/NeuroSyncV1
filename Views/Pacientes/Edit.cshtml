@@ -1,124 +1,644 @@
 @model NeuroSync.Models.Paciente
-
 @{
-    ViewData["Title"] = "Editar Ficha Clínica";
+    ViewData["Title"] = "Editar Prontuário - " + Model.Nome;
+    var abaAtiva = (ViewBag.AbaAtiva as string) ?? "resumo";
+    var inicialPaciente = !string.IsNullOrWhiteSpace(Model.Nome) ? Model.Nome.Trim().Substring(0, 1).ToUpper() : "P";
 }
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-secondary"><i class="bi bi-pencil-square text-warning me-2"></i> Atualizar Prontuário</h2>
-        <a asp-action="Details" asp-route-id="@Model.IdPaciente" class="btn btn-outline-secondary fw-bold">
-            <i class="bi bi-arrow-left"></i> Voltar ao Perfil
-        </a>
-    </div>
+<style>
+    /* Estilos Premium da Tela de Edição de Paciente */
+    .edit-page-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
-            <form asp-action="Edit" method="post">
-                <!-- O ID oculto é fundamental para o C# saber qual paciente atualizar -->
-                <input type="hidden" asp-for="IdPaciente" />
-                <input type="hidden" asp-for="CriadoEm" />
+    .patient-hero-badge {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
 
-                <div class="row">
-                    <!-- COLUNA ESQUERDA: Dados Pessoais -->
-                    <div class="col-md-6 border-end pe-md-4">
-                        <h5 class="text-primary mb-4 border-bottom pb-2">Dados Pessoais e Contato</h5>
-                        
-                        <div class="mb-3">
-                            <label asp-for="Nome" class="form-label fw-bold">Nome do Paciente *</label>
-                            <input asp-for="Nome" class="form-control" required />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label asp-for="Idade" class="form-label fw-bold">Idade *</label>
-                            <input asp-for="Idade" type="number" class="form-control" required />
-                        </div>
+    .patient-avatar-box {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.65rem;
+        font-weight: 800;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+        flex-shrink: 0;
+    }
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="NomeMae" class="form-label fw-bold">Nome da Mãe</label>
-                                <input asp-for="NomeMae" class="form-control" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="NomePai" class="form-label fw-bold">Nome do Pai</label>
-                                <input asp-for="NomePai" class="form-control" />
-                            </div>
-                        </div>
+    .nav-tabs-modern {
+        background: #f1f5f9;
+        padding: 6px;
+        border-radius: 14px;
+        border: none;
+        display: inline-flex;
+        gap: 6px;
+        margin-bottom: 24px;
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="Telefone" class="form-label fw-bold">Telefone *</label>
-                            <input asp-for="Telefone" class="form-control" required />
-                        </div>
+    .nav-tabs-modern .nav-link {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #64748b;
+        background: transparent;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-                        <!-- DADOS DE ENDEREÇO ATUALIZADOS -->
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label asp-for="Cep" class="control-label">CEP</label>
-                                <input asp-for="Cep" class="form-control" />
-                            </div>
-                            <div class="col-md-7 mb-3">
-                                <label asp-for="Logradouro" class="control-label">Logradouro (Rua, Av.)</label>
-                                <input asp-for="Logradouro" class="form-control" />
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label asp-for="Numero" class="control-label">Número</label>
-                                <input asp-for="Numero" class="form-control" />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label asp-for="Complemento" class="control-label">Complemento</label>
-                                <input asp-for="Complemento" class="form-control" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label asp-for="Bairro" class="control-label">Bairro</label>
-                                <input asp-for="Bairro" class="form-control" />
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label asp-for="Cidade" class="control-label">Cidade</label>
-                                <input asp-for="Cidade" class="form-control" />
-                            </div>
-                            <div class="col-md-1 mb-3">
-                                <label asp-for="Estado" class="control-label">UF</label>
-                                <input asp-for="Estado" class="form-control" />
-                            </div>
-                        </div>
-                    </div>
+    .nav-tabs-modern .nav-link:hover {
+        color: #0b223d;
+        background: rgba(255, 255, 255, 0.5);
+    }
 
-                    <!-- COLUNA DIREITA: Dados Clínicos (Anamnese) -->
-                    <div class="col-md-6 ps-md-4">
-                        <h5 class="text-primary mb-4 border-bottom pb-2">Quadro Clínico (Anamnese)</h5>
+    .nav-tabs-modern .nav-link.active {
+        background: #ffffff;
+        color: #2563eb;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="DiagnosticoPrincipal" class="form-label fw-bold text-danger">Diagnóstico Principal (CID)</label>
-                            <input asp-for="DiagnosticoPrincipal" class="form-control" placeholder="Ex: F84.0 - Autismo Infantil" />
-                        </div>
+    .card-edit-section {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: box-shadow 0.2s ease;
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="MedicamentosContinuos" class="form-label fw-bold">Medicamentos de Uso Contínuo</label>
-                            <input asp-for="MedicamentosContinuos" class="form-control" placeholder="Ex: Ritalina 10mg, Risperidona 1mg" />
-                        </div>
+    .card-edit-section:hover {
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="MetasCurtoPrazo" class="form-label fw-bold text-success">Metas Terapêuticas (Curto Prazo)</label>
-                            <textarea asp-for="MetasCurtoPrazo" class="form-control" rows="3" placeholder="O que esperamos alcançar nas próximas semanas?"></textarea>
-                        </div>
+    .edit-section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
 
-                        <div class="mb-4">
-                            <label asp-for="MetasLongoPrazo" class="form-label fw-bold text-primary">Metas Terapêuticas (Longo Prazo)</label>
-                            <textarea asp-for="MetasLongoPrazo" class="form-control" rows="3" placeholder="Objetivos finais da intervenção..."></textarea>
-                        </div>
-                    </div>
+    .edit-section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .icon-blue { background: #eff6ff; color: #2563eb; }
+    .icon-cyan { background: #ecfeff; color: #0891b2; }
+    .icon-amber { background: #fffbeb; color: #d97706; }
+    .icon-purple { background: #faf5ff; color: #9333ea; }
+    .icon-emerald { background: #ecfdf5; color: #059669; }
+    .icon-rose { background: #fff1f2; color: #e11d48; }
+
+    .edit-section-header h5 {
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: #0b223d;
+        margin: 0;
+    }
+
+    .edit-section-header span {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .form-label-custom {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .form-control-custom {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+        background-color: #f8fafc;
+        transition: all 0.2s ease;
+        color: #0f172a;
+        font-weight: 500;
+    }
+
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.14);
+    }
+
+    .form-control-custom[readonly] {
+        background-color: #f1f5f9;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .family-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .bottom-save-bar {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <!-- CABEÇALHO DO PACIENTE -->
+    <div class="patient-hero-badge">
+        <div class="d-flex align-items-center gap-3">
+            <div class="patient-avatar-box">
+                @inicialPaciente
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.45rem;">@Model.Nome</h3>
+                    <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-2 py-1 small">
+                        Prontuário #@Model.IdPaciente
+                    </span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-1 small">
+                        @Model.Idade anos
+                    </span>
                 </div>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-calendar3 me-1"></i> Cadastrado em @Model.CriadoEm.ToString("dd/MM/yyyy") &bull; Atualize os dados cadastrais e o histórico clínico abaixo.
+                </p>
+            </div>
+        </div>
 
-                <hr class="my-4">
-                
-                <div class="text-end">
-                    <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm px-5">
-                        <i class="bi bi-check-circle"></i> Salvar Prontuário
-                    </button>
-                </div>
-            </form>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-action="Details" asp-route-id="@Model.IdPaciente" asp-route-aba="@abaAtiva" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-bold small">
+                <i class="bi bi-arrow-left me-1"></i> Voltar ao Prontuário
+            </a>
+            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="document.getElementById('btnSubmitForm').click();">
+                <i class="bi bi-check2-circle me-1"></i> Salvar Prontuário
+            </button>
         </div>
     </div>
+
+    <!-- FORMULÁRIO PRINCIPAL DE EDIÇÃO -->
+    <form asp-action="Edit" method="post" id="formEditPaciente">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="IdPaciente" />
+        <input type="hidden" asp-for="CriadoEm" />
+        <input type="hidden" asp-for="DataCadastro" />
+        <input type="hidden" name="abaAtiva" id="abaAtivaInput" value="@abaAtiva" />
+
+        <!-- ABAS DE NAVEGAÇÃO SUPERIORES -->
+        <ul class="nav nav-tabs-modern" id="editTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link @(abaAtiva == "resumo" ? "active" : "")" id="tab-resumo-btn" data-bs-toggle="tab" data-bs-target="#tab-resumo" type="button" role="tab" onclick="setAbaAtiva('resumo')">
+                    <i class="bi bi-person-lines-fill"></i> Resumo &amp; Dados Cadastrais
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link @(abaAtiva == "anamnese" ? "active" : "")" id="tab-anamnese-btn" data-bs-toggle="tab" data-bs-target="#tab-anamnese" type="button" role="tab" onclick="setAbaAtiva('anamnese')">
+                    <i class="bi bi-journal-medical"></i> Anamnese &amp; Histórico Clínico
+                </button>
+            </li>
+        </ul>
+
+        <!-- CONTEÚDO DAS ABAS -->
+        <div class="tab-content" id="editTabsContent">
+
+            <!-- ========================================== -->
+            <!-- ABA 1: RESUMO & DADOS CADASTRAIS           -->
+            <!-- ========================================== -->
+            <div class="tab-pane fade @(abaAtiva == "resumo" ? "show active" : "")" id="tab-resumo" role="tabpanel">
+
+                <!-- CARD 1: IDENTIFICAÇÃO DO PACIENTE -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-blue">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <h5>Identificação do Paciente</h5>
+                            <span>Nome, documentos, contato próprio e dados de nascimento.</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Nome" class="form-label-custom">Nome Completo do Paciente *</label>
+                            <input asp-for="Nome" class="form-control form-control-custom" placeholder="Nome do paciente" required />
+                            <span asp-validation-for="Nome" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Cpf" class="form-label-custom">CPF (se houver)</label>
+                            <input asp-for="Cpf" class="form-control form-control-custom" placeholder="000.000.000-00" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Telefone" class="form-label-custom">Telefone Próprio</label>
+                            <input asp-for="Telefone" class="form-control form-control-custom" placeholder="(00) 00000-0000" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Responsavel" class="form-label-custom">Nome do Responsável Legal</label>
+                            <input asp-for="Responsavel" class="form-control form-control-custom" placeholder="Ex: Maria da Silva (Mãe)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label-custom">E-mail Principal</label>
+                            <input asp-for="Email" type="email" class="form-control form-control-custom" placeholder="email@exemplo.com" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="DataNascimento" class="form-label-custom">Data de Nascimento *</label>
+                            <input asp-for="DataNascimento"
+                                   type="date"
+                                   class="form-control form-control-custom"
+                                   id="campoDataNascimento"
+                                   value="@(Model.DataNascimento != DateTime.MinValue ? Model.DataNascimento.ToString("yyyy-MM-dd") : "")"
+                                   required />
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Idade" class="form-label-custom">Idade (Anos)</label>
+                            <input asp-for="Idade" type="number" class="form-control form-control-custom" id="campoIdade" readonly />
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="text-muted small pb-2">
+                                <i class="bi bi-info-circle text-primary me-1"></i> A idade é recalculada automaticamente com base na data de nascimento.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: ENDEREÇO RESIDENCIAL -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-cyan">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h5>Endereço Residencial</h5>
+                            <span>Localização do paciente com preenchimento automático via CEP.</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label-custom">CEP</label>
+                            <div class="position-relative">
+                                <input type="text" id="Cep" name="Cep" asp-for="Cep" class="form-control form-control-custom" placeholder="00000-000" maxlength="9" />
+                                <div id="loadingCep" class="spinner-border spinner-border-sm text-primary position-absolute d-none" style="right: 12px; top: 12px;" role="status"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label-custom">Logradouro (Rua, Av.)</label>
+                            <input type="text" id="Logradouro" name="Logradouro" asp-for="Logradouro" class="form-control form-control-custom" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label-custom">Número</label>
+                            <input type="text" id="Numero" name="Numero" asp-for="Numero" class="form-control form-control-custom" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Complemento</label>
+                            <input type="text" id="Complemento" name="Complemento" asp-for="Complemento" class="form-control form-control-custom" placeholder="Apto, Bloco, Casa" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Bairro</label>
+                            <input type="text" id="Bairro" name="Bairro" asp-for="Bairro" class="form-control form-control-custom" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-custom">Cidade</label>
+                            <input type="text" id="Cidade" name="Cidade" asp-for="Cidade" class="form-control form-control-custom" />
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label-custom">UF</label>
+                            <input type="text" id="Estado" name="Estado" asp-for="Estado" class="form-control form-control-custom" maxlength="2" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: DADOS FAMILIARES (PAIS) -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-purple">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <h5>Dados Familiares &amp; Filiação</h5>
+                            <span>Informações cadastrais e de contato do pai e da mãe.</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- MÃE -->
+                        <div class="col-lg-6">
+                            <div class="family-card h-100">
+                                <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-heart text-danger"></i> Dados da Mãe
+                                </h6>
+                                <div class="mb-3">
+                                    <label asp-for="NomeMae" class="form-label-custom">Nome da Mãe</label>
+                                    <input asp-for="NomeMae" class="form-control form-control-custom" />
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label asp-for="CpfMae" class="form-label-custom">CPF</label>
+                                        <input asp-for="CpfMae" class="form-control form-control-custom" placeholder="000.000.000-00" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label asp-for="DataNascimentoMae" class="form-label-custom">Data Nasc.</label>
+                                        <input asp-for="DataNascimentoMae" type="date" class="form-control form-control-custom"
+                                               value="@(Model.DataNascimentoMae.HasValue ? Model.DataNascimentoMae.Value.ToString("yyyy-MM-dd") : "")" />
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label asp-for="TelefoneMae" class="form-label-custom">Telefone</label>
+                                        <input asp-for="TelefoneMae" class="form-control form-control-custom" placeholder="(00) 00000-0000" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label asp-for="ProfissaoMae" class="form-label-custom">Profissão</label>
+                                        <input asp-for="ProfissaoMae" class="form-control form-control-custom" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label asp-for="EmailMae" class="form-label-custom">E-mail</label>
+                                    <input asp-for="EmailMae" type="email" class="form-control form-control-custom" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PAI -->
+                        <div class="col-lg-6">
+                            <div class="family-card h-100">
+                                <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-fill text-primary"></i> Dados do Pai
+                                </h6>
+                                <div class="mb-3">
+                                    <label asp-for="NomePai" class="form-label-custom">Nome do Pai</label>
+                                    <input asp-for="NomePai" class="form-control form-control-custom" />
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label asp-for="CpfPai" class="form-label-custom">CPF</label>
+                                        <input asp-for="CpfPai" class="form-control form-control-custom" placeholder="000.000.000-00" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label asp-for="DataNascimentoPai" class="form-label-custom">Data Nasc.</label>
+                                        <input asp-for="DataNascimentoPai" type="date" class="form-control form-control-custom"
+                                               value="@(Model.DataNascimentoPai.HasValue ? Model.DataNascimentoPai.Value.ToString("yyyy-MM-dd") : "")" />
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label asp-for="TelefonePai" class="form-label-custom">Telefone</label>
+                                        <input asp-for="TelefonePai" class="form-control form-control-custom" placeholder="(00) 00000-0000" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label asp-for="ProfissaoPai" class="form-label-custom">Profissão</label>
+                                        <input asp-for="ProfissaoPai" class="form-control form-control-custom" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label asp-for="EmailPai" class="form-label-custom">E-mail</label>
+                                    <input asp-for="EmailPai" type="email" class="form-control form-control-custom" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ABA 2: ANAMNESE & HISTÓRICO CLÍNICO        -->
+            <!-- ========================================== -->
+            <div class="tab-pane fade @(abaAtiva == "anamnese" ? "show active" : "")" id="tab-anamnese" role="tabpanel">
+
+                <!-- CARD 1: DIAGNÓSTICO E MEDICAMENTOS -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-rose">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                        </div>
+                        <div>
+                            <h5>Quadro Clínico &amp; Diagnóstico</h5>
+                            <span>Hipótese diagnóstica, CID e farmacoterapia contínua.</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DiagnosticoPrincipal" class="form-label-custom text-danger">Diagnóstico Principal (CID) / Hipótese</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-2 text-danger">
+                                    <i class="bi bi-bookmark-plus"></i>
+                                </span>
+                                <input asp-for="DiagnosticoPrincipal" class="form-control form-control-custom rounded-end-2 border-start-0" placeholder="Ex: F84.0 - Autismo Infantil / F90.0 - TDAH" />
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                Identificação nosológica principal que norteia o plano terapêutico do paciente.
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="MedicamentosContinuos" class="form-label-custom">Medicamentos de Uso Contínuo</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-2 text-muted">
+                                    <i class="bi bi-capsule"></i>
+                                </span>
+                                <input asp-for="MedicamentosContinuos" class="form-control form-control-custom rounded-end-2 border-start-0" placeholder="Ex: Ritalina 10mg, Risperidona 1mg, etc." />
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                Registre posologia e substâncias ativas acompanhadas pelos médicos assistentes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: HISTÓRICO ESCOLAR -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-amber">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <h5>Histórico Escolar &amp; Pedagógico</h5>
+                            <span>Ambiente escolar, série e profissionais de suporte da instituição.</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label asp-for="EscolaEstuda" class="form-label-custom">Escola onde estuda</label>
+                            <input asp-for="EscolaEstuda" class="form-control form-control-custom" placeholder="Nome da instituição de ensino" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Serie" class="form-label-custom">Série / Ano</label>
+                            <input asp-for="Serie" class="form-control form-control-custom" placeholder="Ex: 4º Ano Fundamental I" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="NomeProfessora" class="form-label-custom">Professora Regente</label>
+                            <input asp-for="NomeProfessora" class="form-control form-control-custom" placeholder="Nome da educadora responsável" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NomePedagogaPsicologa" class="form-label-custom">Pedagoga / Psicóloga Escolar</label>
+                            <input asp-for="NomePedagogaPsicologa" class="form-control form-control-custom" placeholder="Nome do contato pedagógico ou psicólogo escolar" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: METAS TERAPÊUTICAS -->
+                <div class="card-edit-section">
+                    <div class="edit-section-header">
+                        <div class="edit-section-icon icon-emerald">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <div>
+                            <h5>Metas Terapêuticas &amp; Planejamento de Intervenção</h5>
+                            <span>Objetivos clínicos de curto e longo prazo para as sessões.</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MetasCurtoPrazo" class="form-label-custom text-success">
+                            <i class="bi bi-flag-fill me-1"></i> Metas Terapêuticas (Curto Prazo)
+                        </label>
+                        <textarea asp-for="MetasCurtoPrazo"
+                                  class="form-control form-control-custom"
+                                  rows="4"
+                                  placeholder="O que esperamos alcançar nas próximas semanas ou meses? (Ex: Aprimorar contato visual, tolerância à frustração, regulação atencional...)"></textarea>
+                        <div class="form-text text-muted small mt-1">
+                            Metas operacionais para o ciclo inicial de intervenções.
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="MetasLongoPrazo" class="form-label-custom text-primary">
+                            <i class="bi bi-trophy-fill me-1"></i> Metas Terapêuticas (Longo Prazo)
+                        </label>
+                        <textarea asp-for="MetasLongoPrazo"
+                                  class="form-control form-control-custom"
+                                  rows="4"
+                                  placeholder="Objetivos globais finais do tratamento e desenvolvimento do paciente (Ex: Autonomia nas AVDs, comunicação funcional, inclusão escolar plena...)"></textarea>
+                        <div class="form-text text-muted small mt-1">
+                            Resultados esperados a médio e longo prazo no desfecho clínico.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BARRA INFERIOR DE AÇÕES -->
+        <div class="bottom-save-bar">
+            <a asp-action="Details" asp-route-id="@Model.IdPaciente" asp-route-aba="@abaAtiva" class="btn btn-light fw-bold text-muted px-4 rounded-pill">
+                <i class="bi bi-x-circle me-1"></i> Cancelar Alterações
+            </a>
+
+            <button type="submit" id="btnSubmitForm" class="btn btn-primary fw-bold px-5 py-3 rounded-pill shadow">
+                <i class="bi bi-check2-circle me-2 fs-5"></i> Salvar Prontuário Completo
+            </button>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+    <script>
+        // Função para manter registro da aba ativa
+        function setAbaAtiva(aba) {
+            document.getElementById('abaAtivaInput').value = aba;
+        }
+
+        // ==========================================
+        // 1. CÁLCULO DINÂMICO DE IDADE
+        // ==========================================
+        document.getElementById('campoDataNascimento').addEventListener('change', function () {
+            var dataSelecionada = new Date(this.value);
+            if (!isNaN(dataSelecionada.getTime())) {
+                var dataAtual = new Date();
+                var idade = dataAtual.getFullYear() - dataSelecionada.getFullYear();
+                var mes = dataAtual.getMonth() - dataSelecionada.getMonth();
+                if (mes < 0 || (mes === 0 && dataAtual.getDate() < dataSelecionada.getDate())) {
+                    idade--;
+                }
+                document.getElementById('campoIdade').value = Math.max(0, idade);
+            } else {
+                document.getElementById('campoIdade').value = '';
+            }
+        });
+
+        // ==========================================
+        // 2. BUSCA AUTOMÁTICA DE CEP VIA VIACEP
+        // ==========================================
+        const cepInput = document.getElementById('Cep');
+        if (cepInput) {
+            cepInput.addEventListener('blur', function () {
+                let cep = this.value.replace(/\D/g, '');
+                if (cep.length === 8) {
+                    const loading = document.getElementById('loadingCep');
+                    if (loading) loading.classList.remove('d-none');
+
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (loading) loading.classList.add('d-none');
+                            if (!data.erro) {
+                                document.getElementById('Logradouro').value = data.logradouro || '';
+                                document.getElementById('Bairro').value = data.bairro || '';
+                                document.getElementById('Cidade').value = data.localidade || '';
+                                document.getElementById('Estado').value = data.uf || '';
+                                document.getElementById('Numero').focus();
+                            }
+                        })
+                        .catch(() => {
+                            if (loading) loading.classList.add('d-none');
+                        });
+                }
+            });
+        }
+    </script>
+}
+

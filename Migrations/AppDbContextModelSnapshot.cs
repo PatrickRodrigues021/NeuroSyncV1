@@ -40,7 +40,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("agenda");
+                    b.ToTable("agenda", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Agendamento", b =>
@@ -79,7 +79,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("agendamento");
+                    b.ToTable("agendamento", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Anexo", b =>
@@ -111,7 +111,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("anexo");
+                    b.ToTable("anexo", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Avaliacao", b =>
@@ -137,7 +137,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("avaliacao");
+                    b.ToTable("avaliacao", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Cobranca", b =>
@@ -185,7 +185,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("cobranca");
+                    b.ToTable("cobranca", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Evolucao", b =>
@@ -212,7 +212,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("evolucao");
+                    b.ToTable("evolucao", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Intervencao", b =>
@@ -238,7 +238,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("intervencao");
+                    b.ToTable("intervencao", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Paciente", b =>
@@ -421,7 +421,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("IdPaciente");
 
-                    b.ToTable("paciente");
+                    b.ToTable("paciente", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Pagamento", b =>
@@ -465,7 +465,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("IdSessao");
 
-                    b.ToTable("pagamento");
+                    b.ToTable("pagamento", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Profissional", b =>
@@ -484,7 +484,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Profissionais");
+                    b.ToTable("Profissionais", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Prontuario", b =>
@@ -523,7 +523,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("IdPaciente");
 
-                    b.ToTable("prontuario");
+                    b.ToTable("prontuario", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Sessao", b =>
@@ -562,7 +562,7 @@ namespace NeuroSync.Migrations
 
                     b.HasIndex("IdIntervencao");
 
-                    b.ToTable("sessao");
+                    b.ToTable("sessao", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Usuario", b =>
@@ -596,7 +596,7 @@ namespace NeuroSync.Migrations
 
                     b.HasKey("IdUsuario");
 
-                    b.ToTable("usuario");
+                    b.ToTable("usuario", (string)null);
                 });
 
             modelBuilder.Entity("NeuroSync.Models.Agendamento", b =>
