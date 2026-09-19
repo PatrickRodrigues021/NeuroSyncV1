@@ -85,22 +85,18 @@
                         <label asp-for="DataHora" class="form-label fw-bold text-dark">Data e Horário <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-calendar-event"></i></span>
-                            <input asp-for="DataHora" type="datetime-local" class="form-control border-start-0 ps-0" required />
+                            <input asp-for="DataHora" type="datetime-local" class="form-control border-start-0 ps-0" value="@Model.DataHora.ToString("yyyy-MM-ddTHH:mm")" required />
                         </div>
                     </div>
 
                     <!-- Tipo de Sessão -->
                     <div class="col-12 col-md-6">
-                        <label asp-for="TipoSessao" class="form-label fw-bold text-dark">Especialidade / Tipo de Sessão</label>
+                        <label asp-for="TipoSessao" class="form-label fw-bold text-dark">Tipo de Sessão</label>
                         <select asp-for="TipoSessao" class="form-select">
                             <option value="Intervenção">Intervenção (Rotina)</option>
-                            <option value="Avaliação">Avaliação Diagnóstica</option>
-                            <option value="Devolutiva">Devolutiva com a Família</option>
-                            <option value="Fonoaudiologia">Fonoaudiologia</option>
-                            <option value="Terapia Ocupacional">Terapia Ocupacional</option>
-                            <option value="Psicologia">Psicologia</option>
-                            <option value="Psicopedagogia">Psicopedagogia</option>
-                            <option value="Fisioterapia">Fisioterapia</option>
+                            <option value="Avaliação">Avaliação Neuropsicopedagógica</option>
+                            <option value="Devolutiva">Devolutiva com os Pais</option>
+                            <option value="Orientação Escolar">Orientação Escolar / Familiar</option>
                         </select>
                     </div>
                 </div>
@@ -152,7 +148,66 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#buscaPaciente').select2({ width: '100%' });
+            $('#buscaPaciente').select2({
+                placeholder: '🔍 Digite o nome do paciente para buscar...',
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Nenhum paciente encontrado";
+                    },
+                    searching: function() {
+                        return "Buscando paciente...";
+                    }
+                }
+            });
         });
     </script>
+    <style>
+        .select2-container--default .select2-selection--single {
+            border-radius: 12px !important;
+            border: 1px solid #cbd5e1 !important;
+            height: 46px !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 8px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #1e293b !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+            line-height: 44px !important;
+            padding-left: 8px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px !important;
+            right: 12px !important;
+        }
+        .select2-container--open .select2-selection--single,
+        .select2-container--focus .select2-selection--single {
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12) !important;
+        }
+        .select2-dropdown {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+            overflow: hidden !important;
+        }
+        .select2-search--dropdown {
+            padding: 10px !important;
+            background: #f8fafc !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .select2-search--dropdown .select2-search__field {
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            padding: 8px 12px !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+    </style>
 }

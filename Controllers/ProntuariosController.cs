@@ -1,26 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
-using NeuroSync.Data;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NeuroSync.Data;
 
-namespace NeuroSync.Controllers
+namespace NeuroSync.Controllers;
+
+/// <summary>
+/// Controlador responsável pelo catálogo e acesso rápido aos Prontuários Eletrônicos dos Pacientes.
+/// </summary>
+[Authorize]
+public class ProntuariosController(AppDbContext context) : Controller
 {
-    [Authorize]
-    public class ProntuariosController : Controller
+    /// <summary>
+    /// Lista todos os pacientes em ordem alfabética para seleção e abertura direta de prontuário.
+    /// </summary>
+    public async Task<IActionResult> Index()
     {
-        private readonly AppDbContext _context;
+        var pacientes = await context.Pacientes
+            .OrderBy(p => p.Nome)
+            .ToListAsync();
 
-        public ProntuariosController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: /Prontuarios
-        public IActionResult Index()
-        {
-            // Busca os pacientes no banco em ordem alfabética para a tela de seleção
-            var pacientes = _context.Pacientes.OrderBy(p => p.Nome).ToList();
-            return View(pacientes);
-        }
+        return View(pacientes);
     }
 }

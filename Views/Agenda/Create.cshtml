@@ -9,6 +9,77 @@
     .form-label { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
     .form-control, .form-select { border-radius: 8px; border: 1px solid #e2e8f0; padding: 12px 16px; background-color: #f8fafc; transition: 0.3s; font-weight: 500; }
     .form-control:focus, .form-select:focus { border-color: var(--primary); background-color: white; box-shadow: 0 0 0 4px rgba(49, 91, 239, 0.1); }
+
+    /* Customização do Select2 para busca com digitação rápida */
+    .select2-container--default .select2-selection--single {
+        border-radius: 8px !important;
+        border: 1px solid #e2e8f0 !important;
+        height: 48px !important;
+        background-color: #f8fafc !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 8px !important;
+        transition: 0.3s !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1e293b !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        line-height: 46px !important;
+        padding-left: 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #94a3b8 !important;
+        font-weight: 400 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+    .select2-container--open .select2-selection--single,
+    .select2-container--focus .select2-selection--single {
+        border-color: var(--primary, #315BEF) !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 4px rgba(49, 91, 239, 0.1) !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden !important;
+        margin-top: 4px !important;
+    }
+    .select2-search--dropdown {
+        padding: 10px !important;
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem !important;
+    }
+    .select2-search--dropdown .select2-search__field:focus {
+        outline: none !important;
+        border-color: var(--primary, #315BEF) !important;
+        box-shadow: 0 0 0 3px rgba(49, 91, 239, 0.15) !important;
+    }
+    .select2-results__option {
+        padding: 10px 14px !important;
+        font-size: 0.92rem !important;
+        font-weight: 500 !important;
+        transition: all 0.15s ease !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary, #315BEF) !important;
+        color: #ffffff !important;
+    }
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #eff6ff !important;
+        color: var(--primary, #315BEF) !important;
+        font-weight: 600 !important;
+    }
 </style>
 
 <div class="row">
@@ -26,32 +97,36 @@
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3 validation-summary-valid"></div>
                 
+                <!-- PACIENTE COM PESQUISA INTERATIVA POR DIGITAÇÃO -->
                 <div class="mb-4">
-                    <label asp-for="PacienteId" class="form-label">Paciente *</label>
-                    <select asp-for="PacienteId" class="form-select" asp-items="ViewBag.Pacientes" required>
-                        <option value="">-- Selecione o Paciente --</option>
+                    <label asp-for="PacienteId" class="form-label d-flex justify-content-between">
+                        <span>Paciente <span class="text-danger">*</span></span>
+                        <small class="text-primary fw-normal text-none"><i class="bi bi-search me-1"></i>Digite para pesquisar</small>
+                    </label>
+                    <select asp-for="PacienteId" id="buscaPaciente" class="form-select" asp-items="ViewBag.Pacientes" required>
+                        <option value="">-- Digite ou selecione o Paciente --</option>
                     </select>
                 </div>
 
                 <div class="mb-4">
                     <label asp-for="DataHora" class="form-label">Data e Horário *</label>
-                    <input asp-for="DataHora" type="datetime-local" class="form-control" required />
+                    <input asp-for="DataHora" type="datetime-local" class="form-control" value="@Model.DataHora.ToString("yyyy-MM-ddTHH:mm")" required />
                 </div>
 
-                <!-- TIPO DE SESSÃO (NOVO) -->
+                <!-- TIPO DE SESSÃO -->
                 <div class="mb-4">
                     <label asp-for="TipoSessao" class="form-label">Tipo de Sessão</label>
                     <select asp-for="TipoSessao" class="form-select">
                         <option value="Intervenção">Intervenção (Rotina)</option>
                         <option value="Avaliação">Avaliação</option>
                         <option value="Devolutiva">Devolutiva com os Pais</option>
+                        <option value="Orientação Escolar">Orientação Escolar / Familiar</option>
                     </select>
                 </div>
 
-                <!-- CAMPO DE REPETIÇÃO SEMANAL (NOVO) -->
+                <!-- CAMPO DE REPETIÇÃO SEMANAL -->
                 <div class="mb-4">
                     <label class="form-label text-primary"><i class="bi bi-arrow-repeat"></i> Repetição Semanal</label>
-                    <!-- O atributo name="semanasRepeticao" conecta com o C# do Controller -->
                     <select name="semanasRepeticao" class="form-select border-primary bg-light">
                         <option value="1">Não se repete (Sessão Única)</option>
                         <option value="4">Repetir toda semana (1 Mês - 4 sessões)</option>
@@ -63,18 +138,14 @@
                     </div>
                 </div>
 
-                <!-- VALOR DA SESSÃO / GERAÇÃO AUTOMÁTICA DE COBRANÇA (NOVO) -->
+                <!-- VALOR DA SESSÃO / GERAÇÃO AUTOMÁTICA DE COBRANÇA -->
                 <div class="mb-4">
                     <label class="form-label text-success"><i class="bi bi-cash-coin"></i> Valor da Sessão (R$)</label>
-                    <!-- name="valorSessao" conecta com o parâmetro do Controller -->
                     <input type="number" step="0.01" min="0" name="valorSessao" class="form-control border-success bg-light" placeholder="Ex: 150,00" />
                     <div class="form-text text-muted small mt-2">
                         <i class="bi bi-info-circle"></i> Se preenchido, o sistema gera automaticamente uma cobrança pendente para <strong>cada sessão criada</strong> (o mesmo valor se repete em todas). O fechamento do pagamento de cada cobrança só fica liberado depois que a respectiva sessão for marcada como <strong>Realizado</strong> na Agenda.
                     </div>
                 </div>
-
-                <!-- Se você tiver outros campos no model Agendamento (como Observação, Status), 
-                     você pode adicioná-los aqui embaixo -->
 
                 <div class="d-flex justify-content-end gap-3 pt-4 border-top mt-5">
                     <a href="/Agenda" class="btn btn-light fw-bold px-4 rounded-pill text-muted">Cancelar</a>
@@ -88,6 +159,25 @@
 </div>
 
 @section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#buscaPaciente').select2({
+                placeholder: '🔍 Digite o nome do paciente para buscar...',
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Nenhum paciente encontrado";
+                    },
+                    searching: function() {
+                        return "Buscando paciente...";
+                    }
+                }
+            });
+        });
+    </script>
     <style>
         .validation-summary-valid { display: none; }
     </style>

@@ -1,89 +1,96 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using NeuroSync.Data;
 using NeuroSync.Models;
 
-namespace NeuroSync.Controllers
+namespace NeuroSync.Controllers;
+
+/// <summary>
+/// Controlador responsável pela autenticação e controle de sessão da usuária no sistema.
+/// </summary>
+public class LoginController(AppDbContext context) : Controller
 {
-    public class LoginController : Controller
+    // =========================================================================
+    // 1. TELA DE LOGIN
+    // =========================================================================
+
+    /// <summary>
+    /// Exibe a página visual de autenticação do NeuroSync.
+    /// </summary>
+    [HttpGet]
+    public IActionResult Index() => View();
+
+    // =========================================================================
+    // 2. PROCESSAMENTO DO LOGIN
+    // =========================================================================
+
+    /// <summary>
+    /// Valida as credenciais informadas, autentica e emite o Cookie de sessão com as claims da usuária.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Entrar(string usuario, string senha)
     {
-        private readonly AppDbContext _context;
-
-        public LoginController(AppDbContext context)
+        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(senha))
         {
-            _context = context;
-        }
-
-        // Abre a tela visual de login
-        public IActionResult Index() => View();
-
-        // Recebe os dados quando o usuário clica em "Entrar"
-        [HttpPost]
-        public async Task<IActionResult> Entrar(string usuario, string senha)
-        {
-            if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(senha))
-            {
-                ViewBag.Erro = "Por favor, informe o usuário/e-mail e a senha.";
-                return View("Index");
-            }
-
-            var termo = usuario.Trim();
-
-            // Busca no banco por e-mail ou nome (login)
-            var usuarioEncontrado = await _context.Usuarios
-                .FirstOrDefaultAsync(u => (u.Email.ToLower() == termo.ToLower() || u.Nome.ToLower() == termo.ToLower()) && u.Senha == senha);
-
-            // Fallback de segurança: caso o usuário ainda não exista e seja o primeiro acesso padrão
-            if (usuarioEncontrado == null && termo.ToLower() == "admin" && senha == "admin123")
-            {
-                usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync();
-                if (usuarioEncontrado == null)
-                {
-                    usuarioEncontrado = new Usuario
-                    {
-                        Nome = "Mariana Silva",
-                        Email = "admin",
-                        Senha = "admin123",
-                        CriadoEm = System.DateTime.Now
-                    };
-                    _context.Usuarios.Add(usuarioEncontrado);
-                    await _context.SaveChangesAsync();
-                }
-            }
-
-            if (usuarioEncontrado != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, usuarioEncontrado.IdUsuario.ToString()),
-                    new Claim(ClaimTypes.Name, usuarioEncontrado.Nome),
-                    new Claim(ClaimTypes.Email, usuarioEncontrado.Email)
-                };
-
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                // Gera o "crachá" (Cookie) e libera a entrada
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-                // Manda o usuário para a tela de Boas-Vindas e Resumo do Dia
-                return RedirectToAction("BoasVindas", "Home");
-            }
-
-            // Se errar a senha, mostra mensagem de erro na tela
-            ViewBag.Erro = "Usuário ou senha inválidos!";
+            ViewBag.Erro = "Por favor, informe o usuário/e-mail e a senha.";
             return View("Index");
         }
 
-        // Função para clicar no botão "Sair" e rasgar o crachá
-        public async Task<IActionResult> Sair()
+        var termo = usuario.Trim();
+
+        // Localiza usuário por e-mail ou nome
+        var usuarioEncontrado = await context.Usuarios
+            .FirstOrDefaultAsync(u => (u.Email.ToLower() == termo.ToLower() || u.Nome.ToLower() == termo.ToLower()) && u.Senha == senha);
+
+        // Fallback de primeiro acesso: cria usuária padrão administrativa se a base estiver vazia
+        if (usuarioEncontrado == null && termo.Equals("admin", StringComparison.OrdinalIgnoreCase) && senha == "admin123")
         {
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Index", "Login");
+            usuarioEncontrado = await context.Usuarios.FirstOrDefaultAsync();
+            if (usuarioEncontrado == null)
+            {
+                usuarioEncontrado = new Usuario
+                {
+                    Nome = "Mariana Silva",
+                    Email = "admin",
+                    Senha = "admin123",
+                    CriadoEm = DateTime.Now
+                };
+                context.Usuarios.Add(usuarioEncontrado);
+                await context.SaveChangesAsync();
+            }
         }
+
+        if (usuarioEncontrado != null)
+        {
+            Claim[] claims = [
+                new(ClaimTypes.NameIdentifier, usuarioEncontrado.IdUsuario.ToString()),
+                new(ClaimTypes.Name, usuarioEncontrado.Nome),
+                new(ClaimTypes.Email, usuarioEncontrado.Email)
+            ];
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            return RedirectToAction("BoasVindas", "Home");
+        }
+
+        ViewBag.Erro = "Usuário ou senha inválidos!";
+        return View("Index");
+    }
+
+    // =========================================================================
+    // 3. LOGOUT / SAÍDA DO SISTEMA
+    // =========================================================================
+
+    /// <summary>
+    /// Encerra a sessão atual e revoga o Cookie de autenticação.
+    /// </summary>
+    public async Task<IActionResult> Sair()
+    {
+        await HttpContext.SignOutAsync();
+        return RedirectToAction("Index", "Login");
     }
 }

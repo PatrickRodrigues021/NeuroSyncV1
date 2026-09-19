@@ -343,30 +343,106 @@
         box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
     }
 
-    .status-prog-item {
-        margin-bottom: 12px;
+    /* Donut e Métricas de Atendimento Modernas */
+    .donut-chart-wrapper {
+        display: inline-block;
+        position: relative;
     }
 
-    .status-prog-label {
+    .donut-center-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        font-size: 0.84rem;
-        font-weight: 600;
-        color: #475569;
-        margin-bottom: 4px;
+        justify-content: center;
+        pointer-events: none;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffffff 60%, rgba(248, 250, 252, 0.9) 100%);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        border: 1px solid rgba(226, 232, 240, 0.6);
     }
 
-    .status-prog-bar {
+    .donut-center-val {
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #0b223d;
+        line-height: 1;
+        letter-spacing: -0.5px;
+    }
+
+    .donut-center-lbl {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #64748b;
+        margin-top: 3px;
+    }
+
+    .status-metric-card {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 9px 12px;
+        transition: all 0.2s ease;
+    }
+
+    .status-metric-card:hover {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        transform: translateX(3px);
+    }
+
+    .status-dot {
+        width: 8px;
         height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .status-name {
+        font-size: 0.83rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .status-count {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0b223d;
+    }
+
+    .status-badge-pill {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        line-height: 1.3;
+    }
+
+    .badge-pill-success { background: #dcfce7; color: #15803d; }
+    .badge-pill-primary { background: #dbeafe; color: #1d4ed8; }
+    .badge-pill-danger  { background: #ffe4e6; color: #be123c; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; }
+
+    .status-progress-track {
+        height: 6px;
         border-radius: 10px;
         background: #f1f5f9;
         overflow: hidden;
+        margin-top: 6px;
     }
 
-    .status-prog-fill {
+    .status-progress-fill {
         height: 100%;
         border-radius: 10px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 </style>
 
@@ -660,54 +736,102 @@
 
                 <!-- Visão 1: Donut de Status + Barras de Progresso -->
                 <div id="viewStatus" class="row align-items-center g-3 my-auto">
-                    <div class="col-12 col-md-6 text-center position-relative">
-                        <div style="height: 210px; width: 100%; position: relative;">
-                            <canvas id="graficoSessoesDonut"></canvas>
+                    @{
+                        var totalMes = Model.TotalSessoesMes;
+                        var realizadasPerc = totalMes > 0 ? (int)Math.Round((double)Model.RealizadasMes / totalMes * 100) : 0;
+                        var agendadasPerc = totalMes > 0 ? (int)Math.Round((double)Model.AgendadasMes / totalMes * 100) : 0;
+                        var canceladasPerc = totalMes > 0 ? (int)Math.Round((double)Model.CanceladasMes / totalMes * 100) : 0;
+                        var faltasPerc = totalMes > 0 ? (int)Math.Round((double)Model.FaltasMes / totalMes * 100) : 0;
+                    }
+
+                    <div class="col-12 col-md-5 text-center">
+                        <div class="donut-chart-wrapper position-relative mx-auto">
+                            <div style="height: 195px; width: 195px; margin: 0 auto; position: relative;">
+                                <canvas id="graficoSessoesDonut"></canvas>
+                                <div class="donut-center-badge">
+                                    <span class="donut-center-val">@totalMes</span>
+                                    <span class="donut-center-lbl">Sessões</span>
+                                </div>
+                            </div>
+                            @if (totalMes > 0)
+                            {
+                                <div class="mt-2">
+                                    <span class="status-badge-pill badge-pill-success fw-bold d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-check2-circle"></i> @realizadasPerc% Concluídas
+                                    </span>
+                                </div>
+                            }
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <!-- Realizadas -->
-                        <div class="status-prog-item">
-                            <div class="status-prog-label">
-                                <span><span class="badge rounded-circle p-1 bg-success me-1"></span> Realizadas</span>
-                                <strong>@Model.RealizadasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.RealizadasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                    <div class="col-12 col-md-7 ps-md-2">
+                        <div class="d-flex flex-column gap-2">
+                            <!-- Realizadas -->
+                            <div class="status-metric-card">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-dot bg-success"></span>
+                                        <span class="status-name">Realizadas</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-count">@Model.RealizadasMes</span>
+                                        <span class="status-badge-pill badge-pill-success">@realizadasPerc%</span>
+                                    </div>
+                                </div>
+                                <div class="status-progress-track">
+                                    <div class="status-progress-fill bg-success" style="width: @realizadasPerc%"></div>
+                                </div>
                             </div>
-                            <div class="status-prog-bar">
-                                <div class="status-prog-fill bg-success" style="width: @(Model.TotalSessoesMes > 0 ? (Model.RealizadasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
-                            </div>
-                        </div>
 
-                        <!-- Agendadas -->
-                        <div class="status-prog-item">
-                            <div class="status-prog-label">
-                                <span><span class="badge rounded-circle p-1 bg-primary me-1"></span> Agendadas</span>
-                                <strong>@Model.AgendadasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.AgendadasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            <!-- Agendadas -->
+                            <div class="status-metric-card">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-dot" style="background-color: #3b82f6;"></span>
+                                        <span class="status-name">Agendadas</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-count">@Model.AgendadasMes</span>
+                                        <span class="status-badge-pill badge-pill-primary">@agendadasPerc%</span>
+                                    </div>
+                                </div>
+                                <div class="status-progress-track">
+                                    <div class="status-progress-fill" style="width: @agendadasPerc%; background-color: #3b82f6;"></div>
+                                </div>
                             </div>
-                            <div class="status-prog-bar">
-                                <div class="status-prog-fill bg-primary" style="width: @(Model.TotalSessoesMes > 0 ? (Model.AgendadasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
-                            </div>
-                        </div>
 
-                        <!-- Canceladas -->
-                        <div class="status-prog-item">
-                            <div class="status-prog-label">
-                                <span><span class="badge rounded-circle p-1 bg-danger me-1"></span> Canceladas</span>
-                                <strong>@Model.CanceladasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.CanceladasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
+                            <!-- Canceladas -->
+                            <div class="status-metric-card">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-dot" style="background-color: #f43f5e;"></span>
+                                        <span class="status-name">Canceladas</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-count">@Model.CanceladasMes</span>
+                                        <span class="status-badge-pill badge-pill-danger">@canceladasPerc%</span>
+                                    </div>
+                                </div>
+                                <div class="status-progress-track">
+                                    <div class="status-progress-fill" style="width: @canceladasPerc%; background-color: #f43f5e;"></div>
+                                </div>
                             </div>
-                            <div class="status-prog-bar">
-                                <div class="status-prog-fill bg-danger" style="width: @(Model.TotalSessoesMes > 0 ? (Model.CanceladasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
-                            </div>
-                        </div>
 
-                        <!-- Faltas -->
-                        <div class="status-prog-item">
-                            <div class="status-prog-label">
-                                <span><span class="badge rounded-circle p-1 bg-warning me-1"></span> Faltas</span>
-                                <strong>@Model.FaltasMes (@(Model.TotalSessoesMes > 0 ? (int)Math.Round((double)Model.FaltasMes / Model.TotalSessoesMes * 100) : 0)%)</strong>
-                            </div>
-                            <div class="status-prog-bar">
-                                <div class="status-prog-fill bg-warning" style="width: @(Model.TotalSessoesMes > 0 ? (Model.FaltasMes * 100 / Model.TotalSessoesMes) : 0)%"></div>
+                            <!-- Faltas -->
+                            <div class="status-metric-card">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-dot" style="background-color: #f59e0b;"></span>
+                                        <span class="status-name">Faltas</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="status-count">@Model.FaltasMes</span>
+                                        <span class="status-badge-pill badge-pill-warning">@faltasPerc%</span>
+                                    </div>
+                                </div>
+                                <div class="status-progress-track">
+                                    <div class="status-progress-fill" style="width: @faltasPerc%; background-color: #f59e0b;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -780,37 +904,61 @@
         document.addEventListener("DOMContentLoaded", function () {
             // 1. Gráfico Doughnut Moderno
             const ctxDonut = document.getElementById('graficoSessoesDonut').getContext('2d');
+            const totalSessoesMes = @Model.TotalSessoesMes;
+            const hasData = totalSessoesMes > 0;
+
             donutChartInstance = new Chart(ctxDonut, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Realizadas', 'Agendadas', 'Canceladas', 'Faltas'],
+                    labels: hasData ? ['Realizadas', 'Agendadas', 'Canceladas', 'Faltas'] : ['Sem atendimentos'],
                     datasets: [{
-                        data: [
-                            @Model.RealizadasMes,
-                            @Model.AgendadasMes,
-                            @Model.CanceladasMes,
-                            @Model.FaltasMes
-                        ],
-                        backgroundColor: ['#10b981', '#0284c7', '#ef4444', '#f59e0b'],
-                        borderWidth: 3,
+                        data: hasData 
+                            ? [@Model.RealizadasMes, @Model.AgendadasMes, @Model.CanceladasMes, @Model.FaltasMes]
+                            : [1],
+                        backgroundColor: hasData 
+                            ? ['#10b981', '#3b82f6', '#f43f5e', '#f59e0b']
+                            : ['#e2e8f0'],
+                        hoverBackgroundColor: hasData 
+                            ? ['#059669', '#2563eb', '#e11d48', '#d97706']
+                            : ['#cbd5e1'],
+                        borderWidth: hasData ? 2 : 0,
                         borderColor: '#ffffff',
-                        hoverOffset: 6
+                        borderRadius: hasData ? 6 : 0,
+                        spacing: hasData ? 3 : 0,
+                        hoverOffset: hasData ? 6 : 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '74%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 800
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            enabled: hasData,
+                            backgroundColor: '#071A3A',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            titleFont: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold', size: 12 },
+                            bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            boxPadding: 4,
+                            usePointStyle: true,
                             callbacks: {
                                 label: function (context) {
-                                    return ' ' + context.label + ': ' + context.raw + ' sessões';
+                                    const val = context.raw || 0;
+                                    const pct = totalSessoesMes > 0 ? Math.round((val / totalSessoesMes) * 100) : 0;
+                                    return ' ' + context.label + ': ' + val + ' sessões (' + pct + '%)';
                                 }
                             }
                         }
-                    },
-                    cutout: '76%'
+                    }
                 }
             });
 

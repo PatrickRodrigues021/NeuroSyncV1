@@ -1,14 +1,14 @@
 @model NeuroSync.Models.RelatoriosViewModel
 
 @{
-    ViewData["Title"] = "Relatórios";
+    ViewData["Title"] = "Relatórios Clínicos";
 }
 
 <style>
-    /* Estilos da Tela de Relatórios */
+    /* Estilos Gerais da Área de Relatórios */
     .reports-container {
         padding-top: 0.5rem;
-        padding-bottom: 2.5rem;
+        padding-bottom: 3rem;
     }
 
     .page-title {
@@ -35,7 +35,9 @@
         text-decoration: none;
         position: relative;
         transition: all 0.2s ease;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .reports-nav-item:hover {
@@ -58,49 +60,76 @@
     }
 
     /* Botões de Ação do Topo */
-    .btn-filter-period {
+    .btn-action-custom {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
-        color: #334155;
         font-weight: 600;
         font-size: 0.88rem;
         padding: 9px 16px;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        color: #334155;
+        text-decoration: none;
     }
 
-    .btn-filter-period:hover {
+    .btn-action-custom:hover {
         background: #F8FAFC;
         border-color: #CBD5E1;
         color: #0F172A;
     }
 
-    .btn-export-custom {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 12px;
-        color: #2563EB;
-        font-weight: 600;
-        font-size: 0.88rem;
-        padding: 9px 18px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    .btn-action-custom.btn-excel {
+        color: #16A34A;
+        border-color: #86EFAC;
+    }
+    .btn-action-custom.btn-excel:hover {
+        background: #F0FDF4;
+        color: #15803D;
     }
 
-    .btn-export-custom:hover {
-        background: #EFF6FF;
+    .btn-action-custom.btn-print {
+        color: #2563EB;
         border-color: #BFDBFE;
+    }
+    .btn-action-custom.btn-print:hover {
+        background: #EFF6FF;
         color: #1D4ED8;
     }
 
-    /* Cards de Indicadores (KPIs) */
+    /* Barra de Filtros */
+    .filter-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 18px 24px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        margin-bottom: 1.75rem;
+    }
+
+    .filter-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748B;
+        margin-bottom: 6px;
+    }
+
+    .filter-input {
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        color: #1E293B;
+    }
+    .filter-input:focus {
+        border-color: #2563EB;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Cards de KPIs */
     .kpi-card {
         background: #FFFFFF;
         border-radius: 16px;
@@ -127,7 +156,7 @@
     }
 
     .kpi-value {
-        font-size: 2.1rem;
+        font-size: 2rem;
         font-weight: 700;
         color: #0F172A;
         letter-spacing: -0.5px;
@@ -144,12 +173,14 @@
         gap: 4px;
     }
 
-    .kpi-trend.negative {
-        color: #EF4444;
+    .kpi-subtext {
+        font-size: 0.8rem;
+        color: #64748B;
+        font-weight: 500;
     }
 
-    /* Cards de Gráficos */
-    .chart-card {
+    /* Cards de Gráficos e Tabelas */
+    .chart-card, .table-card {
         background: #FFFFFF;
         border-radius: 16px;
         padding: 24px;
@@ -158,35 +189,104 @@
         height: 100%;
     }
 
-    .chart-card-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: #0F172A;
-        margin-bottom: 0;
+    .table-card {
+        padding: 0;
+        overflow: hidden;
     }
 
-    .select-period-view {
-        border-radius: 10px;
-        border: 1px solid #E2E8F0;
-        font-size: 0.82rem;
-        padding: 4px 12px;
-        color: #475569;
+    .table-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #F1F5F9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .custom-table th {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748B;
         font-weight: 600;
-        background-color: #FFFFFF;
-        cursor: pointer;
-        outline: none;
+        background: #F8FAFC;
+        padding: 14px 20px;
+        border: none;
     }
 
-    .select-period-view:focus {
-        border-color: #2563EB;
+    .custom-table td {
+        padding: 16px 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #F1F5F9;
+        color: #1E293B;
+        font-size: 0.92rem;
     }
+
+    .custom-table tr:hover td {
+        background-color: #F8FAFC;
+    }
+
+    /* Badges de Status de Atendimento */
+    .status-badge {
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .status-badge.status-realizado {
+        background-color: #DCFCE7;
+        color: #14532D;
+        border: 1px solid #86EFAC;
+    }
+
+    .status-badge.status-agendado {
+        background-color: #FEF3C7;
+        color: #78350F;
+        border: 1px solid #FCD34D;
+    }
+
+    .status-badge.status-falta {
+        background-color: #FFEDD5;
+        color: #7C2D12;
+        border: 1px solid #FDBA74;
+    }
+
+    .status-badge.status-cancelado {
+        background-color: #FEE2E2;
+        color: #991B1B;
+        border: 1px solid #FCA5A5;
+    }
+
+    /* Badges de Tipo de Sessão Neuropsicopedagógica */
+    .badge-tipo-sessao {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .sessao-intervencao { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .sessao-avaliacao   { background: #ECFEFF; color: #0E7490; border: 1px solid #A5F3FC; }
+    .sessao-devolutiva  { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+    .sessao-orientacao  { background: #FAF5FF; color: #6B21A8; border: 1px solid #E9D5FF; }
 
     /* Legenda customizada do Donut Chart */
     .legend-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
+        font-size: 0.88rem;
     }
 
     .legend-indicator {
@@ -194,34 +294,69 @@
         height: 10px;
         border-radius: 50%;
         display: inline-block;
-        margin-right: 10px;
+        margin-right: 8px;
         flex-shrink: 0;
     }
 
-    .legend-name {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #334155;
+    /* Otimização para Impressão */
+    @@media print {
+        .sidebar, .reports-nav-tabs, .btn-action-custom, .filter-card, .dropdown, .btn, .no-print {
+            display: none !important;
+        }
+        .main-content {
+            margin-left: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .reports-container {
+            padding: 0 !important;
+        }
+        .table-card, .chart-card, .kpi-card {
+            border: 1px solid #E2E8F0 !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+        }
+        .print-header {
+            display: block !important;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #071A3A;
+        }
     }
 
-    .legend-pct {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #0F172A;
+    .print-header {
+        display: none;
     }
 </style>
 
 <div class="reports-container">
-    
-    <!-- CABEÇALHO -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <h2 class="page-title mb-0">Relatórios</h2>
 
-        <!-- Ações do Topo: Período e Exportar -->
+    <!-- CABEÇALHO PARA IMPRESSÃO (EXIBIDO APENAS AO IMPRIMIR) -->
+    <div class="print-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">NeuroSync - Relatório Clínico de Atendimentos</h4>
+                <small class="text-muted">Prática Clínica em Neuropsicopedagogia | Período: @Model.PeriodoTexto</small>
+            </div>
+            <div class="text-end">
+                <small class="text-muted">Gerado em: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- CABEÇALHO DA TELA -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 no-print">
+        <div>
+            <h2 class="page-title mb-0">Relatórios Clínicos</h2>
+            <p class="text-muted small mb-0 mt-1">
+                <i class="bi bi-person-badge text-primary me-1"></i> Acompanhamento Clínico em Neuropsicopedagogia
+            </p>
+        </div>
+
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Botão do Seletor de Período -->
+            <!-- Seletor de Período -->
             <div class="dropdown">
-                <button class="btn-filter-period dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn-action-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-calendar3 text-primary"></i>
                     <span>@Model.PeriodoTexto</span>
                 </button>
@@ -238,309 +373,504 @@
                             <input type="date" name="dataFim" class="form-control" value="@Model.DataFim.ToString("yyyy-MM-dd")" />
                         </div>
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold rounded-pill">Aplicar</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold rounded-pill">Aplicar Período</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Botão Exportar -->
-            <div class="dropdown">
-                <button class="btn-export-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-box-arrow-up"></i>
-                    <span>Exportar</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
-                    <li>
-                        <a class="dropdown-item py-2 fw-semibold" asp-action="Exportar" asp-route-dataInicio="@Model.DataInicio.ToString("yyyy-MM-dd")" asp-route-dataFim="@Model.DataFim.ToString("yyyy-MM-dd")">
-                            <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i> Exportar Dados (CSV/Excel)
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item py-2 fw-semibold" href="javascript:window.print();">
-                            <i class="bi bi-printer text-primary me-2"></i> Imprimir / Salvar em PDF
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <!-- Botão Exportar Excel / CSV -->
+            <a asp-action="Exportar" 
+               asp-route-dataInicio="@Model.DataInicio.ToString("yyyy-MM-dd")" 
+               asp-route-dataFim="@Model.DataFim.ToString("yyyy-MM-dd")"
+               asp-route-pacienteId="@Model.PacienteId"
+               asp-route-tipoSessao="@Model.TipoSessaoSelecionado"
+               asp-route-status="@Model.StatusSelecionado"
+               class="btn-action-custom btn-excel"
+               title="Exportar base filtrada para planilha Excel/CSV">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Exportar Planilha</span>
+            </a>
+
+            <!-- Botão Imprimir -->
+            <button type="button" onclick="window.print()" class="btn-action-custom btn-print" title="Imprimir relatório formal ou salvar em PDF">
+                <i class="bi bi-printer"></i>
+                <span>Imprimir Relatório</span>
+            </button>
         </div>
     </div>
 
-    <!-- ABAS DE NAVEGAÇÃO -->
-    <div class="reports-nav-tabs">
-        <a href="@Url.Action("Index", new { aba = "Indicadores" })" class="reports-nav-item @(Model.AbaAtiva == "Indicadores" ? "active" : "")">
-            Indicadores
+    <!-- ABAS DE NAVEGAÇÃO (APENAS INDICADORES CLÍNICOS & HISTÓRICO DE ATENDIMENTOS) -->
+    <div class="reports-nav-tabs no-print">
+        <a href="@Url.Action("Index", new { aba = "Indicadores", dataInicio = Model.DataInicio.ToString("yyyy-MM-dd"), dataFim = Model.DataFim.ToString("yyyy-MM-dd") })" 
+           class="reports-nav-item @(Model.AbaAtiva == "Indicadores" ? "active" : "")">
+            <i class="bi bi-pie-chart-fill"></i>
+            <span>Indicadores Clínicos</span>
         </a>
-        <a href="@Url.Action("Index", new { aba = "Atendimentos" })" class="reports-nav-item @(Model.AbaAtiva == "Atendimentos" ? "active" : "")">
-            Atendimentos
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Financeiro" })" class="reports-nav-item @(Model.AbaAtiva == "Financeiro" ? "active" : "")">
-            Financeiro
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Personalizados" })" class="reports-nav-item @(Model.AbaAtiva == "Personalizados" ? "active" : "")">
-            Personalizados
+        <a href="@Url.Action("Index", new { aba = "Atendimentos", dataInicio = Model.DataInicio.ToString("yyyy-MM-dd"), dataFim = Model.DataFim.ToString("yyyy-MM-dd"), pacienteId = Model.PacienteId, tipoSessao = Model.TipoSessaoSelecionado, status = Model.StatusSelecionado })" 
+           class="reports-nav-item @(Model.AbaAtiva == "Atendimentos" ? "active" : "")">
+            <i class="bi bi-journal-text"></i>
+            <span>Histórico de Atendimentos</span>
         </a>
     </div>
 
-    <!-- LINHA DE 4 CARDS DE INDICADORES (KPIs) -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Card 1: Atendimentos Realizados -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Atendimentos realizados</div>
-                <div class="kpi-value">@Model.AtendimentosRealizados</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@(Model.VariacaoAtendimentos.ToString("N0"))% vs período anterior</span>
+    @* ========================================================================= *@
+    @* ABA 1: INDICADORES CLÍNICOS EM NEUROPSICOPEDAGOGIA                        *@
+    @* ========================================================================= *@
+    @if (Model.AbaAtiva == "Indicadores")
+    {
+        <!-- 4 CARDS DE INDICADORES CLÍNICOS -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Card 1: Sessões Realizadas -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Sessões Realizadas</div>
+                        <div class="kpi-value text-primary">@Model.AtendimentosRealizados</div>
+                    </div>
+                    <div class="kpi-trend">
+                        <i class="bi bi-arrow-up-short fs-6"></i>
+                        <span>+@Model.VariacaoAtendimentos.ToString("0.0")% vs período anterior</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Card 2: Novos Pacientes -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Novos pacientes</div>
-                <div class="kpi-value">@Model.NovosPacientes</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@(Model.VariacaoNovosPacientes.ToString("N0"))% vs período anterior</span>
+            <!-- Card 2: Taxa de Assiduidade -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Taxa de Assiduidade</div>
+                        <div class="kpi-value text-success">@Model.TaxaAssiduidade.ToString("0.0")%</div>
+                    </div>
+                    <div class="kpi-subtext">
+                        <i class="bi bi-check2-all text-success me-1"></i>Presença contínua nas sessões
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Card 3: Taxa de Faltas -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Taxa de faltas</div>
-                <div class="kpi-value">@Model.TaxaFaltas.ToString("0.0")%</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-down-short fs-6"></i>
-                    <span>@(Model.VariacaoTaxaFaltas > 0 ? "+" : "")@Model.VariacaoTaxaFaltas.ToString("0.0")% vs período anterior</span>
+            <!-- Card 3: Pacientes em Acompanhamento -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Pacientes em Acompanhamento</div>
+                        <div class="kpi-value text-dark">@Model.PacientesAtivosCount</div>
+                    </div>
+                    <div class="kpi-trend">
+                        <i class="bi bi-arrow-up-short fs-6"></i>
+                        <span>+@Model.VariacaoPacientes.ToString("0.0")% no período</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Card 4: Satisfação Média -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Satisfação média</div>
-                <div class="kpi-value">@Model.SatisfacaoMedia.ToString("0.0")/5</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@Model.VariacaoSatisfacao.ToString("0.0") vs período anterior</span>
+            <!-- Card 4: Novas Avaliações -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Processos Avaliativos</div>
+                        <div class="kpi-value" style="color: #0E7490;">@Model.NovasAvaliacoesCount</div>
+                    </div>
+                    <div class="kpi-subtext">
+                        <i class="bi bi-clipboard2-pulse me-1"></i>Casos em fase de testagem
+                    </div>
                 </div>
             </div>
+
         </div>
 
-    </div>
+        <!-- LINHA DE GRÁFICOS CLÍNICOS -->
+        <div class="row g-4 mb-4">
+            
+            <!-- GRÁFICO 1: FOCO CLÍNICO NEUROPSICOPEDAGÓGICO (Donut Chart) -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="chart-card-title">Foco Clínico das Sessões</h5>
+                            <small class="text-muted">Distribuição por etapa neuropsicopedagógica</small>
+                        </div>
+                        <span class="badge bg-light text-secondary border rounded-pill px-3 py-1">Prática Clínica</span>
+                    </div>
+                    
+                    <div class="row align-items-center">
+                        <!-- Canvas Donut -->
+                        <div class="col-12 col-sm-6 d-flex justify-content-center mb-3 mb-sm-0">
+                            <div style="width: 200px; height: 200px; position: relative;">
+                                <canvas id="graficoFocoClinico"></canvas>
+                            </div>
+                        </div>
 
-    <!-- LINHA DE GRÁFICOS -->
-    <div class="row g-4">
-        
-        <!-- GRÁFICO 1: ATENDIMENTOS POR ÁREA (Donut Chart) -->
-        <div class="col-12 col-lg-6">
-            <div class="chart-card">
-                <h5 class="chart-card-title mb-4">Atendimentos por área</h5>
-                
-                <div class="row align-items-center">
-                    <!-- Canvas Donut -->
-                    <div class="col-12 col-sm-6 d-flex justify-content-center mb-3 mb-sm-0">
-                        <div style="width: 220px; height: 220px; position: relative;">
-                            <canvas id="graficoPorArea"></canvas>
+                        <!-- Legenda Lateral -->
+                        <div class="col-12 col-sm-6 ps-sm-3">
+                            @foreach (var item in Model.FocoClinicoItens)
+                            {
+                                <div class="legend-item">
+                                    <div class="d-flex align-items-center text-truncate me-2">
+                                        <span class="legend-indicator" style="background-color: @item.CorHex;"></span>
+                                        <span class="fw-semibold text-dark text-truncate">@item.NomeFoco</span>
+                                    </div>
+                                    <span class="fw-bold text-dark">@item.Porcentagem%</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 2: EVOLUÇÃO DE ATENDIMENTOS (Line/Area Chart) -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="chart-card-title">Ritmo de Atendimentos</h5>
+                            <small class="text-muted">Evolução de sessões realizadas nos últimos meses</small>
                         </div>
                     </div>
 
-                    <!-- Legenda Lateral Customizada -->
-                    <div class="col-12 col-sm-6 ps-sm-4">
-                        @foreach (var item in Model.AtendimentosPorArea)
-                        {
-                            <div class="legend-item">
-                                <div class="d-flex align-items-center">
-                                    <span class="legend-indicator" style="background-color: @item.CorHex;"></span>
-                                    <span class="legend-name">@item.NomeArea</span>
-                                </div>
-                                <span class="legend-pct">@item.Porcentagem%</span>
-                            </div>
-                        }
+                    <div style="height: 220px; width: 100%; position: relative;">
+                        <canvas id="graficoEvolucao"></canvas>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- GRÁFICO 2: EVOLUÇÃO DE ATENDIMENTOS (Line/Area Chart) -->
-        <div class="col-12 col-lg-6">
-            <div class="chart-card">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="chart-card-title">Evolução de atendimentos</h5>
-                    
-                    <!-- Dropdown seletor de Periodicidade -->
-                    <select class="select-period-view" id="selectPeriodicidade">
-                        <option value="Mensal" selected>Mensal</option>
-                        <option value="Semanal">Semanal</option>
+        <!-- BANNER DE RESUMO DE PRODUÇÃO & PRONTUÁRIOS -->
+        <div class="p-4 bg-white rounded-4 border shadow-sm">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-8">
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-file-earmark-medical-fill text-primary me-2"></i>Produção Clínica & Prontuários no Período
+                    </h5>
+                    <p class="text-muted small mb-0">
+                        Neste intervalo foram registradas <strong>@Model.EvolucoesRegistradasCount evoluções clínicas</strong> no prontuário e <strong>@Model.PareceresEmitidosCount relatórios/pareceres técnicos</strong> elaborados.
+                    </p>
+                </div>
+                <div class="col-12 col-md-4 text-md-end">
+                    <a href="/Prontuarios" class="btn btn-outline-primary rounded-pill px-4 fw-semibold btn-sm">
+                        <i class="bi bi-folder2-open me-1"></i> Acessar Prontuários
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ========================================================================= *@
+    @* ABA 2: HISTÓRICO DE ATENDIMENTOS (TABELA ANALÍTICA COM FILTROS)           *@
+    @* ========================================================================= *@
+    @if (Model.AbaAtiva == "Atendimentos")
+    {
+        <!-- BARRA DE FILTROS OPERACIONAIS -->
+        <div class="filter-card no-print">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="aba" value="Atendimentos" />
+                <input type="hidden" name="dataInicio" value="@Model.DataInicio.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="dataFim" value="@Model.DataFim.ToString("yyyy-MM-dd")" />
+
+                <!-- Filtro de Paciente -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">Paciente</label>
+                    <select name="pacienteId" asp-items="ViewBag.Pacientes" class="form-select filter-input">
+                        <option value="">Todos os pacientes</option>
                     </select>
                 </div>
 
-                <!-- Canvas Gráfico de Linha/Área -->
-                <div style="height: 220px; width: 100%; position: relative;">
-                    <canvas id="graficoEvolucao"></canvas>
+                <!-- Filtro de Tipo de Sessão -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Foco / Tipo de Sessão</label>
+                    <select name="tipoSessao" class="form-select filter-input">
+                        <option value="Todos" selected="@(Model.TipoSessaoSelecionado == "Todos")">Todos os tipos</option>
+                        @if (ViewBag.TiposSessao != null)
+                        {
+                            foreach (var tipo in (List<string>)ViewBag.TiposSessao)
+                            {
+                                <option value="@tipo" selected="@(Model.TipoSessaoSelecionado == tipo)">@tipo</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Filtro de Status -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Status da Sessão</label>
+                    <select name="status" class="form-select filter-input">
+                        <option value="Todos" selected="@(Model.StatusSelecionado == "Todos")">Todos os status</option>
+                        <option value="Realizado" selected="@(Model.StatusSelecionado == "Realizado")">Realizados</option>
+                        <option value="Agendado" selected="@(Model.StatusSelecionado == "Agendado")">Agendados</option>
+                        <option value="Falta" selected="@(Model.StatusSelecionado == "Falta")">Faltas</option>
+                        <option value="Cancelado" selected="@(Model.StatusSelecionado == "Cancelado")">Cancelados</option>
+                    </select>
+                </div>
+
+                <!-- Botões Filtrar e Limpar -->
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-2">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" asp-route-aba="Atendimentos" class="btn btn-outline-secondary rounded-3 py-2 px-3" title="Limpar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4 MINIS INDICADORES DA TABELA DE ATENDIMENTOS -->
+        <div class="row g-3 mb-4 no-print">
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white border rounded-3 text-center">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Total Listado</small>
+                    <h4 class="fw-bold mb-0 text-dark mt-1">@Model.TotalSessoesPeriodo</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white border rounded-3 text-center">
+                    <small class="text-success text-uppercase fw-bold" style="font-size: 0.72rem;">Realizadas</small>
+                    <h4 class="fw-bold mb-0 text-success mt-1">@Model.Atendimentos.Count(a => a.Status == "Realizado")</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white border rounded-3 text-center">
+                    <small class="text-warning text-uppercase fw-bold" style="font-size: 0.72rem;">Faltas</small>
+                    <h4 class="fw-bold mb-0 text-warning mt-1">@Model.TotalFaltasPeriodo</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white border rounded-3 text-center">
+                    <small class="text-danger text-uppercase fw-bold" style="font-size: 0.72rem;">Canceladas</small>
+                    <h4 class="fw-bold mb-0 text-danger mt-1">@Model.TotalCanceladosPeriodo</h4>
                 </div>
             </div>
         </div>
 
-    </div>
+        <!-- TABELA ANALÍTICA DE ATENDIMENTOS -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Listagem Analítica de Atendimentos</h5>
+                    <p class="text-muted small mb-0">Total: @Model.Atendimentos.Count atendimentos no período selecionado</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Data & Horário</th>
+                            <th>Paciente</th>
+                            <th>Foco da Sessão</th>
+                            <th>Status</th>
+                            <th>Prontuário / Evolução</th>
+                            <th class="pe-4">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Atendimentos != null && Model.Atendimentos.Any())
+                        {
+                            foreach (var item in Model.Atendimentos)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">
+                                        <div>@item.DataHora.ToString("dd/MM/yyyy")</div>
+                                        <small class="text-muted"><i class="bi bi-clock me-1"></i>@item.DataHora.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <a href="/Pacientes/Details/@item.PacienteId" class="text-decoration-none fw-bold text-dark" title="Abrir prontuário do paciente">
+                                            @item.PacienteNome <i class="bi bi-box-arrow-up-right small text-primary ms-1"></i>
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(item.PacienteTelefone))
+                                        {
+                                            <div class="text-muted small">@item.PacienteTelefone</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge-tipo-sessao @ObterClasseSessao(item.TipoSessao)">
+                                            @item.TipoSessao
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @ObterClasseStatus(item.Status)">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.TemEvolucaoRegistrada)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Registrada
+                                            </span>
+                                        }
+                                        else if (item.Status == "Realizado")
+                                        {
+                                            <a href="/Pacientes/Details/@item.PacienteId?aba=evolucao" 
+                                               class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 fw-bold text-decoration-none" 
+                                               title="Sessão concluída sem registro de evolução clínica">
+                                                <i class="bi bi-pencil-square me-1"></i>Pendente
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">-</span>
+                                        }
+                                    </td>
+                                    <td class="pe-4 text-muted small">
+                                        @(string.IsNullOrWhiteSpace(item.Observacoes) ? "Sem anotações adicionais" : item.Observacoes)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    <h6 class="fw-bold text-dark">Nenhum atendimento encontrado para os filtros selecionados</h6>
+                                    <p class="small text-muted mb-0">Tente alterar o período ou selecionar outros filtros.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 
 </div>
 
+@functions {
+    public static string ObterClasseSessao(string tipo)
+    {
+        if (tipo.Contains("Avaliação")) return "sessao-avaliacao";
+        if (tipo.Contains("Devolutiva")) return "sessao-devolutiva";
+        if (tipo.Contains("Orientação")) return "sessao-orientacao";
+        return "sessao-intervencao";
+    }
+
+    public static string ObterClasseStatus(string status)
+    {
+        if (status.Contains("Realizado")) return "status-realizado";
+        if (status.Contains("Falta")) return "status-falta";
+        if (status.Contains("Cancelado")) return "status-cancelado";
+        return "status-agendado";
+    }
+}
+
 @section Scripts {
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             
-            // ==========================================
-            // 1. GRÁFICO DE ROSCA (DONUT): ATENDIMENTOS POR ÁREA
-            // ==========================================
-            const ctxArea = document.getElementById('graficoPorArea').getContext('2d');
-            
-            const areaLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.NomeArea)));
-            const areaValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.Porcentagem)));
-            const areaColors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AtendimentosPorArea.Select(a => a.CorHex)));
+            @if (Model.AbaAtiva == "Indicadores")
+            {
+                <text>
+                // ==========================================
+                // 1. GRÁFICO DONUT: FOCO CLÍNICO NEUROPSICOPEDAGÓGICO
+                // ==========================================
+                const canvasFoco = document.getElementById('graficoFocoClinico');
+                if (canvasFoco) {
+                    const ctxFoco = canvasFoco.getContext('2d');
+                    const focoLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FocoClinicoItens.Select(a => a.NomeFoco)));
+                    const focoValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FocoClinicoItens.Select(a => a.Porcentagem)));
+                    const focoCores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FocoClinicoItens.Select(a => a.CorHex)));
 
-            new Chart(ctxArea, {
-                type: 'doughnut',
-                data: {
-                    labels: areaLabels,
-                    datasets: [{
-                        data: areaValues,
-                        backgroundColor: areaColors,
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '72%',
-                    plugins: {
-                        legend: {
-                            display: false // Usamos a legenda customizada HTML à direita
+                    new Chart(ctxFoco, {
+                        type: 'doughnut',
+                        data: {
+                            labels: focoLabels,
+                            datasets: [{
+                                data: focoValores,
+                                backgroundColor: focoCores,
+                                borderWidth: 0,
+                                hoverOffset: 6
+                            }]
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return ' ' + context.label + ': ' + context.raw + '%';
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '72%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return ' ' + context.label + ': ' + context.raw + '%';
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
                 }
-            });
 
-            // ==========================================
-            // 2. GRÁFICO DE LINHA/ÁREA: EVOLUÇÃO DE ATENDIMENTOS
-            // ==========================================
-            const ctxEvolucao = document.getElementById('graficoEvolucao').getContext('2d');
-            
-            // Criação do gradiente de preenchimento azul suave
-            const gradientBlue = ctxEvolucao.createLinearGradient(0, 0, 0, 200);
-            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
-            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+                // ==========================================
+                // 2. GRÁFICO DE ÁREA/LINHA: EVOLUÇÃO TEMPORAL
+                // ==========================================
+                const canvasEvolucao = document.getElementById('graficoEvolucao');
+                if (canvasEvolucao) {
+                    const ctxEvolucao = canvasEvolucao.getContext('2d');
+                    
+                    const gradientBlue = ctxEvolucao.createLinearGradient(0, 0, 0, 200);
+                    gradientBlue.addColorStop(0, 'rgba(37, 99, 235, 0.35)');
+                    gradientBlue.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
 
-            const evolucaoLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoLabels));
-            const evolucaoValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoValores));
+                    const evolucaoLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoLabels));
+                    const evolucaoValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.EvolucaoValores));
 
-            const chartEvolucao = new Chart(ctxEvolucao, {
-                type: 'line',
-                data: {
-                    labels: evolucaoLabels,
-                    datasets: [{
-                        data: evolucaoValores,
-                        borderColor: '#2563EB',
-                        borderWidth: 2.5,
-                        fill: true,
-                        backgroundColor: gradientBlue,
-                        tension: 0.45, // Curva suave Bézier idêntica ao design
-                        pointBackgroundColor: '#FFFFFF',
-                        pointBorderColor: '#2563EB',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#2563EB',
-                        pointHoverBorderColor: '#FFFFFF'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
+                    new Chart(ctxEvolucao, {
+                        type: 'line',
+                        data: {
+                            labels: evolucaoLabels,
+                            datasets: [{
+                                label: 'Atendimentos',
+                                data: evolucaoValores,
+                                borderColor: '#2563EB',
+                                borderWidth: 3,
+                                backgroundColor: gradientBlue,
+                                fill: true,
+                                tension: 0.38,
+                                pointBackgroundColor: '#2563EB',
+                                pointBorderColor: '#FFFFFF',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            }]
                         },
-                        tooltip: {
-                            backgroundColor: '#0F172A',
-                            titleFont: { family: "'Segoe UI', sans-serif", size: 12 },
-                            bodyFont: { family: "'Segoe UI', sans-serif", size: 13, weight: 'bold' },
-                            padding: 10,
-                            displayColors: false,
-                            callbacks: {
-                                label: function (context) {
-                                    return context.raw + ' atendimentos';
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return ' ' + context.parsed.y + ' atendimentos realizados';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: '#94A3B8',
+                                        font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
+                                    },
+                                    grid: { color: '#F1F5F9', drawBorder: false },
+                                    border: { display: false }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#64748B',
+                                        font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '600' }
+                                    },
+                                    grid: { display: false },
+                                    border: { display: false }
                                 }
                             }
                         }
-                    },
-                    scales: {
-                        y: {
-                            min: 0,
-                            max: 60,
-                            ticks: {
-                                stepSize: 15,
-                                color: '#94A3B8',
-                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '500' }
-                            },
-                            grid: {
-                                color: '#F1F5F9',
-                                drawBorder: false
-                            },
-                            border: {
-                                display: false
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#94A3B8',
-                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '500' }
-                            },
-                            grid: {
-                                display: false
-                            },
-                            border: {
-                                display: false
-                            }
-                        }
-                    }
+                    });
                 }
-            });
-
-            // Alternância entre Mensal e Semanal dinamicamente no gráfico
-            const selectPeriodo = document.getElementById('selectPeriodicidade');
-            if (selectPeriodo) {
-                selectPeriodo.addEventListener('change', function () {
-                    if (this.value === 'Semanal') {
-                        chartEvolucao.data.labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
-                        chartEvolucao.data.datasets[0].data = [12, 18, 15, 22];
-                        chartEvolucao.options.scales.y.max = 30;
-                        chartEvolucao.options.scales.y.ticks.stepSize = 10;
-                    } else {
-                        chartEvolucao.data.labels = evolucaoLabels;
-                        chartEvolucao.data.datasets[0].data = evolucaoValores;
-                        chartEvolucao.options.scales.y.max = 60;
-                        chartEvolucao.options.scales.y.ticks.stepSize = 15;
-                    }
-                    chartEvolucao.update();
-                });
+                </text>
             }
 
         });

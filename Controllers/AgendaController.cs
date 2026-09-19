@@ -1,180 +1,227 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System.Linq;
-using System.Collections.Generic;
 
+namespace NeuroSync.Controllers;
 
-//teste
-namespace NeuroSync.Controllers
+/// <summary>
+/// Controlador responsável pela gestão da agenda clínica e agendamento de sessões.
+/// Suporta recorrência automática (semanas) e geração integrada de cobrança por sessão.
+/// </summary>
+[Authorize]
+public class AgendaController(AppDbContext context) : Controller
 {
-    [Authorize]
-    public class AgendaController : Controller
+    // =========================================================================
+    // 1. LISTAGEM DA AGENDA
+    // =========================================================================
+
+    /// <summary>
+    /// Exibe a lista completa de atendimentos agendados em ordem cronológica.
+    /// </summary>
+    public async Task<IActionResult> Index()
     {
-        private readonly AppDbContext _context;
+        var agendamentos = await context.Agendamentos
+            .Include(a => a.Paciente)
+            .OrderBy(a => a.DataHora)
+            .ToListAsync();
 
-        public AgendaController(AppDbContext context)
+        return View(agendamentos);
+    }
+
+    // =========================================================================
+    // 2. NOVO AGENDAMENTO
+    // =========================================================================
+
+    /// <summary>
+    /// Abre o formulário para cadastro de um novo agendamento.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Create(int? pacienteId, string? data)
+    {
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", pacienteId);
+        
+        var agora = DateTime.Now;
+        DateTime dataSugerida;
+
+        if (!string.IsNullOrWhiteSpace(data) && DateTime.TryParse(data, out var dataInformada))
         {
-            _context = context;
+            dataSugerida = dataInformada;
+        }
+        else if (agora.Hour >= 8 && agora.Hour < 18)
+        {
+            dataSugerida = DateTime.Today.AddHours(agora.Hour + 1);
+        }
+        else
+        {
+            var dia = agora.Hour >= 18 ? DateTime.Today.AddDays(1) : DateTime.Today;
+            dataSugerida = dia.AddHours(9);
         }
 
-        // 1. TELA PRINCIPAL (Lista de horários)
-        public IActionResult Index()
+        var agendamento = new Agendamento
         {
-            var agendamentos = _context.Agendamentos
-                                       .Include(a => a.Paciente)
-                                       .OrderBy(a => a.DataHora)
-                                       .ToList();
+            DataHora = dataSugerida
+        };
 
-            return View(agendamentos);
-        }
+        if (pacienteId.HasValue) agendamento.PacienteId = pacienteId.Value;
+        return View(agendamento);
+    }
 
-        // 2. GET: Abre a tela de Novo Agendamento
-        [HttpGet]
-        public IActionResult Create()
+    /// <summary>
+    /// Salva o agendamento com suporte à repetição semanal (1, 4, 12 ou 24 semanas) e geração de cobrança.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Agendamento agendamento, int semanasRepeticao = 1, decimal? valorSessao = null)
+    {
+        if (ModelState.IsValid)
         {
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome");
-            return View();
-        }
+            var novasSessoes = new List<Agendamento>();
 
-        // 3. POST: Salva a sessão (com Repetição e Cobrança)
-        [HttpPost]
-        public IActionResult Create(Agendamento agendamento, int semanasRepeticao = 1, decimal? valorSessao = null)
-        {
-            if (ModelState.IsValid)
+            // Cria os registros das sessões recorrentes de acordo com o intervalo selecionado
+            for (int i = 0; i < semanasRepeticao; i++)
             {
-                var novasSessoes = new List<Agendamento>();
-
-                // O laço de repetição: vai rodar 1, 4, 12 ou 24 vezes dependendo da escolha
-                for (int i = 0; i < semanasRepeticao; i++)
+                var novaSessao = new Agendamento
                 {
-                    var novaSessao = new Agendamento
-                    {
-                        PacienteId = agendamento.PacienteId,
-                        DataHora = agendamento.DataHora.AddDays(7 * i),
-                        TipoSessao = agendamento.TipoSessao,
-                        Observacoes = agendamento.Observacoes,
-                        Status = "Agendado" 
-                    };
-                    
-                    _context.Agendamentos.Add(novaSessao);
-                    novasSessoes.Add(novaSessao);
-                }
-                
-                // Salva todas as sessões primeiro para o banco gerar o Id de cada uma
-                _context.SaveChanges();
+                    PacienteId = agendamento.PacienteId,
+                    DataHora = agendamento.DataHora.AddDays(7 * i),
+                    TipoSessao = agendamento.TipoSessao,
+                    Observacoes = agendamento.Observacoes,
+                    Status = "Agendado"
+                };
 
-                // --- GERAÇÃO AUTOMÁTICA DE COBRANÇA ---
-                if (valorSessao.HasValue && valorSessao.Value > 0)
-                {
-                    foreach (var sessao in novasSessoes)
-                    {
-                        var novaCobranca = new Cobranca
-                        {
-                            PacienteId = sessao.PacienteId,
-                            AgendamentoId = sessao.IdAgendamento,
-                            Valor = valorSessao.Value,
-                            DataVencimento = sessao.DataHora.Date,
-                            Status = "Pendente",
-                            Descricao = $"Sessão de {sessao.TipoSessao} - {sessao.DataHora:dd/MM/yyyy}"
-                        };
-
-                        _context.Cobrancas.Add(novaCobranca);
-                    }
-                    _context.SaveChanges();
-                }
-                
-                return RedirectToAction("Index"); 
+                context.Agendamentos.Add(novaSessao);
+                novasSessoes.Add(novaSessao);
             }
-            
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", agendamento.PacienteId);
-            return View(agendamento);
-        }
 
-        // 4. GET: Abre a tela de edição
-        public IActionResult Edit(int? id)
-        {
-            if (id == null) return NotFound();
+            // Persiste as sessões para obter os Ids gerados
+            await context.SaveChangesAsync();
 
-            var agendamento = _context.Agendamentos.Find(id);
-            if (agendamento == null) return NotFound();
-
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", agendamento.PacienteId);
-            return View(agendamento);
-        }
-
-        // 5. POST: Salva as alterações da sessão
-        [HttpPost]
-        public IActionResult Edit(int id, Agendamento agendamento)
-        {
-            if (id != agendamento.IdAgendamento) return NotFound();
-
-            if (ModelState.IsValid)
+            // Gera cobranças pendentes automáticas caso um valor por sessão tenha sido informado
+            if (valorSessao is > 0)
             {
-                _context.Update(agendamento);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                foreach (var sessao in novasSessoes)
+                {
+                    context.Cobrancas.Add(new Cobranca
+                    {
+                        PacienteId = sessao.PacienteId,
+                        AgendamentoId = sessao.IdAgendamento,
+                        Valor = valorSessao.Value,
+                        DataVencimento = sessao.DataHora.Date,
+                        Status = "Pendente",
+                        Descricao = $"Sessão de {sessao.TipoSessao} - {sessao.DataHora:dd/MM/yyyy}"
+                    });
+                }
+                await context.SaveChangesAsync();
             }
-            
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", agendamento.PacienteId);
-            return View(agendamento);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // 6. GET: Abre a tela de confirmação de exclusão
-        public IActionResult Delete(int? id)
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", agendamento.PacienteId);
+        return View(agendamento);
+    }
+
+    // =========================================================================
+    // 3. EDIÇÃO DE AGENDAMENTO
+    // =========================================================================
+
+    /// <summary>
+    /// Abre o formulário de edição de um atendimento existente.
+    /// </summary>
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var agendamento = await context.Agendamentos.FindAsync(id.Value);
+        if (agendamento == null) return NotFound();
+
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", agendamento.PacienteId);
+        return View(agendamento);
+    }
+
+    /// <summary>
+    /// Salva as alterações efetuadas em um atendimento.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Agendamento agendamento)
+    {
+        if (id != agendamento.IdAgendamento) return NotFound();
+
+        if (ModelState.IsValid)
         {
-            if (id == null) return NotFound();
-
-            var agendamento = _context.Agendamentos
-                                      .Include(a => a.Paciente)
-                                      .FirstOrDefault(a => a.IdAgendamento == id);
-            
-            if (agendamento == null) return NotFound();
-
-            return View(agendamento);
+            context.Update(agendamento);
+            await context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        // 7. POST: Apaga a sessão
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", agendamento.PacienteId);
+        return View(agendamento);
+    }
+
+    // =========================================================================
+    // 4. EXCLUSÃO DE AGENDAMENTO
+    // =========================================================================
+
+    /// <summary>
+    /// Abre a tela de confirmação de exclusão do agendamento.
+    /// </summary>
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var agendamento = await context.Agendamentos
+            .Include(a => a.Paciente)
+            .FirstOrDefaultAsync(a => a.IdAgendamento == id.Value);
+
+        return agendamento == null ? NotFound() : View(agendamento);
+    }
+
+    /// <summary>
+    /// Executa a exclusão definitiva do agendamento selecionado.
+    /// </summary>
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var agendamento = await context.Agendamentos.FindAsync(id);
+        if (agendamento != null)
         {
-            var agendamento = _context.Agendamentos.Find(id);
-            
+            context.Agendamentos.Remove(agendamento);
+            await context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // =========================================================================
+    // 5. TRANSIÇÃO CLÍNICA: INICIAR ATENDIMENTO
+    // =========================================================================
+
+    /// <summary>
+    /// Marca o agendamento como "Em atendimento" e redireciona para a aba de evolução do paciente.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> IniciarAtendimento(int? id, int? pacienteId)
+    {
+        int idPacienteDestino = pacienteId ?? 0;
+
+        if (id is > 0)
+        {
+            var agendamento = await context.Agendamentos.FindAsync(id.Value);
             if (agendamento != null)
             {
-                _context.Agendamentos.Remove(agendamento);
-                _context.SaveChanges();
+                agendamento.Status = "Em atendimento";
+                await context.SaveChangesAsync();
+                idPacienteDestino = agendamento.PacienteId;
             }
-            
-            return RedirectToAction("Index");
         }
 
-        // 8. GET: Inicia o atendimento do paciente e abre o prontuário
-        [HttpGet]
-        public async Task<IActionResult> IniciarAtendimento(int? id, int? pacienteId)
-        {
-            int idPacienteDestino = pacienteId ?? 0;
-
-            if (id.HasValue && id.Value > 0)
-            {
-                var agendamento = await _context.Agendamentos.FindAsync(id.Value);
-                if (agendamento != null)
-                {
-                    agendamento.Status = "Em atendimento";
-                    await _context.SaveChangesAsync();
-                    idPacienteDestino = agendamento.PacienteId;
-                }
-            }
-
-            if (idPacienteDestino > 0)
-            {
-                return RedirectToAction("Details", "Pacientes", new { id = idPacienteDestino, aba = "evolucao" });
-            }
-
-            return RedirectToAction("Index");
-        }
+        return idPacienteDestino > 0
+            ? RedirectToAction("Details", "Pacientes", new { id = idPacienteDestino, aba = "evolucao" })
+            : RedirectToAction(nameof(Index));
     }
 }
