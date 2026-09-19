@@ -5,7 +5,7 @@
 }
 
 <style>
-    /* Estilos da Tela Financeira */
+    /* Estilos Gerais da Área Financeira */
     .financeiro-container {
         padding-top: 0.5rem;
         padding-bottom: 3rem;
@@ -35,7 +35,9 @@
         text-decoration: none;
         position: relative;
         transition: all 0.2s ease;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
     .finance-nav-item:hover {
@@ -98,6 +100,16 @@
     }
     .btn-action-custom.btn-nova:hover {
         background: #1D4ED8;
+        color: #FFFFFF;
+    }
+
+    .btn-action-custom.btn-nova-despesa {
+        background: #DC2626;
+        color: #FFFFFF;
+        border-color: #DC2626;
+    }
+    .btn-action-custom.btn-nova-despesa:hover {
+        background: #B91C1C;
         color: #FFFFFF;
     }
 
@@ -180,8 +192,8 @@
         font-weight: 500;
     }
 
-    /* Cards de Gráficos */
-    .chart-card {
+    /* Cards de Gráficos e Tabelas */
+    .chart-card, .table-card {
         background: #FFFFFF;
         border-radius: 16px;
         padding: 24px;
@@ -190,37 +202,8 @@
         height: 100%;
     }
 
-    .chart-card-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: #0F172A;
-        margin-bottom: 0;
-    }
-
-    /* Donut Center Text */
-    .donut-center-container {
-        position: relative;
-        width: 140px;
-        height: 140px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .donut-center-text {
-        position: absolute;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #0F172A;
-        pointer-events: none;
-    }
-
-    /* Tabela de Cobranças */
     .table-card {
-        background: #FFFFFF;
-        border-radius: 16px;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        padding: 0;
         overflow: hidden;
     }
 
@@ -230,6 +213,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
     .custom-table th {
@@ -255,10 +240,10 @@
         background-color: #F8FAFC;
     }
 
-    /* Badges de Status com alto contraste e legibilidade */
+    /* Badges de Status de Alto Contraste */
     .status-badge {
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-size: 0.8rem;
+        font-weight: 700;
         padding: 6px 14px;
         border-radius: 50px;
         display: inline-flex;
@@ -266,30 +251,76 @@
         gap: 6px;
         letter-spacing: 0.2px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        white-space: nowrap;
     }
 
     .status-badge.status-pago {
         background-color: #DCFCE7;
-        color: #15803D;
+        color: #14532D;
         border: 1px solid #86EFAC;
     }
 
     .status-badge.status-pendente {
         background-color: #FEF3C7;
-        color: #92400E;
+        color: #78350F;
         border: 1px solid #FCD34D;
     }
 
     .status-badge.status-atrasado {
         background-color: #FEE2E2;
-        color: #B91C1C;
+        color: #991B1B;
         border: 1px solid #FCA5A5;
     }
 
     .status-badge.status-cancelado {
         background-color: #F1F5F9;
-        color: #475569;
+        color: #1E293B;
         border: 1px solid #CBD5E1;
+    }
+
+    /* Badges de Categorias de Despesas */
+    .badge-categoria {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .cat-luz { background: #FEF9C3; color: #854D0E; border: 1px solid #FDE047; }
+    .cat-agua { background: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; }
+    .cat-telefonia { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }
+    .cat-internet { background: #E0E7FF; color: #3730A3; border: 1px solid #A5B4FC; }
+    .cat-material { background: #FFEDD5; color: #9A3412; border: 1px solid #FED7AA; }
+    .cat-sistemas { background: #F3E8FF; color: #6B21A8; border: 1px solid #D8B4FE; }
+    .cat-aluguel { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+    .cat-limpeza { background: #CCFBF1; color: #115E59; border: 1px solid #5EEAD4; }
+    .cat-outros { background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1; }
+
+    /* Atalhos Rápidos de Categorias */
+    .cat-shortcut-pill {
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 50px;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        color: #334155;
+        font-size: 0.84rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .cat-shortcut-pill:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #0F172A;
+        transform: translateY(-1px);
     }
 </style>
 
@@ -306,464 +337,1016 @@
         </div>
     }
 
-    <!-- CABEÇALHO COM TÍTULO E AÇÕES (EXCEL, PDF, NOVA COBRANÇA) -->
+    @if (TempData["MensagemErro"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center justify-content-between py-3 px-4" role="alert" style="background-color: #FEF2F2; color: #991B1B;">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>
+                <span class="fw-semibold">@TempData["MensagemErro"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- CABEÇALHO COM TÍTULO E AÇÕES CONFORME A ABA ATIVA -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="page-title mb-0">Financeiro</h2>
             @if (!string.IsNullOrEmpty(Model.PacienteNome))
             {
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mt-2">
-                    <i class="bi bi-person-check-fill me-1"></i> Paciente Selecionado: @Model.PacienteNome
+                    <i class="bi bi-person-check-fill me-1"></i> Paciente: @Model.PacienteNome
                 </span>
             }
         </div>
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Botão Exportar Excel -->
-            <a asp-action="ExportarExcel" 
-               asp-route-pacienteId="@Model.PacienteId" 
-               asp-route-status="@Model.StatusSelecionado" 
-               asp-route-competencia="@Model.CompetenciaSelecionada" 
-               class="btn-action-custom btn-excel"
-               title="Baixar planilha formatada em Excel">
-                <i class="bi bi-file-earmark-excel fs-6"></i>
-                <span>Excel</span>
-            </a>
-
-            <!-- Botão Exportar PDF com Identidade Visual & Resumo -->
-            <a asp-action="ExportarPdf" 
-               asp-route-pacienteId="@Model.PacienteId" 
-               asp-route-status="@Model.StatusSelecionado" 
-               asp-route-competencia="@Model.CompetenciaSelecionada" 
-               class="btn-action-custom btn-pdf"
-               title="Baixar relatório formatado em PDF com valores pagos e pendentes">
-                <i class="bi bi-file-earmark-pdf fs-6"></i>
-                <span>PDF</span>
-            </a>
-
-            <!-- Botão Nova Cobrança -->
-            <a asp-action="Create" class="btn-action-custom btn-nova">
-                <i class="bi bi-plus-lg fs-6"></i>
-                <span>Nova Cobrança</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- ABAS DE NAVEGAÇÃO SUPERIORES -->
-    <div class="finance-nav-tabs">
-        <a href="@Url.Action("Index", new { aba = "Resumo", pacienteId = Model.PacienteId, status = Model.StatusSelecionado, competencia = Model.CompetenciaSelecionada })" 
-           class="finance-nav-item @(Model.AbaAtiva == "Resumo" ? "active" : "")">
-            Resumo
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Receitas", pacienteId = Model.PacienteId, status = "Pago", competencia = Model.CompetenciaSelecionada })" 
-           class="finance-nav-item @(Model.AbaAtiva == "Receitas" ? "active" : "")">
-            Receitas
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Despesas", pacienteId = Model.PacienteId, status = Model.StatusSelecionado, competencia = Model.CompetenciaSelecionada })" 
-           class="finance-nav-item @(Model.AbaAtiva == "Despesas" ? "active" : "")">
-            Despesas
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Planos", pacienteId = Model.PacienteId, status = Model.StatusSelecionado, competencia = Model.CompetenciaSelecionada })" 
-           class="finance-nav-item @(Model.AbaAtiva == "Planos" ? "active" : "")">
-            Planos
-        </a>
-        <a href="@Url.Action("Index", new { aba = "Pendencias", pacienteId = Model.PacienteId, status = "Atrasado", competencia = Model.CompetenciaSelecionada })" 
-           class="finance-nav-item @(Model.AbaAtiva == "Pendencias" ? "active" : "")">
-            Pendências
-        </a>
-    </div>
-
-    <!-- BARRA DE PESQUISA E FILTROS (PACIENTE, STATUS, COMPETÊNCIA) -->
-    <div class="filter-card">
-        <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            <input type="hidden" name="aba" value="@Model.AbaAtiva" />
-
-            <!-- Seleção de Paciente -->
-            <div class="col-12 col-md-4">
-                <label class="filter-label">Paciente</label>
-                <select name="pacienteId" asp-items="ViewBag.Pacientes" class="form-select filter-input">
-                    <option value="">Todos os pacientes</option>
-                </select>
-            </div>
-
-            <!-- Filtro de Status -->
-            <div class="col-12 col-md-3">
-                <label class="filter-label">Status da Cobrança</label>
-                <select name="status" class="form-select filter-input">
-                    <option value="Todos" selected="@(Model.StatusSelecionado == "Todos")">Todos os status</option>
-                    <option value="Pago" selected="@(Model.StatusSelecionado == "Pago")">Pagos</option>
-                    <option value="Pendente" selected="@(Model.StatusSelecionado == "Pendente")">Pendentes</option>
-                    <option value="Atrasado" selected="@(Model.StatusSelecionado == "Atrasado")">Atrasados</option>
-                    <option value="Cancelado" selected="@(Model.StatusSelecionado == "Cancelado")">Cancelados</option>
-                </select>
-            </div>
-
-            <!-- Filtro de Competência (Ex: 2026-08) -->
-            <div class="col-12 col-md-3">
-                <label class="filter-label">Competência (Mês / Ano)</label>
-                <input type="month" name="competencia" value="@Model.CompetenciaSelecionada" class="form-control filter-input" />
-            </div>
-
-            <!-- Botões Filtrar e Limpar -->
-            <div class="col-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-2">
-                    <i class="bi bi-funnel-fill me-1"></i> Filtrar
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary rounded-3 py-2 px-3" title="Limpar todos os filtros">
-                    <i class="bi bi-arrow-counterclockwise"></i>
+            @if (Model.AbaAtiva == "Receitas")
+            {
+                <a asp-action="ExportarExcel" 
+                   asp-route-pacienteId="@Model.PacienteId" 
+                   asp-route-status="@Model.StatusSelecionado" 
+                   asp-route-competencia="@Model.CompetenciaSelecionada" 
+                   class="btn-action-custom btn-excel"
+                   title="Baixar planilha Excel">
+                    <i class="bi bi-file-earmark-excel fs-6"></i>
+                    <span>Excel</span>
                 </a>
-            </div>
-        </form>
+
+                <a asp-action="ExportarPdf" 
+                   asp-route-pacienteId="@Model.PacienteId" 
+                   asp-route-status="@Model.StatusSelecionado" 
+                   asp-route-competencia="@Model.CompetenciaSelecionada" 
+                   class="btn-action-custom btn-pdf"
+                   title="Baixar relatório em PDF">
+                    <i class="bi bi-file-earmark-pdf fs-6"></i>
+                    <span>PDF</span>
+                </a>
+
+                <a asp-action="Create" class="btn-action-custom btn-nova">
+                    <i class="bi bi-plus-lg fs-6"></i>
+                    <span>Nova Cobrança</span>
+                </a>
+            }
+            else if (Model.AbaAtiva == "Despesas")
+            {
+                <button type="button" class="btn-action-custom btn-nova-despesa" onclick="abrirModalNovaDespesa()">
+                    <i class="bi bi-plus-circle-fill fs-6"></i>
+                    <span>Nova Despesa</span>
+                </button>
+            }
+            else
+            {
+                <!-- Ações na Aba Resumo -->
+                <a asp-action="Create" class="btn-action-custom btn-nova">
+                    <i class="bi bi-plus-lg fs-6"></i>
+                    <span>Nova Cobrança</span>
+                </a>
+                <button type="button" class="btn-action-custom btn-nova-despesa" onclick="abrirModalNovaDespesa()">
+                    <i class="bi bi-dash-circle-fill fs-6"></i>
+                    <span>Nova Despesa</span>
+                </button>
+            }
+        </div>
     </div>
 
-    <!-- LINHA DE 4 CARDS DE INDICADORES (KPIs) -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Card 1: Receita do Mês -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Receita do mês</div>
-                <div class="kpi-value">@Model.ReceitaMes.ToString("C")</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@Model.VariacaoReceitaMes.ToString("0.0")% vs período anterior</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 2: Recebido -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Recebido</div>
-                <div class="kpi-value text-success">@Model.TotalRecebido.ToString("C")</div>
-                <div class="kpi-subtext">
-                    @Model.PercentualRecebido.ToString("0")% do total
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 3: A receber -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">A receber</div>
-                <div class="kpi-value text-primary">@Model.TotalAReceber.ToString("C")</div>
-                <div class="kpi-subtext">
-                    @Model.PercentualAReceber.ToString("0")% do total
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 4: Despesas -->
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-label">Despesas</div>
-                <div class="kpi-value">@Model.DespesasMes.ToString("C")</div>
-                <div class="kpi-trend">
-                    <i class="bi bi-arrow-up-short fs-6"></i>
-                    <span>+@Model.VariacaoDespesas.ToString("0.0")% vs mês anterior</span>
-                </div>
-            </div>
-        </div>
-
+    <!-- ABAS DE NAVEGAÇÃO SUPERIORES (APENAS RESUMO, RECEITAS, DESPESAS) -->
+    <div class="finance-nav-tabs">
+        <a href="@Url.Action("Index", new { aba = "Resumo", competencia = Model.CompetenciaSelecionada })" 
+           class="finance-nav-item @(Model.AbaAtiva == "Resumo" ? "active" : "")">
+            <i class="bi bi-pie-chart-fill"></i>
+            <span>Resumo</span>
+        </a>
+        <a href="@Url.Action("Index", new { aba = "Receitas", pacienteId = Model.PacienteId, status = Model.StatusSelecionado, competencia = Model.CompetenciaSelecionada })" 
+           class="finance-nav-item @(Model.AbaAtiva == "Receitas" ? "active" : "")">
+            <i class="bi bi-arrow-down-left-circle-fill text-success"></i>
+            <span>Receitas</span>
+        </a>
+        <a href="@Url.Action("Index", new { aba = "Despesas", categoriaDespesa = Model.CategoriaDespesaSelecionada, statusDespesa = Model.StatusDespesaSelecionado, competencia = Model.CompetenciaSelecionada })" 
+           class="finance-nav-item @(Model.AbaAtiva == "Despesas" ? "active" : "")">
+            <i class="bi bi-arrow-up-right-circle-fill text-danger"></i>
+            <span>Despesas</span>
+        </a>
     </div>
 
-    <!-- LINHA DE GRÁFICOS (RECEITA X DESPESAS E INADIMPLÊNCIA) -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Gráfico 1: Receita x Despesas (Barras agrupadas) -->
-        <div class="col-12 col-lg-7">
-            <div class="chart-card">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <h5 class="chart-card-title">Receita x Despesas</h5>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #06B6D4;"></span>
-                            <span class="small fw-semibold text-muted">Receitas</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #2563EB;"></span>
-                            <span class="small fw-semibold text-muted">Despesas</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="height: 220px; width: 100%; position: relative;">
-                    <canvas id="graficoReceitaDespesas"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gráfico 2: Inadimplência (Donut com centro percentual) -->
-        <div class="col-12 col-lg-5">
-            <div class="chart-card">
-                <h5 class="chart-card-title mb-4">Inadimplência</h5>
-
-                <div class="d-flex align-items-center justify-content-around h-75 flex-wrap gap-3">
-                    <!-- Donut Chart com Percentual no Centro -->
-                    <div class="donut-center-container">
-                        <canvas id="graficoInadimplencia"></canvas>
-                        <div class="donut-center-text">@Model.TaxaInadimplencia.ToString("0")%</div>
-                    </div>
-
-                    <!-- Informações à direita -->
+    @* ========================================================================= *@
+    @* ABA 1: RESUMO CONSOLIDADO (RECEITAS X DESPESAS, RESULTADO & INDICADORES) *@
+    @* ========================================================================= *@
+    @if (Model.AbaAtiva == "Resumo")
+    {
+        <!-- 4 CARDS CONSOLIDADOS DE INDICADORES (RECEITA, DESPESAS, SALDO LÍQUIDO, A RECEBER) -->
+        <div class="row g-4 mb-4">
+            <!-- Card 1: Receitas do Mês -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
                     <div>
-                        <div class="fs-4 fw-bold text-dark mb-1">@Model.TotalEmAberto.ToString("C")</div>
-                        <div class="text-muted small fw-semibold mb-3">Total em aberto</div>
-                        <a href="@Url.Action("Index", new { status = "Atrasado", pacienteId = Model.PacienteId, competencia = Model.CompetenciaSelecionada })" 
-                           class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3">
-                            Ver pendências <i class="bi bi-arrow-right ms-1"></i>
+                        <div class="kpi-label">Receita do Mês</div>
+                        <div class="kpi-value text-primary">@Model.ReceitaMes.ToString("C")</div>
+                    </div>
+                    <div class="kpi-trend">
+                        <i class="bi bi-arrow-up-short fs-6"></i>
+                        <span>+@Model.VariacaoReceitaMes.ToString("0.0")% vs mês anterior</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Despesas do Mês -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Despesas do Mês</div>
+                        <div class="kpi-value text-danger">@Model.TotalDespesasMes.ToString("C")</div>
+                    </div>
+                    <div class="kpi-subtext text-muted">
+                        @Model.DespesasPagasMes.ToString("C") pagas | @Model.DespesasPendentesMes.ToString("C") pendentes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Saldo Líquido do Mês (Lucro Operacional) -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Resultado Líquido</div>
+                        <div class="kpi-value @(Model.SaldoLiquidoMes >= 0 ? "text-success" : "text-danger")">
+                            @Model.SaldoLiquidoMes.ToString("C")
+                        </div>
+                    </div>
+                    <div>
+                        @if (Model.SaldoLiquidoMes >= 0)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-semibold">
+                                <i class="bi bi-check-circle me-1"></i> Margem Positiva
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1 small fw-semibold">
+                                <i class="bi bi-exclamation-circle me-1"></i> Atenção ao Fluxo
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: A Receber (Previsão de Entradas) -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Contas a Receber</div>
+                        <div class="kpi-value text-dark">@Model.TotalAReceber.ToString("C")</div>
+                    </div>
+                    <div class="kpi-subtext">
+                        <a href="@Url.Action("Index", new { aba = "Receitas", status = "Pendente" })" class="text-decoration-none fw-semibold text-primary">
+                            Ver recebimentos pendentes <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
+        <!-- GRÁFICOS: RECEITA X DESPESAS E DISTRIBUIÇÃO POR CATEGORIA -->
+        <div class="row g-4 mb-4">
+            <!-- Gráfico 1: Receita x Despesas (Barras) -->
+            <div class="col-12 col-lg-7">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <div>
+                            <h5 class="chart-card-title">Receita x Despesas</h5>
+                            <p class="text-muted small mb-0">Comparativo dos últimos 5 meses</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width: 12px; height: 12px; border-radius: 3px; background-color: #10B981;"></span>
+                                <span class="small fw-semibold text-muted">Receitas</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width: 12px; height: 12px; border-radius: 3px; background-color: #EF4444;"></span>
+                                <span class="small fw-semibold text-muted">Despesas</span>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- TABELA DE REGISTROS DE COBRANÇA -->
-    <div class="table-card">
-        <div class="table-card-header">
-            <div>
-                <h5 class="fw-bold text-dark mb-1">Registros de Cobrança</h5>
-                <p class="text-muted small mb-0">Total listado: @Model.Cobrancas.Count registros encontrados</p>
+                    <div style="height: 250px; width: 100%; position: relative;">
+                        <canvas id="graficoReceitaDespesas"></canvas>
+                    </div>
+                </div>
             </div>
-            
-            <div class="text-muted small">
-                Total do filtro: <strong class="text-dark fs-6">@Model.Cobrancas.Sum(c => c.Valor).ToString("C")</strong>
+
+            <!-- Gráfico 2: Despesas por Categoria (Donut) -->
+            <div class="col-12 col-lg-5">
+                <div class="chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="chart-card-title">Despesas por Categoria</h5>
+                        <span class="badge bg-light text-secondary border rounded-pill px-2">Centros de Custo</span>
+                    </div>
+
+                    <div class="row align-items-center g-3">
+                        <div class="col-12 col-sm-6 text-center">
+                            <div style="height: 190px; width: 100%; position: relative; margin: auto;">
+                                <canvas id="graficoDespesasCategorias"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
+                                @for (int i = 0; i < Math.Min(Model.CategoriasLabels.Count, 5); i++)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center small">
+                                        <span class="text-secondary text-truncate" style="max-width: 110px;">@Model.CategoriasLabels[i]</span>
+                                        <strong class="text-dark">@Model.CategoriasValores[i].ToString("C")</strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table custom-table mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Vencimento</th>
-                        <th>Paciente</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                        <th>Data Pagamento</th>
-                        <th class="text-end pe-4">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Cobrancas != null && Model.Cobrancas.Any())
-                    {
-                        foreach (var item in Model.Cobrancas)
+        <!-- PAINEL DE MOVIMENTAÇÕES RECENTES: ÚLTIMAS RECEITAS & PRÓXIMAS DESPESAS -->
+        <div class="row g-4">
+            <!-- Coluna 1: Últimas Receitas -->
+            <div class="col-12 col-lg-6">
+                <div class="table-card h-100">
+                    <div class="table-card-header">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i>Últimas Receitas
+                            </h6>
+                        </div>
+                        <a href="@Url.Action("Index", new { aba = "Receitas" })" class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold text-primary">
+                            Ver todas <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table custom-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Paciente</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Vencimento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.UltimasReceitas != null && Model.UltimasReceitas.Any())
+                                {
+                                    foreach (var rec in Model.UltimasReceitas)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">@(rec.Paciente != null ? rec.Paciente.Nome : "Excluído")</div>
+                                                <small class="text-muted">@rec.Descricao</small>
+                                            </td>
+                                            <td class="fw-bold text-success">@rec.Valor.ToString("C")</td>
+                                            <td>
+                                                @if (rec.Status == "Pago")
+                                                {
+                                                    <span class="status-badge status-pago"><i class="bi bi-check-circle-fill"></i> Pago</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status-badge status-pendente"><i class="bi bi-clock-fill"></i> @rec.Status</span>
+                                                }
+                                            </td>
+                                            <td class="text-end pe-4 text-muted small">@rec.DataVencimento.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted small">Nenhuma receita registrada até o momento.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna 2: Próximas Despesas a Vencer -->
+            <div class="col-12 col-lg-6">
+                <div class="table-card h-100">
+                    <div class="table-card-header">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-arrow-up-right-circle-fill text-danger me-2"></i>Contas e Despesas da Clínica
+                            </h6>
+                        </div>
+                        <a href="@Url.Action("Index", new { aba = "Despesas" })" class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold text-primary">
+                            Ver todas <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table custom-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Despesa</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                    <th class="text-end pe-4">Vencimento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.ProximasDespesas != null && Model.ProximasDespesas.Any())
+                                {
+                                    foreach (var desp in Model.ProximasDespesas)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">@desp.Descricao</div>
+                                                @if (desp.Status == "Pago")
+                                                {
+                                                    <small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Paga</small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-warning"><i class="bi bi-clock-fill me-1"></i>Pendente</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge-categoria @ObterClasseCategoria(desp.Categoria)">
+                                                    @desp.Categoria
+                                                </span>
+                                            </td>
+                                            <td class="fw-bold text-danger">@desp.Valor.ToString("C")</td>
+                                            <td class="text-end pe-4 text-muted small">@desp.DataVencimento.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted small">Nenhuma despesa cadastrada.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ========================================================================= *@
+    @* ABA 2: RECEITAS (COBRANÇAS DE PACIENTES)                                  *@
+    @* ========================================================================= *@
+    @if (Model.AbaAtiva == "Receitas")
+    {
+        <!-- BARRA DE PESQUISA E FILTROS DE RECEITAS -->
+        <div class="filter-card">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="aba" value="Receitas" />
+
+                <!-- Seleção de Paciente -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">Paciente</label>
+                    <select name="pacienteId" asp-items="ViewBag.Pacientes" class="form-select filter-input">
+                        <option value="">Todos os pacientes</option>
+                    </select>
+                </div>
+
+                <!-- Filtro de Status -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Status da Cobrança</label>
+                    <select name="status" class="form-select filter-input">
+                        <option value="Todos" selected="@(Model.StatusSelecionado == "Todos")">Todos os status</option>
+                        <option value="Pago" selected="@(Model.StatusSelecionado == "Pago")">Pagos</option>
+                        <option value="Pendente" selected="@(Model.StatusSelecionado == "Pendente")">Pendentes</option>
+                        <option value="Atrasado" selected="@(Model.StatusSelecionado == "Atrasado")">Atrasados</option>
+                        <option value="Cancelado" selected="@(Model.StatusSelecionado == "Cancelado")">Cancelados</option>
+                    </select>
+                </div>
+
+                <!-- Filtro de Competência (Ex: 2026-08) -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Competência (Mês / Ano)</label>
+                    <input type="month" name="competencia" value="@Model.CompetenciaSelecionada" class="form-control filter-input" />
+                </div>
+
+                <!-- Botões Filtrar e Limpar -->
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-2">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" asp-route-aba="Receitas" class="btn btn-outline-secondary rounded-3 py-2 px-3" title="Limpar todos os filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4 CARDS DE INDICADORES DE RECEITA -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Faturamento Total</div>
+                    <div class="kpi-value">@Model.ReceitaMes.ToString("C")</div>
+                    <div class="kpi-trend">
+                        <i class="bi bi-arrow-up-short fs-6"></i>
+                        <span>+@Model.VariacaoReceitaMes.ToString("0.0")% vs período anterior</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Recebido</div>
+                    <div class="kpi-value text-success">@Model.TotalRecebido.ToString("C")</div>
+                    <div class="kpi-subtext">@Model.PercentualRecebido.ToString("0")% do total</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">A receber</div>
+                    <div class="kpi-value text-primary">@Model.TotalAReceber.ToString("C")</div>
+                    <div class="kpi-subtext">@Model.PercentualAReceber.ToString("0")% do total</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Inadimplência</div>
+                    <div class="kpi-value text-danger">@Model.TotalEmAberto.ToString("C")</div>
+                    <div class="kpi-subtext">@Model.TaxaInadimplencia.ToString("0")% em atraso</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA DE REGISTROS DE COBRANÇA -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Registros de Cobrança aos Pacientes</h5>
+                    <p class="text-muted small mb-0">Total listado: @Model.Cobrancas.Count registros encontrados</p>
+                </div>
+                
+                <div class="text-muted small">
+                    Total do filtro: <strong class="text-dark fs-6">@Model.Cobrancas.Sum(c => c.Valor).ToString("C")</strong>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Vencimento</th>
+                            <th>Paciente</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Data Pagamento</th>
+                            <th class="text-end pe-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Cobrancas != null && Model.Cobrancas.Any())
                         {
-                            <tr>
-                                <td class="ps-4 fw-bold text-dark">
-                                    @item.DataVencimento.ToString("dd/MM/yyyy")
-                                </td>
-                                <td>
-                                    <strong>@(item.Paciente != null ? item.Paciente.Nome : "Excluído")</strong>
-                                    @if (!string.IsNullOrEmpty(item.Paciente?.Telefone))
-                                    {
-                                        <div class="text-muted small">@item.Paciente.Telefone</div>
-                                    }
-                                </td>
-                                <td>@item.Descricao</td>
-                                <td class="fw-bold text-dark">@item.Valor.ToString("C")</td>
-                                <td>
-                                    @if (item.Status == "Pago")
-                                    {
-                                        <span class="status-badge status-pago">
-                                            <i class="bi bi-check-circle-fill"></i> Pago
-                                        </span>
-                                    }
-                                    else if (item.Status == "Pendente")
-                                    {
-                                        <span class="status-badge status-pendente">
-                                            <i class="bi bi-clock-fill"></i> Pendente
-                                        </span>
-                                    }
-                                    else if (item.Status == "Atrasado")
-                                    {
-                                        <span class="status-badge status-atrasado">
-                                            <i class="bi bi-exclamation-circle-fill"></i> Atrasado
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="status-badge status-cancelado">
-                                            <i class="bi bi-x-circle-fill"></i> @item.Status
-                                        </span>
-                                    }
-                                </td>
-                                <td class="text-muted">
-                                    @(item.DataPagamento.HasValue ? item.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-inline-flex gap-1 align-items-center">
-                                        @if (item.Status != "Pago")
+                            foreach (var item in Model.Cobrancas)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">
+                                        @item.DataVencimento.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <strong>@(item.Paciente != null ? item.Paciente.Nome : "Excluído")</strong>
+                                        @if (!string.IsNullOrEmpty(item.Paciente?.Telefone))
                                         {
-                                            <a asp-action="Baixa" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" title="Registrar Pagamento">
-                                                <i class="bi bi-check2-circle me-1"></i> Baixar
-                                            </a>
+                                            <div class="text-muted small">@item.Paciente.Telefone</div>
+                                        }
+                                    </td>
+                                    <td>@item.Descricao</td>
+                                    <td class="fw-bold text-dark">@item.Valor.ToString("C")</td>
+                                    <td>
+                                        @if (item.Status == "Pago")
+                                        {
+                                            <span class="status-badge status-pago">
+                                                <i class="bi bi-check-circle-fill"></i> Pago
+                                            </span>
+                                        }
+                                        else if (item.Status == "Pendente")
+                                        {
+                                            <span class="status-badge status-pendente">
+                                                <i class="bi bi-clock-fill"></i> Pendente
+                                            </span>
+                                        }
+                                        else if (item.Status == "Atrasado")
+                                        {
+                                            <span class="status-badge status-atrasado">
+                                                <i class="bi bi-exclamation-circle-fill"></i> Atrasado
+                                            </span>
                                         }
                                         else
                                         {
-                                            <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold" 
-                                                    title="Reabrir cobrança (Voltar para Pendente)" 
-                                                    onclick="abrirModalReabrir(@item.IdCobranca, '@(item.Paciente != null ? item.Paciente.Nome.Replace("'", "\\'") : "Paciente")', '@item.Valor.ToString("C")')">
-                                                <i class="bi bi-arrow-counterclockwise me-1 text-warning"></i> Reabrir
-                                            </button>
+                                            <span class="status-badge status-cancelado">
+                                                <i class="bi bi-x-circle-fill"></i> @item.Status
+                                            </span>
                                         }
-                                        <a asp-action="Delete" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" title="Excluir cobrança">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
+                                    </td>
+                                    <td class="text-muted">
+                                        @(item.DataPagamento.HasValue ? item.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-inline-flex gap-1 align-items-center">
+                                            @if (item.Status != "Pago")
+                                            {
+                                                <a asp-action="Baixa" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" title="Registrar Pagamento">
+                                                    <i class="bi bi-check2-circle me-1"></i> Baixar
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold" 
+                                                        title="Reabrir cobrança" 
+                                                        onclick="abrirModalReabrir(@item.IdCobranca, '@(item.Paciente != null ? item.Paciente.Nome.Replace("'", "\\'") : "Paciente")', '@item.Valor.ToString("C")')">
+                                                    <i class="bi bi-arrow-counterclockwise me-1 text-warning"></i> Reabrir
+                                                </button>
+                                            }
+                                            <a asp-action="Delete" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-danger rounded-circle" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" title="Excluir cobrança">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-wallet2 fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    <h6 class="fw-bold text-dark">Nenhuma cobrança encontrada para os filtros aplicados</h6>
+                                    <p class="small text-muted mb-0">Tente selecionar outro paciente ou limpar os filtros.</p>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="bi bi-wallet2 fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                                <h6 class="fw-bold text-dark">Nenhuma cobrança encontrada para os filtros aplicados</h6>
-                                <p class="small text-muted mb-0">Tente selecionar outro paciente, limpar os filtros ou criar uma nova cobrança.</p>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    }
+
+    @* ========================================================================= *@
+    @* ABA 3: DESPESAS OPERACIONAIS DA CLÍNICA                                   *@
+    @* ========================================================================= *@
+    @if (Model.AbaAtiva == "Despesas")
+    {
+        <!-- ATALHOS RÁPIDOS DE CATEGORIAS FREQUENTES -->
+        <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+            <span class="text-muted small fw-semibold me-1">Categorias frequentes:</span>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Energia Elétrica')" class="cat-shortcut-pill">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> Luz / Energia
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Água')" class="cat-shortcut-pill">
+                <i class="bi bi-droplet-fill text-info"></i> Água
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Telefonia')" class="cat-shortcut-pill">
+                <i class="bi bi-telephone-fill text-success"></i> Telefonia
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Internet')" class="cat-shortcut-pill">
+                <i class="bi bi-wifi text-primary"></i> Internet
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Material de Escritório')" class="cat-shortcut-pill">
+                <i class="bi bi-box-seam-fill text-danger"></i> Material de Escritório
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Sistemas')" class="cat-shortcut-pill">
+                <i class="bi bi-laptop" style="color: #9333ea;"></i> Sistemas & Softwares
+            </a>
+            <a href="javascript:void(0)" onclick="abrirModalComCategoria('Aluguel')" class="cat-shortcut-pill">
+                <i class="bi bi-building text-secondary"></i> Aluguel
+            </a>
+        </div>
+
+        <!-- BARRA DE FILTROS DE DESPESAS -->
+        <div class="filter-card">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="aba" value="Despesas" />
+
+                <!-- Filtro de Categoria -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">Categoria de Despesa</label>
+                    <select name="categoriaDespesa" class="form-select filter-input">
+                        <option value="Todas" selected="@(Model.CategoriaDespesaSelecionada == "Todas")">Todas as categorias</option>
+                        @if (ViewBag.CategoriasDespesas != null)
+                        {
+                            foreach (var cat in (List<string>)ViewBag.CategoriasDespesas)
+                            {
+                                <option value="@cat" selected="@(Model.CategoriaDespesaSelecionada == cat)">@cat</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Filtro de Status -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Status do Pagamento</label>
+                    <select name="statusDespesa" class="form-select filter-input">
+                        <option value="Todos" selected="@(Model.StatusDespesaSelecionado == "Todos")">Todos os status</option>
+                        <option value="Pago" selected="@(Model.StatusDespesaSelecionado == "Pago")">Pagas</option>
+                        <option value="Pendente" selected="@(Model.StatusDespesaSelecionado == "Pendente")">Pendentes / A pagar</option>
+                    </select>
+                </div>
+
+                <!-- Filtro de Competência -->
+                <div class="col-12 col-md-3">
+                    <label class="filter-label">Competência (Mês / Ano)</label>
+                    <input type="month" name="competencia" value="@Model.CompetenciaSelecionada" class="form-control filter-input" />
+                </div>
+
+                <!-- Botões Filtrar e Limpar -->
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-2">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" asp-route-aba="Despesas" class="btn btn-outline-secondary rounded-3 py-2 px-3" title="Limpar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4 CARDS DE INDICADORES DE DESPESAS -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total de Despesas</div>
+                    <div class="kpi-value text-danger">@Model.TotalDespesasMes.ToString("C")</div>
+                    <div class="kpi-trend text-secondary">
+                        <span>Compilado operacional do mês</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Despesas Pagas</div>
+                    <div class="kpi-value text-success">@Model.DespesasPagasMes.ToString("C")</div>
+                    <div class="kpi-subtext">Liquidado no período</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Despesas a Pagar</div>
+                    <div class="kpi-value text-warning">@Model.DespesasPendentesMes.ToString("C")</div>
+                    <div class="kpi-subtext">Contas pendentes de liquidação</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-label">Maior Centro de Custo</div>
+                    <div class="kpi-value text-dark" style="font-size: 1.45rem;">@Model.MaiorCategoriaDespesa</div>
+                    <div class="kpi-subtext">Categoria com maior peso</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA DE REGISTROS DE DESPESAS -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Contas e Despesas da Clínica</h5>
+                    <p class="text-muted small mb-0">Total listado: @Model.Despesas.Count itens de custo cadastrados</p>
+                </div>
+                
+                <div class="text-muted small">
+                    Total das despesas listadas: <strong class="text-danger fs-6">@Model.Despesas.Sum(d => d.Valor).ToString("C")</strong>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Vencimento</th>
+                            <th>Categoria</th>
+                            <th>Descrição / Fornecedor</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Data Pagamento</th>
+                            <th class="text-end pe-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Despesas != null && Model.Despesas.Any())
+                        {
+                            foreach (var item in Model.Despesas)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">
+                                        @item.DataVencimento.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <span class="badge-categoria @ObterClasseCategoria(item.Categoria)">
+                                            <i class="bi @ObterIconeCategoria(item.Categoria)"></i>
+                                            @item.Categoria
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>@item.Descricao</strong>
+                                        @if (!string.IsNullOrEmpty(item.Observacoes))
+                                        {
+                                            <div class="text-muted small">@item.Observacoes</div>
+                                        }
+                                    </td>
+                                    <td class="fw-bold text-danger">@item.Valor.ToString("C")</td>
+                                    <td>
+                                        @if (item.Status == "Pago")
+                                        {
+                                            <span class="status-badge status-pago">
+                                                <i class="bi bi-check-circle-fill"></i> Paga
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-pendente">
+                                                <i class="bi bi-clock-fill"></i> Pendente
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-muted">
+                                        @(item.DataPagamento.HasValue ? item.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-inline-flex gap-1 align-items-center">
+                                            @if (item.Status != "Pago")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" 
+                                                        title="Registrar pagamento da despesa"
+                                                        onclick="abrirModalBaixarDespesa(@item.IdDespesa, '@item.Descricao.Replace("'", "\\'")', '@item.Valor.ToString("C")')">
+                                                    <i class="bi bi-check2-circle me-1"></i> Pagar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold" 
+                                                        title="Reabrir despesa" 
+                                                        onclick="abrirModalReabrirDespesa(@item.IdDespesa, '@item.Descricao.Replace("'", "\\'")', '@item.Valor.ToString("C")')">
+                                                    <i class="bi bi-arrow-counterclockwise me-1 text-warning"></i> Reabrir
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" 
+                                                    style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" 
+                                                    title="Excluir despesa"
+                                                    onclick="abrirModalExcluirDespesa(@item.IdDespesa, '@item.Descricao.Replace("'", "\\'")')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-receipt fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    <h6 class="fw-bold text-dark">Nenhuma despesa encontrada para os filtros aplicados</h6>
+                                    <p class="small text-muted mb-0">Clique no botão <strong>Nova Despesa</strong> para cadastrar contas da clínica.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            // ==========================================
-            // 1. GRÁFICO DE BARRAS: RECEITA X DESPESAS
-            // ==========================================
-            const ctxRecDesp = document.getElementById('graficoReceitaDespesas').getContext('2d');
+@* ========================================================================= *@
+@* MODAL: NOVA DESPESA                                                       *@
+@* ========================================================================= *@
+<div class="modal fade" id="modalNovaDespesa" tabindex="-1" aria-labelledby="modalNovaDespesaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-arrow-up-right-circle-fill fs-4 text-danger"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalNovaDespesaLabel">Cadastrar Nova Despesa</h5>
+                        <small class="text-muted">Registro de saídas e custos operacionais</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
             
-            const labelsMeses = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MesesLabels));
-            const dadosReceitas = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ReceitasMensais));
-            const dadosDespesas = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DespesasMensais));
+            <form method="post" action="/Financeiro/CriarDespesa" id="formNovaDespesa">
+                @Html.AntiForgeryToken()
+                
+                <div class="modal-body p-4 pt-3">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Descrição da Despesa *</label>
+                            <input type="text" name="Descricao" id="despesaDescricao" required class="form-control" placeholder="Ex: Conta de Luz CEMIG, Vivo Fibra, etc." />
+                        </div>
 
-            new Chart(ctxRecDesp, {
-                type: 'bar',
-                data: {
-                    labels: labelsMeses,
-                    datasets: [
-                        {
-                            label: 'Receitas',
-                            data: dadosReceitas,
-                            backgroundColor: '#06B6D4',
-                            borderRadius: 4,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.5
-                        },
-                        {
-                            label: 'Despesas',
-                            data: dadosDespesas,
-                            backgroundColor: '#2563EB',
-                            borderRadius: 4,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.dataset.label + ': ' + Number(context.raw).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#94A3B8',
-                                font: { family: "'Segoe UI', sans-serif", size: 11 },
-                                callback: function (value) {
-                                    if (value >= 1000) return (value / 1000) + 'k';
-                                    return value;
-                                }
-                            },
-                            grid: {
-                                color: '#F1F5F9',
-                                drawBorder: false
-                            },
-                            border: { display: false }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#94A3B8',
-                                font: { family: "'Segoe UI', sans-serif", size: 12, weight: '500' }
-                            },
-                            grid: { display: false },
-                            border: { display: false }
-                        }
-                    }
-                }
-            });
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label small fw-bold text-dark">Categoria *</label>
+                            <select name="Categoria" id="despesaCategoria" required class="form-select">
+                                <option value="Energia Elétrica">Energia Elétrica (Luz)</option>
+                                <option value="Água">Água e Saneamento</option>
+                                <option value="Telefonia">Telefonia / Celular</option>
+                                <option value="Internet">Internet</option>
+                                <option value="Material de Escritório">Material de Escritório</option>
+                                <option value="Sistemas">Sistemas & Softwares</option>
+                                <option value="Aluguel">Aluguel / Condomínio</option>
+                                <option value="Limpeza">Limpeza & Manutenção</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
 
-            // ==========================================
-            // 2. GRÁFICO DONUT: INADIMPLÊNCIA
-            // ==========================================
-            const ctxInad = document.getElementById('graficoInadimplencia').getContext('2d');
-            const taxa = @Model.TaxaInadimplencia.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            const restante = Math.max(0, 100 - taxa);
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label small fw-bold text-dark">Valor (R$) *</label>
+                            <input type="number" step="0.01" name="Valor" id="despesaValor" required class="form-control" placeholder="0,00" />
+                        </div>
 
-            new Chart(ctxInad, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Inadimplência', 'Regular'],
-                    datasets: [{
-                        data: [taxa, restante],
-                        backgroundColor: ['#EF4444', '#E2E8F0'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '78%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label small fw-bold text-dark">Data de Vencimento *</label>
+                            <input type="date" name="DataVencimento" id="despesaVencimento" required class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
 
-        });
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label small fw-bold text-dark">Status Inicial</label>
+                            <select name="Status" id="despesaStatus" class="form-select" onchange="toggleDataPagamentoDespesa(this.value)">
+                                <option value="Pendente" selected>Pendente (A pagar)</option>
+                                <option value="Pago">Pago (Já liquidado)</option>
+                            </select>
+                        </div>
 
-        // Função de abertura do modal de reabertura de cobrança
-        function abrirModalReabrir(id, nomePaciente, valor) {
-            document.getElementById('reabrirIdCobranca').value = id;
-            document.getElementById('reabrirNomePaciente').textContent = nomePaciente;
-            document.getElementById('reabrirValorCobranca').textContent = valor;
-            const modalEl = document.getElementById('modalReabrir');
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.show();
-        }
-    </script>
-}
+                        <div class="col-12" id="boxDataPagamentoDespesa" style="display: none;">
+                            <label class="form-label small fw-bold text-dark">Data do Pagamento</label>
+                            <input type="date" name="DataPagamento" id="despesaDataPagamento" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
 
-<!-- MODAL DE CONFIRMAÇÃO PARA REABRIR COBRANÇA (PAGO -> PENDENTE) -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Observações / Fornecedor</label>
+                            <input type="text" name="Observacoes" id="despesaObservacoes" class="form-control" placeholder="Ex: Número do boleto, débito em conta..." />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-check-lg me-1"></i> Salvar Despesa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ========================================================================= *@
+@* MODAL: BAIXAR / PAGAR DESPESA                                             *@
+@* ========================================================================= *@
+<div class="modal fade" id="modalBaixarDespesa" tabindex="-1" aria-labelledby="modalBaixarDespesaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-success-subtle text-dark p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-25 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-check2-circle fs-4 text-success"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalBaixarDespesaLabel">Registrar Pagamento</h5>
+                        <small class="text-muted">Marcar despesa como Paga</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <form method="post" action="/Financeiro/BaixarDespesa">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="baixarIdDespesa" value="" />
+                
+                <div class="modal-body p-4 pt-3">
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between mb-1 small text-muted">
+                            <span>Despesa:</span>
+                            <strong class="text-dark" id="baixarDescricaoDespesa">—</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>Valor:</span>
+                            <strong class="text-danger" id="baixarValorDespesa">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark">Data de Efetivação do Pagamento</label>
+                        <input type="date" name="dataPagamento" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-check2 me-1"></i> Confirmar Pagamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ========================================================================= *@
+@* MODAL: REABRIR DESPESA (PAGA -> PENDENTE)                                 *@
+@* ========================================================================= *@
+<div class="modal fade" id="modalReabrirDespesa" tabindex="-1" aria-labelledby="modalReabrirDespesaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-warning-subtle text-dark p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-25 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-arrow-counterclockwise fs-4 text-dark"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalReabrirDespesaLabel">Reabrir Despesa</h5>
+                        <small class="text-muted">Reverter status de Paga para Pendente</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <form method="post" action="/Financeiro/ReabrirDespesa">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="reabrirIdDespesa" value="" />
+                
+                <div class="modal-body p-4 pt-3">
+                    <p class="text-secondary mb-3">
+                        Tem certeza de que deseja reabrir esta despesa como Pendente?
+                    </p>
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between mb-1 small text-muted">
+                            <span>Despesa:</span>
+                            <strong class="text-dark" id="reabrirDescricaoDespesa">—</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>Valor:</span>
+                            <strong class="text-danger" id="reabrirValorDespesa">—</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reabrir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ========================================================================= *@
+@* MODAL: EXCLUIR DESPESA                                                    *@
+@* ========================================================================= *@
+<div class="modal fade" id="modalExcluirDespesa" tabindex="-1" aria-labelledby="modalExcluirDespesaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-danger-subtle text-dark p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-25 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-trash fs-4 text-danger"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalExcluirDespesaLabel">Excluir Despesa</h5>
+                        <small class="text-muted">Ação irreversível</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <form method="post" action="/Financeiro/ExcluirDespesa">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="excluirIdDespesa" value="" />
+                
+                <div class="modal-body p-4 pt-3">
+                    <p class="text-secondary mb-3">
+                        Tem certeza de que deseja excluir a despesa <strong id="excluirDescricaoDespesa" class="text-dark">—</strong>?
+                    </p>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-trash me-1"></i> Excluir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ========================================================================= *@
+@* MODAL: REABRIR COBRANÇA DE PACIENTE                                       *@
+@* ========================================================================= *@
 <div class="modal fade" id="modalReabrir" tabindex="-1" aria-labelledby="modalReabrirLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -817,3 +1400,233 @@
         </div>
     </div>
 </div>
+
+@functions {
+    public static string ObterClasseCategoria(string categoria)
+    {
+        return categoria switch
+        {
+            "Energia Elétrica" => "cat-luz",
+            "Água" => "cat-agua",
+            "Telefonia" => "cat-telefonia",
+            "Internet" => "cat-internet",
+            "Material de Escritório" => "cat-material",
+            "Sistemas" => "cat-sistemas",
+            "Aluguel" => "cat-aluguel",
+            "Limpeza" => "cat-limpeza",
+            _ => "cat-outros"
+        };
+    }
+
+    public static string ObterIconeCategoria(string categoria)
+    {
+        return categoria switch
+        {
+            "Energia Elétrica" => "bi-lightning-charge-fill",
+            "Água" => "bi-droplet-fill",
+            "Telefonia" => "bi-telephone-fill",
+            "Internet" => "bi-wifi",
+            "Material de Escritório" => "bi-box-seam-fill",
+            "Sistemas" => "bi-laptop",
+            "Aluguel" => "bi-building",
+            "Limpeza" => "bi-brush-fill",
+            _ => "bi-tag-fill"
+        };
+    }
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            @if (Model.AbaAtiva == "Resumo")
+            {
+                <text>
+                // ==========================================
+                // 1. GRÁFICO DE BARRAS: RECEITA X DESPESAS
+                // ==========================================
+                const canvasRecDesp = document.getElementById('graficoReceitaDespesas');
+                if (canvasRecDesp) {
+                    const ctxRecDesp = canvasRecDesp.getContext('2d');
+                    const labelsMeses = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MesesLabels));
+                    const dadosReceitas = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ReceitasMensais));
+                    const dadosDespesas = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DespesasMensais));
+
+                    new Chart(ctxRecDesp, {
+                        type: 'bar',
+                        data: {
+                            labels: labelsMeses,
+                            datasets: [
+                                {
+                                    label: 'Receitas',
+                                    data: dadosReceitas,
+                                    backgroundColor: '#10B981',
+                                    borderRadius: 6,
+                                    barPercentage: 0.6,
+                                    categoryPercentage: 0.5
+                                },
+                                {
+                                    label: 'Despesas',
+                                    data: dadosDespesas,
+                                    backgroundColor: '#EF4444',
+                                    borderRadius: 6,
+                                    barPercentage: 0.6,
+                                    categoryPercentage: 0.5
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return ' ' + context.dataset.label + ': ' + Number(context.raw).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: '#94A3B8',
+                                        font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                                        callback: function (value) {
+                                            if (value >= 1000) return (value / 1000) + 'k';
+                                            return value;
+                                        }
+                                    },
+                                    grid: { color: '#F1F5F9', drawBorder: false },
+                                    border: { display: false }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#64748B',
+                                        font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '600' }
+                                    },
+                                    grid: { display: false },
+                                    border: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // ==========================================
+                // 2. GRÁFICO DONUT: DESPESAS POR CATEGORIA
+                // ==========================================
+                const canvasCat = document.getElementById('graficoDespesasCategorias');
+                if (canvasCat) {
+                    const ctxCat = canvasCat.getContext('2d');
+                    const catLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoriasLabels));
+                    const catValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoriasValores));
+
+                    const cores = [
+                        '#F59E0B', '#06B6D4', '#10B981', '#6366F1', 
+                        '#F97316', '#8B5CF6', '#EF4444', '#14B8A6', '#64748B'
+                    ];
+
+                    new Chart(ctxCat, {
+                        type: 'doughnut',
+                        data: {
+                            labels: catLabels,
+                            datasets: [{
+                                data: catValores,
+                                backgroundColor: cores.slice(0, catLabels.length),
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '68%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return ' ' + context.label + ': ' + Number(context.raw).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                </text>
+            }
+
+        });
+
+        // ==========================================
+        // FUNÇÕES MODAIS DE DESPESAS
+        // ==========================================
+        function abrirModalNovaDespesa() {
+            document.getElementById('formNovaDespesa').reset();
+            document.getElementById('despesaVencimento').value = new Date().toISOString().split('T')[0];
+            document.getElementById('boxDataPagamentoDespesa').style.display = 'none';
+            const modalEl = document.getElementById('modalNovaDespesa');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        function abrirModalComCategoria(categoria) {
+            abrirModalNovaDespesa();
+            const selectCat = document.getElementById('despesaCategoria');
+            if (selectCat) {
+                selectCat.value = categoria;
+            }
+        }
+
+        function toggleDataPagamentoDespesa(status) {
+            const box = document.getElementById('boxDataPagamentoDespesa');
+            if (box) {
+                box.style.display = status === 'Pago' ? 'block' : 'none';
+            }
+        }
+
+        function abrirModalBaixarDespesa(id, descricao, valor) {
+            document.getElementById('baixarIdDespesa').value = id;
+            document.getElementById('baixarDescricaoDespesa').textContent = descricao;
+            document.getElementById('baixarValorDespesa').textContent = valor;
+            const modalEl = document.getElementById('modalBaixarDespesa');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        function abrirModalReabrirDespesa(id, descricao, valor) {
+            document.getElementById('reabrirIdDespesa').value = id;
+            document.getElementById('reabrirDescricaoDespesa').textContent = descricao;
+            document.getElementById('reabrirValorDespesa').textContent = valor;
+            const modalEl = document.getElementById('modalReabrirDespesa');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        function abrirModalExcluirDespesa(id, descricao) {
+            document.getElementById('excluirIdDespesa').value = id;
+            document.getElementById('excluirDescricaoDespesa').textContent = descricao;
+            const modalEl = document.getElementById('modalExcluirDespesa');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        // ==========================================
+        // FUNÇÕES MODAIS DE COBRANÇAS
+        // ==========================================
+        function abrirModalReabrir(id, nomePaciente, valor) {
+            document.getElementById('reabrirIdCobranca').value = id;
+            document.getElementById('reabrirNomePaciente').textContent = nomePaciente;
+            document.getElementById('reabrirValorCobranca').textContent = valor;
+            const modalEl = document.getElementById('modalReabrir');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    </script>
+}

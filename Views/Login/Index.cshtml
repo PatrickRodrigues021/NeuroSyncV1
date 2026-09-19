@@ -152,6 +152,7 @@
 
                 <div class="mb-4 login-form-area">
                     <form method="post" action="/Login/Entrar">
+                        @Html.AntiForgeryToken()
                         @if (ViewBag.Erro != null)
                         {
                             <div class="alert alert-danger text-center small fw-bold py-2 mb-3">
@@ -242,7 +243,7 @@
                     </h1>
                     <p class="text-muted mb-0" style="font-size: clamp(1rem, 1.1vw, 1.15rem); max-width: 900px; font-weight: 500;">
                         Um sistema completo de Gestão Clínica e Prontuário Eletrônico do Paciente (PEP), 
-                        projetado com foco em clínicas de terapias e neurodesenvolvimento.
+                        projetado com foco em neuropsicopedagogia e neurodesenvolvimento.
                     </p>
                 </div>
 

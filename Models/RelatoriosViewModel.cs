@@ -1,47 +1,87 @@
-using System;
-using System.Collections.Generic;
+namespace NeuroSync.Models;
 
-namespace NeuroSync.Models
+/// <summary>
+/// Modelo unificado de exibição para a tela de Relatórios e Indicadores Clínicos (Abas Indicadores e Atendimentos).
+/// </summary>
+public class RelatoriosViewModel
 {
-    public class RelatoriosViewModel
-    {
-        // Filtros e Navegação
-        public string AbaAtiva { get; set; } = "Indicadores";
-        public DateTime DataInicio { get; set; }
-        public DateTime DataFim { get; set; }
-        public string PeriodoTexto { get; set; } = string.Empty;
-        public string Periodicidade { get; set; } = "Mensal";
+    /// <summary>
+    /// Aba ativa da tela ("Indicadores" ou "Atendimentos").
+    /// </summary>
+    public string AbaAtiva { get; set; } = "Indicadores";
+    
+    // Filtros de Período
+    public DateTime DataInicio { get; set; }
+    public DateTime DataFim { get; set; }
+    public string PeriodoTexto { get; set; } = string.Empty;
 
-        // KPI 1: Atendimentos Realizados
-        public int AtendimentosRealizados { get; set; }
-        public double VariacaoAtendimentos { get; set; }
+    // Filtros Operacionais da Aba Atendimentos
+    public int? PacienteId { get; set; }
+    public string TipoSessaoSelecionado { get; set; } = "Todos";
+    public string StatusSelecionado { get; set; } = "Todos";
 
-        // KPI 2: Novos Pacientes
-        public int NovosPacientes { get; set; }
-        public double VariacaoNovosPacientes { get; set; }
+    // ==========================================
+    // KPIs CLÍNICOS DA NEUROPSICOPEDAGOGA
+    // ==========================================
+    public int AtendimentosRealizados { get; set; }
+    public double VariacaoAtendimentos { get; set; }
 
-        // KPI 3: Taxa de Faltas
-        public double TaxaFaltas { get; set; }
-        public double VariacaoTaxaFaltas { get; set; }
+    public double TaxaAssiduidade { get; set; }
+    public double VariacaoAssiduidade { get; set; }
 
-        // KPI 4: Satisfação Média
-        public double SatisfacaoMedia { get; set; }
-        public double VariacaoSatisfacao { get; set; }
+    public int PacientesAtivosCount { get; set; }
+    public double VariacaoPacientes { get; set; }
 
-        // Gráfico 1: Atendimentos por Área
-        public List<AtendimentoAreaItem> AtendimentosPorArea { get; set; } = new();
+    public int NovasAvaliacoesCount { get; set; }
+    public double VariacaoNovasAvaliacoes { get; set; }
 
-        // Gráfico 2: Evolução de Atendimentos
-        public List<string> EvolucaoLabels { get; set; } = new();
-        public List<int> EvolucaoValores { get; set; } = new();
-    }
+    // Indicadores de Prontuário e Pareceres
+    public int EvolucoesRegistradasCount { get; set; }
+    public int PareceresEmitidosCount { get; set; }
 
-    public class AtendimentoAreaItem
-    {
-        public string NomeArea { get; set; } = string.Empty;
-        public int Porcentagem { get; set; }
-        public int Quantidade { get; set; }
-        public string CorHex { get; set; } = "#315BEF";
-    }
+    // ==========================================
+    // GRÁFICOS CLÍNICOS
+    // ==========================================
+    // Gráfico 1: Evolução Temporal de Atendimentos (Últimos 5 meses)
+    public List<string> EvolucaoLabels { get; set; } = [];
+    public List<int> EvolucaoValores { get; set; } = [];
+
+    // Gráfico 2: Foco Clínico Neuropsicopedagógico (Donut Chart)
+    public List<FocoClinicoItem> FocoClinicoItens { get; set; } = [];
+
+    // ==========================================
+    // LISTAGEM ANALÍTICA DE ATENDIMENTOS
+    // ==========================================
+    public List<AgendamentoRelatorioItem> Atendimentos { get; set; } = [];
+    public int TotalSessoesPeriodo { get; set; }
+    public int TotalFaltasPeriodo { get; set; }
+    public int TotalCanceladosPeriodo { get; set; }
 }
 
+/// <summary>
+/// Segmento de foco clínico para o gráfico donut de distribuição do tempo de atendimento.
+/// </summary>
+public class FocoClinicoItem
+{
+    public string NomeFoco { get; set; } = string.Empty;
+    public int Quantidade { get; set; }
+    public int Porcentagem { get; set; }
+    public string CorHex { get; set; } = "#2563EB";
+    public string Icone { get; set; } = "bi-puzzle";
+}
+
+/// <summary>
+/// Linha analítica de atendimento com verificação de prontuário na listagem de relatórios.
+/// </summary>
+public class AgendamentoRelatorioItem
+{
+    public int IdAgendamento { get; set; }
+    public DateTime DataHora { get; set; }
+    public int PacienteId { get; set; }
+    public string PacienteNome { get; set; } = string.Empty;
+    public string? PacienteTelefone { get; set; }
+    public string TipoSessao { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string? Observacoes { get; set; }
+    public bool TemEvolucaoRegistrada { get; set; }
+}

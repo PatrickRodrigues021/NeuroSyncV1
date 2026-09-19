@@ -1,616 +1,654 @@
+using System.Globalization;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using ClosedXML.Excel;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace NeuroSync.Controllers
+namespace NeuroSync.Controllers;
+
+/// <summary>
+/// Controlador responsável pelo módulo Financeiro: Faturamento de Pacientes (Receitas),
+/// Despesas Operacionais da Clínica (Contas), Comparativos em Gráfico e Exportações.
+/// </summary>
+[Authorize]
+public class FinanceiroController(AppDbContext context, IWebHostEnvironment hostEnvironment) : Controller
 {
-    [Authorize]
-    public class FinanceiroController : Controller
+    // =========================================================================
+    // 1. MÉTODOS DE FILTRAGEM
+    // =========================================================================
+
+    /// <summary>
+    /// Consulta cobranças filtradas por paciente, status e competência (Ano-Mês).
+    /// </summary>
+    private List<Cobranca> ObterCobrancasFiltradas(int? pacienteId, string? status, string? competencia)
     {
-        private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _hostEnvironment;
+        var query = context.Cobrancas
+            .Include(c => c.Paciente)
+            .Include(c => c.Agendamento)
+            .AsQueryable();
 
-        public FinanceiroController(AppDbContext context, IWebHostEnvironment hostEnvironment)
+        query = query.Where(c => c.AgendamentoId == null || (c.Agendamento != null && c.Agendamento.Status == "Realizado"));
+
+        if (pacienteId is > 0)
+            query = query.Where(c => c.PacienteId == pacienteId.Value);
+
+        if (!string.IsNullOrWhiteSpace(status) && status != "Todos")
+            query = query.Where(c => c.Status == status);
+
+        if (!string.IsNullOrWhiteSpace(competencia) &&
+            DateTime.TryParseExact(competencia, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var competenciaData))
         {
-            _context = context;
-            _hostEnvironment = hostEnvironment;
+            query = query.Where(c => c.DataVencimento.Year == competenciaData.Year && c.DataVencimento.Month == competenciaData.Month);
         }
 
-        // ==========================================
-        // FILTRO CENTRAL DE COBRANÇAS
-        // ==========================================
-        private List<Cobranca> ObterCobrancasFiltradas(int? pacienteId, string? status, string? competencia)
+        return query.OrderBy(c => c.DataVencimento).ToList();
+    }
+
+    /// <summary>
+    /// Consulta despesas filtradas por categoria, status (Pagas/Pendentes) e competência.
+    /// </summary>
+    private List<Despesa> ObterDespesasFiltradas(string? categoria, string? status, string? competencia)
+    {
+        var query = context.Despesas.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(categoria) && categoria != "Todas")
+            query = query.Where(d => d.Categoria == categoria);
+
+        if (!string.IsNullOrWhiteSpace(status) && status != "Todos")
+            query = query.Where(d => d.Status == status);
+
+        if (!string.IsNullOrWhiteSpace(competencia) &&
+            DateTime.TryParseExact(competencia, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var compData))
         {
-            var query = _context.Cobrancas
-                                .Include(c => c.Paciente)
-                                .Include(c => c.Agendamento)
-                                .AsQueryable();
-
-            query = query.Where(c => c.AgendamentoId == null || (c.Agendamento != null && c.Agendamento.Status == "Realizado"));
-
-            if (pacienteId.HasValue && pacienteId.Value > 0)
-            {
-                query = query.Where(c => c.PacienteId == pacienteId.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(status) && status != "Todos")
-            {
-                query = query.Where(c => c.Status == status);
-            }
-
-            if (!string.IsNullOrWhiteSpace(competencia) &&
-                DateTime.TryParseExact(competencia, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var competenciaData))
-            {
-                query = query.Where(c => c.DataVencimento.Year == competenciaData.Year && c.DataVencimento.Month == competenciaData.Month);
-            }
-
-            return query.OrderBy(c => c.DataVencimento).ToList();
+            query = query.Where(d => d.DataVencimento.Year == compData.Year && d.DataVencimento.Month == compData.Month);
         }
 
-        private void PreencherFiltrosViewBag(int? pacienteId, string? status, string? competencia)
+        return query.OrderBy(d => d.DataVencimento).ToList();
+    }
+
+    // =========================================================================
+    // 2. TELA PRINCIPAL (RESUMO, RECEITAS E DESPESAS)
+    // =========================================================================
+
+    /// <summary>
+    /// Carrega as três visões financeiras: KPIs consolidados de resultado líquido, cobranças e despesas operacionais.
+    /// </summary>
+    public async Task<IActionResult> Index(
+        string? aba,
+        int? pacienteId,
+        string? status,
+        string? competencia,
+        string? despesaCategoria,
+        string? despesaStatus,
+        string? despesaCompetencia)
+    {
+        var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
+        var despesas = ObterDespesasFiltradas(despesaCategoria, despesaStatus, despesaCompetencia);
+
+        var hoje = DateTime.Today;
+        var inicioMesAtual = new DateTime(hoje.Year, hoje.Month, 1);
+        var fimMesAtual = inicioMesAtual.AddMonths(1).AddDays(-1);
+
+        // Cobranças e despesas do mês corrente para o Resumo
+        var cobrancasMes = await context.Cobrancas
+            .Where(c => c.DataVencimento >= inicioMesAtual && c.DataVencimento <= fimMesAtual)
+            .ToListAsync();
+
+        var despesasMes = await context.Despesas
+            .Where(d => d.DataVencimento >= inicioMesAtual && d.DataVencimento <= fimMesAtual)
+            .ToListAsync();
+
+        decimal receitaMes = cobrancasMes.Where(c => c.Status == "Pago").Sum(c => c.Valor);
+        if (receitaMes == 0) receitaMes = cobrancasMes.Sum(c => c.Valor);
+
+        decimal despesaMesTotal = despesasMes.Sum(d => d.Valor);
+        decimal resultadoLiquido = receitaMes - despesaMesTotal;
+
+        var todasCobrancasAbertas = await context.Cobrancas
+            .Include(c => c.Paciente)
+            .Where(c => c.Status == "Pendente" || c.Status == "Atrasado")
+            .ToListAsync();
+        decimal totalContasReceber = todasCobrancasAbertas.Sum(c => c.Valor);
+
+        // Histórico comparativo Receita x Despesa dos últimos 5 meses
+        string[] mesesNomes = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        List<string> mesesLabels = [];
+        List<decimal> receitasMeses = [];
+        List<decimal> despesasMeses = [];
+
+        for (int i = 4; i >= 0; i--)
         {
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", pacienteId);
-            ViewBag.StatusSelecionado = status ?? "Todos";
-            ViewBag.CompetenciaSelecionada = competencia ?? string.Empty;
-            ViewBag.PacienteSelecionado = pacienteId;
-        }
+            var m = hoje.AddMonths(-i);
+            mesesLabels.Add(mesesNomes[m.Month]);
 
-        // ==========================================
-        // 1. TELA PRINCIPAL (COM NOVO DESIGN & KPIS)
-        // ==========================================
-        public async Task<IActionResult> Index(int? pacienteId, string? status, string? competencia, string? aba)
-        {
-            var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
-            PreencherFiltrosViewBag(pacienteId, status, competencia);
+            var ini = new DateTime(m.Year, m.Month, 1);
+            var fim = ini.AddMonths(1).AddDays(-1);
 
-            var hoje = DateTime.Today;
-            DateTime mesReferencia = hoje;
-            if (!string.IsNullOrWhiteSpace(competencia) &&
-                DateTime.TryParseExact(competencia, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var compDt))
-            {
-                mesReferencia = compDt;
-            }
-
-            var inicioMes = new DateTime(mesReferencia.Year, mesReferencia.Month, 1);
-            var fimMes = inicioMes.AddMonths(1).AddTicks(-1);
-            var inicioMesAnt = inicioMes.AddMonths(-1);
-            var fimMesAnt = inicioMes.AddTicks(-1);
-
-            // Consulta todas as cobranças do mês de referência
-            var cobrancasMes = await _context.Cobrancas
-                .Where(c => c.DataVencimento >= inicioMes && c.DataVencimento <= fimMes)
+            var recValores = await context.Cobrancas
+                .Where(c => c.DataVencimento >= ini && c.DataVencimento <= fim && (c.Status == "Pago" || c.Status == "Pendente"))
+                .Select(c => c.Valor)
                 .ToListAsync();
+            var rec = recValores.Sum();
 
-            var cobrancasMesAnt = await _context.Cobrancas
-                .Where(c => c.DataVencimento >= inicioMesAnt && c.DataVencimento <= fimMesAnt)
+            var despValores = await context.Despesas
+                .Where(d => d.DataVencimento >= ini && d.DataVencimento <= fim)
+                .Select(d => d.Valor)
                 .ToListAsync();
+            var desp = despValores.Sum();
 
-            var totalFaturadoMes = cobrancasMes.Sum(c => c.Valor);
-            var totalRecebidoMes = cobrancasMes.Where(c => c.Status == "Pago").Sum(c => c.Valor);
-            var totalAReceberMes = cobrancasMes.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
-            var totalFaturadoAnt = cobrancasMesAnt.Sum(c => c.Valor);
-
-            var viewModel = new FinanceiroViewModel
-            {
-                Cobrancas = cobrancas,
-                PacienteId = pacienteId,
-                StatusSelecionado = status ?? "Todos",
-                CompetenciaSelecionada = competencia ?? string.Empty,
-                AbaAtiva = string.IsNullOrWhiteSpace(aba) ? "Resumo" : aba
-            };
-
-            if (pacienteId.HasValue && pacienteId.Value > 0)
-            {
-                var pac = await _context.Pacientes.FindAsync(pacienteId.Value);
-                if (pac != null) viewModel.PacienteNome = pac.Nome;
-            }
-
-            // Atribuição de KPIs calculados com base real ou defaults da imagem caso a base seja recente
-            if (totalFaturadoMes > 0 || totalRecebidoMes > 0)
-            {
-                viewModel.ReceitaMes = totalFaturadoMes;
-                viewModel.VariacaoReceitaMes = totalFaturadoAnt > 0
-                    ? Math.Round(((double)(totalFaturadoMes - totalFaturadoAnt) / (double)totalFaturadoAnt) * 100, 1)
-                    : 8.2;
-
-                viewModel.TotalRecebido = totalRecebidoMes;
-                viewModel.PercentualRecebido = totalFaturadoMes > 0
-                    ? Math.Round(((double)totalRecebidoMes / (double)totalFaturadoMes) * 100, 0)
-                    : 83;
-
-                viewModel.TotalAReceber = totalAReceberMes;
-                viewModel.PercentualAReceber = totalFaturadoMes > 0
-                    ? Math.Round(((double)totalAReceberMes / (double)totalFaturadoMes) * 100, 0)
-                    : 17;
-
-                // Despesas estimadas / operacionais clínicas (aprox 34% da receita)
-                viewModel.DespesasMes = Math.Round(totalFaturadoMes * 0.34m, 2);
-                viewModel.VariacaoDespesas = 4.1;
-
-                var cobrancasAtrasadas = cobrancasMes.Where(c => c.Status == "Atrasado").ToList();
-                viewModel.TotalEmAberto = totalAReceberMes;
-                viewModel.TaxaInadimplencia = totalFaturadoMes > 0
-                    ? Math.Round(((double)cobrancasAtrasadas.Sum(c => c.Valor) / (double)totalFaturadoMes) * 100, 0)
-                    : 12.0;
-            }
-            else
-            {
-                // Valores padrão idênticos ao layout da imagem de referência
-                viewModel.ReceitaMes = 18450.00m;
-                viewModel.VariacaoReceitaMes = 8.2;
-                viewModel.TotalRecebido = 15320.00m;
-                viewModel.PercentualRecebido = 83;
-                viewModel.TotalAReceber = 3130.00m;
-                viewModel.PercentualAReceber = 17;
-                viewModel.DespesasMes = 6240.00m;
-                viewModel.VariacaoDespesas = 4.1;
-                viewModel.TotalEmAberto = 2210.00m;
-                viewModel.TaxaInadimplencia = 12.0;
-            }
-
-            // Séries históricas para o gráfico de barras Receita x Despesas (5 meses)
-            var mesesAbrev = new[] { "", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
-            var dtMinima = mesReferencia.AddMonths(-4);
-            var dtInicioGeral = new DateTime(dtMinima.Year, dtMinima.Month, 1);
-            var dtFimGeral = new DateTime(mesReferencia.Year, mesReferencia.Month, 1).AddMonths(1).AddTicks(-1);
-
-            // Carrega em memória com ToListAsync para evitar o erro de NotSupportedException do SQLite ao fazer Sum em decimal
-            var cobrancasHistorico = await _context.Cobrancas
-                .Where(c => c.DataVencimento >= dtInicioGeral && c.DataVencimento <= dtFimGeral)
-                .Select(c => new { c.DataVencimento, c.Valor })
-                .ToListAsync();
-
-            for (int i = 4; i >= 0; i--)
-            {
-                var dt = mesReferencia.AddMonths(-i);
-                viewModel.MesesLabels.Add(mesesAbrev[dt.Month]);
-
-                var rec = cobrancasHistorico
-                    .Where(c => c.DataVencimento.Year == dt.Year && c.DataVencimento.Month == dt.Month)
-                    .Sum(c => c.Valor);
-
-                if (rec > 0)
-                {
-                    viewModel.ReceitasMensais.Add(rec);
-                    viewModel.DespesasMensais.Add(Math.Round(rec * 0.34m, 2));
-                }
-                else
-                {
-                    // Curva de barras da imagem de exemplo: 18k, 16k, 20k, 19k, 18.5k
-                    decimal[] defRec = { 18500m, 16200m, 20100m, 19400m, 18450m };
-                    decimal[] defDesp = { 12000m, 11500m, 14200m, 11000m, 12500m };
-                    int idx = 4 - i;
-                    viewModel.ReceitasMensais.Add(defRec[Math.Min(idx, defRec.Length - 1)]);
-                    viewModel.DespesasMensais.Add(defDesp[Math.Min(idx, defDesp.Length - 1)]);
-                }
-            }
-
-            return View(viewModel);
+            receitasMeses.Add(rec);
+            despesasMeses.Add(desp);
         }
 
-        // 2. GET: Nova cobrança
-        public IActionResult Create()
+        // Distribuição de despesas por categoria para o Donut Chart
+        var categoriasAgrupadas = despesasMes
+            .GroupBy(d => d.Categoria)
+            .OrderByDescending(g => g.Sum(x => x.Valor))
+            .ToList();
+
+        var categoriasLabels = categoriasAgrupadas.Select(g => g.Key).ToList();
+        var categoriasValores = categoriasAgrupadas.Select(g => g.Sum(x => x.Valor)).ToList();
+
+        // Movimentações recentes
+        var ultimasReceitas = await context.Cobrancas
+            .Include(c => c.Paciente)
+            .OrderByDescending(c => c.DataPagamento ?? c.DataVencimento)
+            .Take(5)
+            .ToListAsync();
+
+        var proximasDespesas = await context.Despesas
+            .Where(d => d.Status == "Pendente")
+            .OrderBy(d => d.DataVencimento)
+            .Take(5)
+            .ToListAsync();
+
+        // KPIs específicos
+        decimal despesasPagas = despesas.Where(d => d.Status == "Pago").Sum(d => d.Valor);
+        decimal despesasAPagar = despesas.Where(d => d.Status == "Pendente").Sum(d => d.Valor);
+        string maiorCategoria = categoriasLabels.FirstOrDefault() ?? "Geral";
+
+        decimal totalFaturado = cobrancas.Sum(c => c.Valor);
+        decimal totalRecebido = cobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor);
+        decimal totalAReceber = cobrancas.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
+        decimal totalAtrasado = cobrancas.Where(c => c.Status == "Atrasado").Sum(c => c.Valor);
+
+        var viewModel = new FinanceiroViewModel
         {
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome");
-            return View();
+            AbaAtiva = string.IsNullOrWhiteSpace(aba) ? "Resumo" : aba,
+            Cobrancas = cobrancas,
+            TotalRecebido = totalRecebido,
+            TotalAReceber = totalAReceber,
+            TotalEmAberto = totalAReceber,
+            PercentualRecebido = totalFaturado > 0 ? Math.Round((double)totalRecebido / (double)totalFaturado * 100, 1) : 0,
+            PercentualAReceber = totalFaturado > 0 ? Math.Round((double)totalAReceber / (double)totalFaturado * 100, 1) : 0,
+            TaxaInadimplencia = totalFaturado > 0 ? Math.Round((double)totalAtrasado / (double)totalFaturado * 100, 1) : 0,
+            PacienteId = pacienteId,
+            StatusSelecionado = status ?? "Todos",
+            CompetenciaSelecionada = competencia ?? "",
+            ReceitaMes = receitaMes,
+            TotalDespesasMes = despesaMesTotal,
+            DespesasPagasMes = despesasPagas,
+            DespesasPendentesMes = despesasAPagar,
+            SaldoLiquidoMes = resultadoLiquido,
+            MesesLabels = mesesLabels,
+            ReceitasMensais = receitasMeses,
+            DespesasMensais = despesasMeses,
+            CategoriasLabels = categoriasLabels,
+            CategoriasValores = categoriasValores,
+            UltimasReceitas = ultimasReceitas,
+            ProximasDespesas = proximasDespesas,
+            Despesas = despesas,
+            MaiorCategoriaDespesa = maiorCategoria,
+            CategoriaDespesaSelecionada = despesaCategoria ?? "Todas",
+            StatusDespesaSelecionado = despesaStatus ?? "Todos"
+        };
+
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", pacienteId);
+        ViewBag.StatusList = new SelectList(new[] { "Todos", "Pendente", "Pago", "Atrasado", "Cancelado" }, status);
+        ViewBag.CategoriasDespesa = new SelectList(new[] { "Todas", "Energia Elétrica", "Água", "Telefonia", "Internet", "Material de Escritório", "Sistemas", "Aluguel", "Limpeza", "Outros" }, despesaCategoria);
+
+        return View(viewModel);
+    }
+
+    // =========================================================================
+    // 3. GESTÃO DE DESPESAS DA CLÍNICA
+    // =========================================================================
+
+    /// <summary>
+    /// Cadastra uma nova despesa da clínica via modal.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CriarDespesa(Despesa despesa)
+    {
+        if (ModelState.IsValid)
+        {
+            if (despesa.Status == "Pago" && !despesa.DataPagamento.HasValue)
+                despesa.DataPagamento = DateTime.Today;
+
+            context.Despesas.Add(despesa);
+            await context.SaveChangesAsync();
+
+            TempData["MensagemSucesso"] = $"Despesa \"{despesa.Descricao}\" cadastrada com sucesso!";
+            return RedirectToAction(nameof(Index), new { aba = "Despesas" });
         }
 
-        // 3. POST: Salva cobrança
-        [HttpPost]
-        public IActionResult Create(Cobranca cobranca)
+        TempData["MensagemErro"] = "Preencha todos os campos obrigatórios da despesa.";
+        return RedirectToAction(nameof(Index), new { aba = "Despesas" });
+    }
+
+    /// <summary>
+    /// Registra o pagamento efetuado de uma despesa da clínica.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BaixarDespesa(int id, DateTime? dataPagamento)
+    {
+        var despesa = await context.Despesas.FindAsync(id);
+        if (despesa != null)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Cobrancas.Add(cobranca);
-                _context.SaveChanges();
-                return RedirectToAction("Index"); 
-            }
-            
-            ViewBag.Pacientes = new SelectList(_context.Pacientes.OrderBy(p => p.Nome), "IdPaciente", "Nome", cobranca.PacienteId);
-            return View(cobranca);
+            despesa.Status = "Pago";
+            despesa.DataPagamento = dataPagamento ?? DateTime.Today;
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = $"Pagamento da despesa \"{despesa.Descricao}\" registrado com sucesso!";
         }
+        return RedirectToAction(nameof(Index), new { aba = "Despesas" });
+    }
 
-        // 4. GET: Confirmação de pagamento
-        public IActionResult Baixa(int? id)
+    /// <summary>
+    /// Reabre uma despesa previamente marcada como paga, retornando-a para o status Pendente.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReabrirDespesa(int id)
+    {
+        var despesa = await context.Despesas.FindAsync(id);
+        if (despesa != null)
         {
-            if (id == null) return NotFound();
+            despesa.Status = "Pendente";
+            despesa.DataPagamento = null;
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = $"Despesa \"{despesa.Descricao}\" reaberta com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Despesas" });
+    }
 
-            var cobranca = _context.Cobrancas
-                                   .Include(c => c.Paciente)
-                                   .Include(c => c.Agendamento)
-                                   .FirstOrDefault(c => c.IdCobranca == id);
+    /// <summary>
+    /// Exclui o registro de uma despesa do banco de dados.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExcluirDespesa(int id)
+    {
+        var despesa = await context.Despesas.FindAsync(id);
+        if (despesa != null)
+        {
+            context.Despesas.Remove(despesa);
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Despesa excluída com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Despesas" });
+    }
 
-            if (cobranca == null) return NotFound();
+    // =========================================================================
+    // 4. GESTÃO DE COBRANÇAS DE PACIENTES (RECEITAS)
+    // =========================================================================
 
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome");
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Cobranca cobranca)
+    {
+        if (ModelState.IsValid)
+        {
+            context.Cobrancas.Add(cobranca);
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Cobrança cadastrada com sucesso!";
+            return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+        }
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", cobranca.PacienteId);
+        return View(cobranca);
+    }
+
+    public async Task<IActionResult> MarcarComoPago(int id)
+    {
+        var cobranca = await context.Cobrancas.FindAsync(id);
+        if (cobranca != null)
+        {
+            cobranca.Status = "Pago";
             cobranca.DataPagamento = DateTime.Today;
-            ViewBag.SessaoPendente = cobranca.Agendamento != null && cobranca.Agendamento.Status != "Realizado";
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Cobrança baixada com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+    }
 
-            return View(cobranca);
+    [HttpGet]
+    public async Task<IActionResult> Baixa(int? id)
+    {
+        if (id == null) return NotFound();
+        var cobranca = await context.Cobrancas.Include(c => c.Paciente).FirstOrDefaultAsync(c => c.IdCobranca == id);
+        if (cobranca == null) return NotFound();
+        cobranca.DataPagamento = DateTime.Today;
+        return View(cobranca);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Baixa(int id, Cobranca cobranca)
+    {
+        if (id != cobranca.IdCobranca) return NotFound();
+        var cobrancaOriginal = await context.Cobrancas.FindAsync(id);
+        if (cobrancaOriginal != null)
+        {
+            cobrancaOriginal.Status = "Pago";
+            cobrancaOriginal.DataPagamento = cobranca.DataPagamento ?? DateTime.Today;
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Pagamento registrado com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+        var cobranca = await context.Cobrancas.FindAsync(id);
+        if (cobranca == null) return NotFound();
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", cobranca.PacienteId);
+        return View(cobranca);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Cobranca cobranca)
+    {
+        if (id != cobranca.IdCobranca) return NotFound();
+        if (ModelState.IsValid)
+        {
+            var cobrancaOriginal = await context.Cobrancas.FindAsync(id);
+            if (cobrancaOriginal == null) return NotFound();
+            cobrancaOriginal.Descricao = cobranca.Descricao;
+            cobrancaOriginal.Valor = cobranca.Valor;
+            cobrancaOriginal.DataVencimento = cobranca.DataVencimento;
+            cobrancaOriginal.Status = cobranca.Status;
+            cobrancaOriginal.DataPagamento = cobranca.DataPagamento;
+            cobrancaOriginal.PacienteId = cobranca.PacienteId;
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Cobrança atualizada com sucesso!";
+            return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+        }
+        ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", cobranca.PacienteId);
+        return View(cobranca);
+    }
+
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+        var cobranca = await context.Cobrancas.Include(c => c.Paciente).FirstOrDefaultAsync(m => m.IdCobranca == id);
+        return cobranca == null ? NotFound() : View(cobranca);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var cobranca = await context.Cobrancas.FindAsync(id);
+        if (cobranca != null)
+        {
+            context.Cobrancas.Remove(cobranca);
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Cobrança excluída com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+    }
+
+    public async Task<IActionResult> Reabrir(int id)
+    {
+        var cobranca = await context.Cobrancas.FindAsync(id);
+        if (cobranca != null)
+        {
+            cobranca.Status = "Pendente";
+            cobranca.DataPagamento = null;
+            await context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Cobrança reaberta com sucesso!";
+        }
+        return RedirectToAction(nameof(Index), new { aba = "Receitas" });
+    }
+
+    // =========================================================================
+    // 5. EXPORTAÇÕES (EXCEL E PDF)
+    // =========================================================================
+
+    /// <summary>
+    /// Gera planilha Excel formatada (.xlsx) com as cobranças filtradas.
+    /// </summary>
+    public IActionResult ExportarExcel(int? pacienteId, string? status, string? competencia)
+    {
+        var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
+
+        using var workbook = new XLWorkbook();
+        var planilha = workbook.Worksheets.Add("Financeiro");
+
+        planilha.Cell(1, 1).Value = "Vencimento";
+        planilha.Cell(1, 2).Value = "Paciente";
+        planilha.Cell(1, 3).Value = "Descrição";
+        planilha.Cell(1, 4).Value = "Valor";
+        planilha.Cell(1, 5).Value = "Status";
+        planilha.Cell(1, 6).Value = "Data do Pagamento";
+
+        var linhaCabecalho = planilha.Row(1);
+        linhaCabecalho.Style.Font.Bold = true;
+        linhaCabecalho.Style.Fill.BackgroundColor = XLColor.FromHtml("#071A3A");
+        linhaCabecalho.Style.Font.FontColor = XLColor.White;
+
+        int linha = 2;
+        foreach (var c in cobrancas)
+        {
+            planilha.Cell(linha, 1).Value = c.DataVencimento;
+            planilha.Cell(linha, 1).Style.DateFormat.Format = "dd/MM/yyyy";
+            planilha.Cell(linha, 2).Value = c.Paciente != null ? c.Paciente.Nome : "Excluído";
+            planilha.Cell(linha, 3).Value = c.Descricao;
+            planilha.Cell(linha, 4).Value = c.Valor;
+            planilha.Cell(linha, 4).Style.NumberFormat.Format = "R$ #,##0.00";
+            planilha.Cell(linha, 5).Value = c.Status;
+            planilha.Cell(linha, 6).Value = c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("dd/MM/yyyy") : "-";
+            linha++;
         }
 
-        // 5. POST: Efetiva o pagamento
-        [HttpPost]
-        public IActionResult Baixa(int id, Cobranca cobranca)
+        planilha.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"financeiro_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+    }
+
+    /// <summary>
+    /// Emite relatório financeiro em PDF de alta qualidade com QuestPDF.
+    /// </summary>
+    public IActionResult ExportarPdf(int? pacienteId, string? status, string? competencia)
+    {
+        var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
+        var culturaBr = new CultureInfo("pt-BR");
+
+        Paciente? paciente = pacienteId is > 0 ? context.Pacientes.Find(pacienteId.Value) : null;
+
+        var totalGeral = cobrancas.Sum(c => c.Valor);
+        var totalPago = cobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor);
+        var totalEmAberto = cobrancas.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
+        var totalCancelado = cobrancas.Where(c => c.Status == "Cancelado").Sum(c => c.Valor);
+
+        string logoPath = Path.Combine(hostEnvironment.WebRootPath, "images", "logo-principal-cerebro-coracao 2.png");
+        byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
+
+        var documento = Document.Create(container =>
         {
-            if (id != cobranca.IdCobranca) return NotFound();
-
-            var cobrancaOriginal = _context.Cobrancas
-                                           .Include(c => c.Paciente)
-                                           .Include(c => c.Agendamento)
-                                           .FirstOrDefault(c => c.IdCobranca == id);
-
-            if (cobrancaOriginal != null)
+            container.Page(page =>
             {
-                if (cobrancaOriginal.Agendamento != null && cobrancaOriginal.Agendamento.Status != "Realizado")
+                page.Size(PageSizes.A4);
+                page.Margin(30);
+                page.DefaultTextStyle(x => x.FontSize(9).FontColor(Colors.Grey.Darken3));
+
+                // 1. Cabeçalho Timbrado
+                page.Header().Column(headerCol =>
                 {
-                    ModelState.AddModelError(string.Empty, "Não é possível confirmar o pagamento: a sessão vinculada ainda não foi marcada como \"Realizado\".");
-                    ViewBag.SessaoPendente = true;
-                    return View(cobrancaOriginal);
-                }
-
-                cobrancaOriginal.Status = "Pago";
-                cobrancaOriginal.DataPagamento = cobranca.DataPagamento;
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        // 6. GET: Confirmação para apagar
-        public IActionResult Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var cobranca = _context.Cobrancas
-                                   .Include(c => c.Paciente)
-                                   .FirstOrDefault(c => c.IdCobranca == id);
-
-            if (cobranca == null) return NotFound();
-
-            return View(cobranca);
-        }
-
-        // 7. POST: Apaga a cobrança
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var cobranca = _context.Cobrancas.Find(id);
-            
-            if (cobranca != null)
-            {
-                _context.Cobrancas.Remove(cobranca);
-                _context.SaveChanges();
-            }
-            
-            return RedirectToAction("Index");
-        }
-
-        // ==========================================
-        // 7.1 REABRIR COBRANÇA (Pago -> Pendente)
-        // ==========================================
-        [HttpPost]
-        public IActionResult Reabrir(int id)
-        {
-            var cobranca = _context.Cobrancas.Find(id);
-            if (cobranca != null)
-            {
-                cobranca.Status = "Pendente";
-                cobranca.DataPagamento = null;
-                _context.SaveChanges();
-                TempData["MensagemSucesso"] = "Cobrança reaberta com sucesso! O status foi revertido para Pendente.";
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public IActionResult Reabrir(int? id)
-        {
-            if (id.HasValue)
-            {
-                return Reabrir(id.Value);
-            }
-            return RedirectToAction("Index");
-        }
-
-        // ==========================================
-        // 8. EXPORTAÇÃO EXCEL (.xlsx) 
-        // ==========================================
-        public IActionResult ExportarExcel(int? pacienteId, string? status, string? competencia)
-        {
-            var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
-
-            using var workbook = new XLWorkbook();
-            var planilha = workbook.Worksheets.Add("Financeiro");
-
-            planilha.Cell(1, 1).Value = "Vencimento";
-            planilha.Cell(1, 2).Value = "Paciente";
-            planilha.Cell(1, 3).Value = "Descrição";
-            planilha.Cell(1, 4).Value = "Valor";
-            planilha.Cell(1, 5).Value = "Status";
-            planilha.Cell(1, 6).Value = "Data do Pagamento";
-
-            var linhaCabecalho = planilha.Row(1);
-            linhaCabecalho.Style.Font.Bold = true;
-            linhaCabecalho.Style.Fill.BackgroundColor = XLColor.FromHtml("#071A3A");
-            linhaCabecalho.Style.Font.FontColor = XLColor.White;
-
-            int linha = 2;
-            foreach (var c in cobrancas)
-            {
-                planilha.Cell(linha, 1).Value = c.DataVencimento;
-                planilha.Cell(linha, 1).Style.DateFormat.Format = "dd/MM/yyyy";
-                planilha.Cell(linha, 2).Value = c.Paciente != null ? c.Paciente.Nome : "Excluído";
-                planilha.Cell(linha, 3).Value = c.Descricao;
-                planilha.Cell(linha, 4).Value = c.Valor;
-                planilha.Cell(linha, 4).Style.NumberFormat.Format = "R$ #,##0.00";
-                planilha.Cell(linha, 5).Value = c.Status;
-
-                if (c.DataPagamento.HasValue)
-                {
-                    planilha.Cell(linha, 6).Value = c.DataPagamento.Value;
-                    planilha.Cell(linha, 6).Style.DateFormat.Format = "dd/MM/yyyy";
-                }
-                else
-                {
-                    planilha.Cell(linha, 6).Value = "-";
-                }
-                linha++;
-            }
-
-            planilha.Columns().AdjustToContents();
-
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            var conteudo = stream.ToArray();
-
-            var nomeArquivo = $"financeiro_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-            return File(conteudo, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", nomeArquivo);
-        }
-
-        // =========================================================================
-        // 9. EXPORTAÇÃO PDF COM IDENTIDADE VISUAL NEUROSYNC E RESUMO FINANCEIRO
-        // =========================================================================
-        public IActionResult ExportarPdf(int? pacienteId, string? status, string? competencia)
-        {
-            var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
-            var culturaBr = new CultureInfo("pt-BR");
-
-            Paciente? paciente = null;
-            if (pacienteId.HasValue && pacienteId.Value > 0)
-            {
-                paciente = _context.Pacientes.Find(pacienteId.Value);
-            }
-
-            // Cálculos específicos do resumo financeiro
-            var totalGeral = cobrancas.Sum(c => c.Valor);
-            var totalPago = cobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor);
-            var totalEmAberto = cobrancas.Where(c => c.Status == "Pendente" || c.Status == "Atrasado").Sum(c => c.Valor);
-            var totalCancelado = cobrancas.Where(c => c.Status == "Cancelado").Sum(c => c.Valor);
-
-            // Carrega logo NeuroSync
-            string logoPath = Path.Combine(_hostEnvironment.WebRootPath, "images", "logo-principal-cerebro-coracao 2.png");
-            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
-
-            var documento = Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(30);
-                    page.DefaultTextStyle(x => x.FontSize(9).FontColor(Colors.Grey.Darken3));
-
-                    // 1. CABEÇALHO COM IDENTIDADE VISUAL
-                    page.Header().Column(headerCol =>
+                    headerCol.Item().Row(row =>
                     {
-                        headerCol.Item().Row(row =>
+                        row.RelativeItem(7).Row(brandRow =>
                         {
-                            // Logo e Marca NeuroSync
-                            row.RelativeItem(7).Row(brandRow =>
+                            if (logoBytes != null)
                             {
-                                if (logoBytes != null)
+                                brandRow.ConstantItem(44).Height(44).Image(logoBytes).FitArea();
+                                brandRow.ConstantItem(10);
+                            }
+                            brandRow.RelativeItem().Column(brandCol =>
+                            {
+                                brandCol.Item().Row(logoRow =>
                                 {
-                                    brandRow.ConstantItem(44).Height(44).Image(logoBytes).FitArea();
-                                    brandRow.ConstantItem(10);
-                                }
-                                brandRow.RelativeItem().Column(brandCol =>
-                                {
-                                    brandCol.Item().Row(logoRow =>
-                                    {
-                                        logoRow.AutoItem().Text("Neuro").FontSize(22).Bold().FontColor(Color.FromHex("#071A3A"));
-                                        logoRow.AutoItem().Text("Sync").FontSize(22).Bold().FontColor(Color.FromHex("#315BEF"));
-                                    });
-                                    brandCol.Item().Text("Gestão Clínica e Prontuário Eletrônico").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
+                                    logoRow.AutoItem().Text("Neuro").FontSize(22).Bold().FontColor(Color.FromHex("#071A3A"));
+                                    logoRow.AutoItem().Text("Sync").FontSize(22).Bold().FontColor(Color.FromHex("#315BEF"));
                                 });
-                            });
-
-                            // Dados do Relatório / Emissão
-                            row.RelativeItem(5).AlignRight().Column(metaCol =>
-                            {
-                                metaCol.Item().Text("DEMONSTRATIVO FINANCEIRO").FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
-                                metaCol.Item().Text($"Competência: {(string.IsNullOrEmpty(competencia) ? "Todas" : competencia)}").FontSize(9).FontColor(Colors.Grey.Darken2);
-                                metaCol.Item().Text($"Emissão: {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(8).FontColor(Colors.Grey.Medium);
+                                brandCol.Item().Text("Gestão Clínica e Prontuário Eletrônico").FontSize(8.5f).FontColor(Colors.Grey.Darken1);
                             });
                         });
 
-                        // Linha decorativa azul
-                        headerCol.Item().PaddingTop(8).LineHorizontal(2).LineColor(Color.FromHex("#315BEF"));
-
-                        // 2. IDENTIFICAÇÃO DO PACIENTE (SE HOUVER FILTRO)
-                        if (paciente != null)
+                        row.RelativeItem(5).AlignRight().Column(metaCol =>
                         {
-                            headerCol.Item().PaddingTop(10).Background(Colors.Grey.Lighten4).Padding(8).Row(pRow =>
-                            {
-                                pRow.RelativeItem(5).Text(t =>
-                                {
-                                    t.Span("Paciente: ").Bold().FontColor(Color.FromHex("#071A3A"));
-                                    t.Span(paciente.Nome).Bold();
-                                });
-                                pRow.RelativeItem(4).Text(t =>
-                                {
-                                    t.Span("CPF: ").Bold().FontColor(Color.FromHex("#071A3A"));
-                                    t.Span(!string.IsNullOrEmpty(paciente.Cpf) ? paciente.Cpf : "Não informado");
-                                });
-                                pRow.RelativeItem(3).Text(t =>
-                                {
-                                    t.Span("Status Filtro: ").Bold().FontColor(Color.FromHex("#071A3A"));
-                                    t.Span(status ?? "Todos");
-                                });
-                            });
-                        }
+                            metaCol.Item().Text("RELATÓRIO FINANCEIRO").FontSize(11).Bold().FontColor(Color.FromHex("#071A3A"));
+                            metaCol.Item().Text($"Emissão: {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(8).FontColor(Colors.Grey.Medium);
+                        });
                     });
 
-                    // 3. CONTEÚDO PRINCIPAL (RESUMO + TABELA)
-                    page.Content().PaddingTop(12).Column(contentCol =>
+                    headerCol.Item().PaddingTop(6).LineHorizontal(1.5f).LineColor(Color.FromHex("#315BEF"));
+                });
+
+                // 2. Conteúdo e Tabela
+                page.Content().PaddingTop(12).Column(contentCol =>
+                {
+                    // Cards de Totais
+                    contentCol.Item().Row(kpiRow =>
                     {
-                        // 3.1 CARDS DE RESUMO (TOTAL PAGO, TOTAL EM ABERTO, TOTAL FATURADO)
-                        contentCol.Item().PaddingBottom(14).Row(cardsRow =>
+                        kpiRow.RelativeItem().Background(Color.FromHex("#F8FAFC")).Border(1).BorderColor(Color.FromHex("#E2E8F0")).Padding(8).Column(c =>
                         {
-                            // Card Total Pago (Verde)
-                            cardsRow.RelativeItem().Border(1).BorderColor(Colors.Green.Lighten2).Background(Colors.Green.Lighten5).Padding(10).Column(c =>
-                            {
-                                c.Item().Text("VALORES JÁ PAGOS").FontSize(7.5f).Bold().FontColor(Colors.Green.Darken3);
-                                c.Item().PaddingTop(2).Text(totalPago.ToString("C", culturaBr)).FontSize(14).Bold().FontColor(Colors.Green.Darken2);
-                                c.Item().Text("Cobranças liquidadas").FontSize(7).FontColor(Colors.Green.Darken1);
-                            });
-
-                            cardsRow.ConstantItem(10);
-
-                            // Card Total em Aberto (Vermelho/Laranja)
-                            cardsRow.RelativeItem().Border(1).BorderColor(Colors.Red.Lighten2).Background(Colors.Red.Lighten5).Padding(10).Column(c =>
-                            {
-                                c.Item().Text("VALORES EM ABERTO").FontSize(7.5f).Bold().FontColor(Colors.Red.Darken3);
-                                c.Item().PaddingTop(2).Text(totalEmAberto.ToString("C", culturaBr)).FontSize(14).Bold().FontColor(Colors.Red.Darken2);
-                                c.Item().Text("Pendentes e atrasadas").FontSize(7).FontColor(Colors.Red.Darken1);
-                            });
-
-                            cardsRow.ConstantItem(10);
-
-                            // Card Total Geral
-                            cardsRow.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Grey.Lighten5).Padding(10).Column(c =>
-                            {
-                                c.Item().Text("TOTAL DO PERÍODO").FontSize(7.5f).Bold().FontColor(Color.FromHex("#071A3A"));
-                                c.Item().PaddingTop(2).Text(totalGeral.ToString("C", culturaBr)).FontSize(14).Bold().FontColor(Color.FromHex("#071A3A"));
-                                c.Item().Text($"{cobrancas.Count} registro(s)").FontSize(7).FontColor(Colors.Grey.Darken1);
-                            });
+                            c.Item().Text("FATURAMENTO").FontSize(7.5f).Bold().FontColor(Colors.Grey.Darken1);
+                            c.Item().Text(totalGeral.ToString("C", culturaBr)).FontSize(12).Bold().FontColor(Color.FromHex("#071A3A"));
                         });
-
-                        // 3.2 TABELA DETALHADA DE COBRANÇAS
-                        contentCol.Item().Table(table =>
+                        kpiRow.ConstantItem(8);
+                        kpiRow.RelativeItem().Background(Color.FromHex("#F0FDF4")).Border(1).BorderColor(Color.FromHex("#BBF7D0")).Padding(8).Column(c =>
                         {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(70);  // Vencimento
-                                columns.RelativeColumn(3);   // Paciente
-                                columns.RelativeColumn(3.5f);// Descrição
-                                columns.ConstantColumn(80);  // Valor
-                                columns.ConstantColumn(70);  // Status
-                                columns.ConstantColumn(75);  // Pagamento
-                            });
-
-                            // Cabeçalho da Tabela
-                            table.Header(header =>
-                            {
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Vencimento").Bold().FontColor(Colors.White);
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Paciente").Bold().FontColor(Colors.White);
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Descrição").Bold().FontColor(Colors.White);
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignRight().Text("Valor").Bold().FontColor(Colors.White);
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignCenter().Text("Status").Bold().FontColor(Colors.White);
-                                header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignCenter().Text("Pagamento").Bold().FontColor(Colors.White);
-                            });
-
-                            int rowIdx = 0;
-                            foreach (var c in cobrancas)
-                            {
-                                var bgRow = (rowIdx % 2 == 0) ? Colors.White : Colors.Grey.Lighten5;
-
-                                table.Cell().Background(bgRow).Padding(5).Text(c.DataVencimento.ToString("dd/MM/yyyy"));
-                                table.Cell().Background(bgRow).Padding(5).Text(c.Paciente != null ? c.Paciente.Nome : "Excluído").Bold();
-                                table.Cell().Background(bgRow).Padding(5).Text(c.Descricao);
-                                table.Cell().Background(bgRow).Padding(5).AlignRight().Text(c.Valor.ToString("C", culturaBr)).Bold();
-
-                                // Status Colorizado
-                                var statusColor = c.Status == "Pago" ? Colors.Green.Darken2 :
-                                                  c.Status == "Pendente" ? Colors.Orange.Darken2 :
-                                                  c.Status == "Atrasado" ? Colors.Red.Darken2 : Colors.Grey.Darken1;
-
-                                table.Cell().Background(bgRow).Padding(5).AlignCenter().Text(c.Status).Bold().FontColor(statusColor);
-                                
-                                var dtPag = c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("dd/MM/yyyy") : "-";
-                                table.Cell().Background(bgRow).Padding(5).AlignCenter().Text(dtPag);
-
-                                rowIdx++;
-                            }
-
-                            if (!cobrancas.Any())
-                            {
-                                table.Cell().ColumnSpan(6).Padding(20).AlignCenter().Text("Nenhuma cobrança encontrada para os filtros selecionados.").FontColor(Colors.Grey.Darken1);
-                            }
+                            c.Item().Text("RECEBIDO").FontSize(7.5f).Bold().FontColor(Color.FromHex("#15803D"));
+                            c.Item().Text(totalPago.ToString("C", culturaBr)).FontSize(12).Bold().FontColor(Color.FromHex("#15803D"));
                         });
-
-                        // 3.3 TOTALIZADORES NO RODAPÉ DA TABELA
-                        if (cobrancas.Any())
+                        kpiRow.ConstantItem(8);
+                        kpiRow.RelativeItem().Background(Color.FromHex("#FEFCE8")).Border(1).BorderColor(Color.FromHex("#FEF08A")).Padding(8).Column(c =>
                         {
-                            contentCol.Item().PaddingTop(10).AlignRight().Text(t =>
-                            {
-                                t.Span($"Total Pago: ").FontColor(Colors.Green.Darken2).Bold();
-                                t.Span($"{totalPago.ToString("C", culturaBr)}   |   ").Bold();
-                                t.Span($"Total em Aberto: ").FontColor(Colors.Red.Darken2).Bold();
-                                t.Span($"{totalEmAberto.ToString("C", culturaBr)}   |   ").Bold();
-                                t.Span($"Total Geral: ").FontColor(Color.FromHex("#071A3A")).Bold();
-                                t.Span($"{totalGeral.ToString("C", culturaBr)}").FontSize(11).Bold();
-                            });
-                        }
+                            c.Item().Text("A RECEBER").FontSize(7.5f).Bold().FontColor(Color.FromHex("#A16207"));
+                            c.Item().Text(totalEmAberto.ToString("C", culturaBr)).FontSize(12).Bold().FontColor(Color.FromHex("#A16207"));
+                        });
+                        kpiRow.ConstantItem(8);
+                        kpiRow.RelativeItem().Background(Color.FromHex("#FFF1F2")).Border(1).BorderColor(Color.FromHex("#FECDD3")).Padding(8).Column(c =>
+                        {
+                            c.Item().Text("CANCELADO").FontSize(7.5f).Bold().FontColor(Color.FromHex("#BE123C"));
+                            c.Item().Text(totalCancelado.ToString("C", culturaBr)).FontSize(12).Bold().FontColor(Color.FromHex("#BE123C"));
+                        });
                     });
 
-                    // 4. RODAPÉ INSTITUCIONAL
-                    page.Footer().Column(footCol =>
+                    // Tabela de Cobranças
+                    contentCol.Item().PaddingTop(14).Table(tabela =>
                     {
-                        footCol.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
-                        footCol.Item().PaddingTop(6).Row(footRow =>
+                        tabela.ColumnsDefinition(columns =>
                         {
-                            footRow.RelativeItem().Text("NeuroSync Gestão Clínica • Confidencial").FontSize(7.5f).FontColor(Colors.Grey.Darken1);
-                            footRow.RelativeItem().AlignRight().Text(x =>
-                            {
-                                x.Span("Página ").FontSize(7.5f);
-                                x.CurrentPageNumber().FontSize(7.5f);
-                                x.Span(" de ").FontSize(7.5f);
-                                x.TotalPages().FontSize(7.5f);
-                            });
+                            columns.ConstantColumn(65);
+                            columns.RelativeColumn(3);
+                            columns.RelativeColumn(3);
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(75);
+                            columns.ConstantColumn(75);
                         });
+
+                        tabela.Header(header =>
+                        {
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Vencimento").Bold().FontColor(Colors.White);
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Paciente").Bold().FontColor(Colors.White);
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).Text("Descrição").Bold().FontColor(Colors.White);
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignRight().Text("Valor").Bold().FontColor(Colors.White);
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignCenter().Text("Status").Bold().FontColor(Colors.White);
+                            header.Cell().Background(Color.FromHex("#071A3A")).Padding(6).AlignCenter().Text("Pagamento").Bold().FontColor(Colors.White);
+                        });
+
+                        int idx = 0;
+                        foreach (var c in cobrancas)
+                        {
+                            var fundo = idx % 2 == 0 ? Colors.White : Color.FromHex("#F8FAFC");
+                            tabela.Cell().Background(fundo).Padding(5).Text(c.DataVencimento.ToString("dd/MM/yyyy"));
+                            tabela.Cell().Background(fundo).Padding(5).Text(c.Paciente?.Nome ?? "-").SemiBold();
+                            tabela.Cell().Background(fundo).Padding(5).Text(c.Descricao ?? "Atendimento Clínico");
+                            tabela.Cell().Background(fundo).Padding(5).AlignRight().Text(c.Valor.ToString("C", culturaBr)).Bold();
+                            tabela.Cell().Background(fundo).Padding(5).AlignCenter().Text(c.Status);
+                            tabela.Cell().Background(fundo).Padding(5).AlignCenter().Text(c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("dd/MM/yyyy") : "-");
+                            idx++;
+                        }
+                    });
+                });
+
+                // 3. Rodapé
+                page.Footer().Row(r =>
+                {
+                    r.RelativeItem().Text("NeuroSync • Gestão Clínica Integrada").FontSize(8).FontColor(Colors.Grey.Medium);
+                    r.RelativeItem().AlignRight().Text(x =>
+                    {
+                        x.Span("Página ");
+                        x.CurrentPageNumber();
+                        x.Span(" de ");
+                        x.TotalPages();
                     });
                 });
             });
+        });
 
-            var pdfBytes = documento.GeneratePdf();
-
-            // Nome do arquivo inteligente com nome do paciente se filtrado
-            string nomeArquivo;
-            if (paciente != null)
-            {
-                var nomeSanitizado = string.Join("_", paciente.Nome.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
-                var compStr = string.IsNullOrWhiteSpace(competencia) ? DateTime.Now.ToString("yyyyMM") : competencia.Replace("-", "");
-                nomeArquivo = $"financeiro_{nomeSanitizado}_{compStr}.pdf";
-            }
-            else
-            {
-                var compStr = string.IsNullOrWhiteSpace(competencia) ? DateTime.Now.ToString("yyyyMMdd_HHmmss") : competencia.Replace("-", "");
-                nomeArquivo = $"financeiro_geral_{compStr}.pdf";
-            }
-
-            return File(pdfBytes, "application/pdf", nomeArquivo);
-        }
+        var pdfBytes = documento.GeneratePdf();
+        return File(pdfBytes, "application/pdf", $"RelatorioFinanceiro_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
     }
+
+    // =========================================================================
+    // 6. CORES E ÍCONES DE CATEGORIAS
+    // =========================================================================
+
+    private static string ObterCorCategoria(string cat) => cat switch
+    {
+        "Energia Elétrica" => "#F59E0B",
+        "Água" => "#06B6D4",
+        "Telefonia" => "#8B5CF6",
+        "Internet" => "#3B82F6",
+        "Material de Escritório" => "#EC4899",
+        "Sistemas" => "#6366F1",
+        "Aluguel" => "#10B981",
+        "Limpeza" => "#14B8A6",
+        _ => "#64748B"
+    };
+
+    private static string ObterIconeCategoria(string cat) => cat switch
+    {
+        "Energia Elétrica" => "bi-lightning-charge-fill",
+        "Água" => "bi-droplet-fill",
+        "Telefonia" => "bi-telephone-fill",
+        "Internet" => "bi-wifi",
+        "Material de Escritório" => "bi-box-seam-fill",
+        "Sistemas" => "bi-laptop",
+        "Aluguel" => "bi-building",
+        "Limpeza" => "bi-stars",
+        _ => "bi-receipt"
+    };
 }

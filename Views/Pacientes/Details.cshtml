@@ -98,14 +98,73 @@
         gap: 8px;
     }
 
-    .badge-status-pill {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.78rem;
+    /* Badges de Status com Alto Contraste e Legibilidade Garantida */
+    .badge-status-atendimento {
+        font-size: 0.8rem;
         font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 50px;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        line-height: 1.2;
+    }
+
+    .status-atendimento-em-atendimento {
+        background-color: #dbeafe !important;
+        color: #1e40af !important;
+        border: 1px solid #93c5fd !important;
+    }
+
+    .status-atendimento-confirmado {
+        background-color: #dcfce7 !important;
+        color: #14532d !important;
+        border: 1px solid #86efac !important;
+    }
+
+    .status-atendimento-agendado {
+        background-color: #fef3c7 !important;
+        color: #78350f !important;
+        border: 1px solid #fcd34d !important;
+    }
+
+    .status-atendimento-realizado {
+        background-color: #e2e8f0 !important;
+        color: #1e293b !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+
+    .status-atendimento-cancelado {
+        background-color: #fee2e2 !important;
+        color: #991b1b !important;
+        border: 1px solid #fca5a5 !important;
+    }
+
+    .status-atendimento-falta {
+        background-color: #ffedd5 !important;
+        color: #7c2d12 !important;
+        border: 1px solid #fdba74 !important;
+    }
+
+    .status-cobranca-pago {
+        background-color: #dcfce7 !important;
+        color: #14532d !important;
+        border: 1px solid #86efac !important;
+    }
+
+    .status-cobranca-atrasado {
+        background-color: #fee2e2 !important;
+        color: #991b1b !important;
+        border: 1px solid #fca5a5 !important;
+    }
+
+    .status-cobranca-pendente {
+        background-color: #fef3c7 !important;
+        color: #78350f !important;
+        border: 1px solid #fcd34d !important;
     }
 
     .card-kpi-subtle {
@@ -662,32 +721,38 @@
                                             <td>
                                                 @if (ag.Status == "Em atendimento")
                                                 {
-                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-1">
-                                                        <span class="spinner-grow spinner-grow-sm me-1" style="width: 7px; height: 7px;" role="status"></span>Em atendimento
+                                                    <span class="badge-status-atendimento status-atendimento-em-atendimento">
+                                                        <span class="spinner-grow spinner-grow-sm" style="width: 8px; height: 8px;" role="status"></span>Em atendimento
                                                     </span>
                                                 }
                                                 else if (ag.Status == "Confirmado")
                                                 {
-                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">
-                                                        <i class="bi bi-check2-circle me-1"></i>Confirmado
+                                                    <span class="badge-status-atendimento status-atendimento-confirmado">
+                                                        <i class="bi bi-check2-circle"></i>Confirmado
                                                     </span>
                                                 }
                                                 else if (ag.Status == "Realizado")
                                                 {
-                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-1">
-                                                        <i class="bi bi-check-all me-1"></i>Realizado
+                                                    <span class="badge-status-atendimento status-atendimento-realizado">
+                                                        <i class="bi bi-check-all"></i>Realizado
                                                     </span>
                                                 }
                                                 else if (ag.Status == "Cancelado")
                                                 {
-                                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">
-                                                        <i class="bi bi-x-circle me-1"></i>Cancelado
+                                                    <span class="badge-status-atendimento status-atendimento-cancelado">
+                                                        <i class="bi bi-x-circle"></i>Cancelado
+                                                    </span>
+                                                }
+                                                else if (ag.Status == "Falta")
+                                                {
+                                                    <span class="badge-status-atendimento status-atendimento-falta">
+                                                        <i class="bi bi-person-x"></i>Falta
                                                     </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">
-                                                        <i class="bi bi-hourglass-split me-1"></i>@ag.Status
+                                                    <span class="badge-status-atendimento status-atendimento-agendado">
+                                                        <i class="bi bi-calendar-check"></i>@ag.Status
                                                     </span>
                                                 }
                                             </td>
@@ -1065,15 +1130,21 @@
                                             <td>
                                                 @if (c.Status == "Pago")
                                                 {
-                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">Pago</span>
+                                                    <span class="badge-status-atendimento status-cobranca-pago">
+                                                        <i class="bi bi-check-circle-fill"></i>Pago
+                                                    </span>
                                                 }
                                                 else if (c.Status == "Atrasado")
                                                 {
-                                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">Atrasado</span>
+                                                    <span class="badge-status-atendimento status-cobranca-atrasado">
+                                                        <i class="bi bi-exclamation-circle-fill"></i>Atrasado
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">Pendente</span>
+                                                    <span class="badge-status-atendimento status-cobranca-pendente">
+                                                        <i class="bi bi-clock-fill"></i>Pendente
+                                                    </span>
                                                 }
                                             </td>
                                             <td>@(c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")</td>

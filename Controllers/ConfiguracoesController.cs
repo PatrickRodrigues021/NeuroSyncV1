@@ -1,184 +1,168 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using NeuroSync.Data;
 using NeuroSync.Models;
 
-namespace NeuroSync.Controllers
+namespace NeuroSync.Controllers;
+
+/// <summary>
+/// Controlador responsável pelas configurações da conta da profissional (perfil e segurança).
+/// </summary>
+[Authorize]
+public class ConfiguracoesController(AppDbContext context) : Controller
 {
-    [Authorize]
-    public class ConfiguracoesController : Controller
+    // =========================================================================
+    // 1. MÉTODOS AUXILIARES
+    // =========================================================================
+
+    /// <summary>
+    /// Localiza o usuário atualmente autenticado a partir dos claims da sessão ou fallback seguro.
+    /// </summary>
+    private async Task<Usuario?> ObterUsuarioAtualAsync()
     {
-        private readonly AppDbContext _context;
-
-        public ConfiguracoesController(AppDbContext context)
+        // 1. Tenta buscar pelo ID numérico no Claim
+        if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int idUsuario))
         {
-            _context = context;
+            var userById = await context.Usuarios.FindAsync(idUsuario);
+            if (userById != null) return userById;
         }
 
-        // Helper para obter o usuário atualmente autenticado
-        private async Task<Usuario?> ObterUsuarioAtualAsync()
+        // 2. Tenta buscar pelo E-mail no Claim
+        var claimEmail = User.FindFirstValue(ClaimTypes.Email);
+        if (!string.IsNullOrEmpty(claimEmail))
         {
-            // 1. Tenta buscar pelo ID registrado no Claim
-            var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(claimId, out int idUsuario))
-            {
-                var userById = await _context.Usuarios.FindAsync(idUsuario);
-                if (userById != null) return userById;
-            }
-
-            // 2. Tenta buscar pelo Email do Claim
-            var claimEmail = User.FindFirstValue(ClaimTypes.Email);
-            if (!string.IsNullOrEmpty(claimEmail))
-            {
-                var userByEmail = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == claimEmail.ToLower());
-                if (userByEmail != null) return userByEmail;
-            }
-
-            // 3. Tenta buscar pelo Nome do Claim
-            var claimNome = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(claimNome))
-            {
-                var userByNome = await _context.Usuarios.FirstOrDefaultAsync(u => u.Nome.ToLower() == claimNome.ToLower() || u.Email.ToLower() == claimNome.ToLower());
-                if (userByNome != null) return userByNome;
-            }
-
-            // 4. Fallback para o primeiro usuário cadastrado
-            return await _context.Usuarios.FirstOrDefaultAsync();
+            var userByEmail = await context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == claimEmail.ToLower());
+            if (userByEmail != null) return userByEmail;
         }
 
-        // Helper para extrair o primeiro nome de saudação
-        public static string ExtrairPrimeiroNome(string? nomeCompleto)
+        // 3. Tenta buscar pelo Nome de exibição
+        var claimNome = User.Identity?.Name;
+        if (!string.IsNullOrEmpty(claimNome))
         {
-            if (string.IsNullOrWhiteSpace(nomeCompleto)) return "Usuário";
-            var partes = nomeCompleto.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (partes.Length == 0) return "Usuário";
-
-            var titulos = new[] { "dr.", "dra.", "dr", "dra", "prof.", "profa.", "prof", "profa" };
-            if (titulos.Contains(partes[0].ToLower()) && partes.Length > 1)
-            {
-                return $"{partes[0]} {partes[1]}";
-            }
-            return partes[0];
+            var userByNome = await context.Usuarios.FirstOrDefaultAsync(u => u.Nome.ToLower() == claimNome.ToLower() || u.Email.ToLower() == claimNome.ToLower());
+            if (userByNome != null) return userByNome;
         }
 
-        // GET: /Configuracoes
-        [HttpGet]
-        public async Task<IActionResult> Index()
+        return await context.Usuarios.FirstOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// Extrai o primeiro nome ou título profissional para saudações (ex: "Dra. Mariana").
+    /// </summary>
+    public static string ExtrairPrimeiroNome(string? nomeCompleto)
+    {
+        if (string.IsNullOrWhiteSpace(nomeCompleto)) return "Usuário";
+        var partes = nomeCompleto.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length == 0) return "Usuário";
+
+        string[] titulos = ["dr.", "dra.", "dr", "dra", "prof.", "profa.", "prof", "profa"];
+        return titulos.Contains(partes[0].ToLower()) && partes.Length > 1
+            ? $"{partes[0]} {partes[1]}"
+            : partes[0];
+    }
+
+    // =========================================================================
+    // 2. TELAS E AÇÕES DE CONFIGURAÇÃO
+    // =========================================================================
+
+    /// <summary>
+    /// Exibe os dados cadastrais da profissional e o formulário de alteração de senha.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var usuario = await ObterUsuarioAtualAsync();
+        if (usuario == null) return RedirectToAction("Index", "Login");
+
+        return View(new ConfiguracoesViewModel
         {
-            var usuario = await ObterUsuarioAtualAsync();
-            if (usuario == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            IdUsuario = usuario.IdUsuario,
+            Nome = usuario.Nome,
+            Email = usuario.Email,
+            CriadoEm = usuario.CriadoEm,
+            PrimeiroNome = ExtrairPrimeiroNome(usuario.Nome)
+        });
+    }
 
-            var model = new ConfiguracoesViewModel
-            {
-                IdUsuario = usuario.IdUsuario,
-                Nome = usuario.Nome,
-                Email = usuario.Email,
-                CriadoEm = usuario.CriadoEm,
-                PrimeiroNome = ExtrairPrimeiroNome(usuario.Nome)
-            };
+    /// <summary>
+    /// Atualiza o nome e e-mail do usuário e renova a identidade de autenticação (Cookie).
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AtualizarPerfil(AtualizarPerfilInputModel model)
+    {
+        var usuario = await ObterUsuarioAtualAsync();
+        if (usuario == null) return RedirectToAction("Index", "Login");
 
-            return View(model);
+        if (string.IsNullOrWhiteSpace(model.Nome) || string.IsNullOrWhiteSpace(model.Email))
+        {
+            TempData["ErroPerfil"] = "Nome e e-mail não podem ficar em branco.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Configuracoes/AtualizarPerfil
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AtualizarPerfil(AtualizarPerfilInputModel model)
+        usuario.Nome = model.Nome.Trim();
+        usuario.Email = model.Email.Trim();
+
+        context.Update(usuario);
+        await context.SaveChangesAsync();
+
+        // Renova o Cookie de autenticação com o novo nome/e-mail
+        Claim[] claims = [
+            new(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+            new(ClaimTypes.Name, usuario.Nome),
+            new(ClaimTypes.Email, usuario.Email)
+        ];
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+        TempData["SucessoPerfil"] = "Dados do perfil atualizados com sucesso!";
+        return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Altera a senha de acesso da profissional com validação da senha atual.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AlterarSenha(AlterarSenhaInputModel senhaModel)
+    {
+        var usuario = await ObterUsuarioAtualAsync();
+        if (usuario == null) return RedirectToAction("Index", "Login");
+
+        if (string.IsNullOrWhiteSpace(senhaModel.SenhaAtual))
         {
-            var usuario = await ObterUsuarioAtualAsync();
-            if (usuario == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.Nome))
-            {
-                TempData["ErroPerfil"] = "O nome não pode ficar em branco.";
-                return RedirectToAction("Index");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.Email))
-            {
-                TempData["ErroPerfil"] = "O e-mail/usuário não pode ficar em branco.";
-                return RedirectToAction("Index");
-            }
-
-            // Atualiza os dados no banco
-            usuario.Nome = model.Nome.Trim();
-            usuario.Email = model.Email.Trim();
-
-            _context.Update(usuario);
-            await _context.SaveChangesAsync();
-
-            // Atualiza o Cookie de sessão com os novos dados em tempo real
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Name, usuario.Nome),
-                new Claim(ClaimTypes.Email, usuario.Email)
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-            TempData["SucessoPerfil"] = "Dados do perfil atualizados com sucesso!";
-            return RedirectToAction("Index");
+            TempData["ErroSenha"] = "A senha atual é obrigatória.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Configuracoes/AlterarSenha
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AlterarSenha(AlterarSenhaInputModel senhaModel)
+        if (string.IsNullOrWhiteSpace(senhaModel.NovaSenha) || senhaModel.NovaSenha.Length < 6)
         {
-            var usuario = await ObterUsuarioAtualAsync();
-            if (usuario == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            if (string.IsNullOrWhiteSpace(senhaModel.SenhaAtual))
-            {
-                TempData["ErroSenha"] = "A senha atual é obrigatória.";
-                return RedirectToAction("Index");
-            }
-
-            if (string.IsNullOrWhiteSpace(senhaModel.NovaSenha) || senhaModel.NovaSenha.Length < 6)
-            {
-                TempData["ErroSenha"] = "A nova senha deve ter no mínimo 6 caracteres.";
-                return RedirectToAction("Index");
-            }
-
-            if (senhaModel.NovaSenha != senhaModel.ConfirmarNovaSenha)
-            {
-                TempData["ErroSenha"] = "A confirmação de senha não confere com a nova senha digitada.";
-                return RedirectToAction("Index");
-            }
-
-            // Valida se a senha atual confere
-            if (usuario.Senha != senhaModel.SenhaAtual)
-            {
-                TempData["ErroSenha"] = "A senha atual informada está incorreta.";
-                return RedirectToAction("Index");
-            }
-
-            // Atualiza a senha no banco
-            usuario.Senha = senhaModel.NovaSenha;
-            _context.Update(usuario);
-            await _context.SaveChangesAsync();
-
-            TempData["SucessoSenha"] = "Sua senha foi alterada com sucesso! Utilize-a em seu próximo login.";
-            return RedirectToAction("Index");
+            TempData["ErroSenha"] = "A nova senha deve ter no mínimo 6 caracteres.";
+            return RedirectToAction(nameof(Index));
         }
+
+        if (senhaModel.NovaSenha != senhaModel.ConfirmarNovaSenha)
+        {
+            TempData["ErroSenha"] = "A confirmação de senha não confere com a nova senha.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (usuario.Senha != senhaModel.SenhaAtual)
+        {
+            TempData["ErroSenha"] = "A senha atual informada está incorreta.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        usuario.Senha = senhaModel.NovaSenha;
+        context.Update(usuario);
+        await context.SaveChangesAsync();
+
+        TempData["SucessoSenha"] = "Sua senha foi alterada com sucesso!";
+        return RedirectToAction(nameof(Index));
     }
 }
