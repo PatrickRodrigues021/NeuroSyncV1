@@ -6,12 +6,10 @@
     <title>@ViewData["Title"] - NeuroSync</title>
     <link rel="icon" type="image/png" href="~/images/logo-principal-cerebro-coracao 2.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https:
-    
-    
-    <link rel="preconnect" href="https:
-    <link rel="preconnect" href="https:
-    <link href="https:
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     
     <style>
         :root {
@@ -30,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        
         .sidebar { 
             width: 250px; 
             height: 100vh; 
@@ -43,7 +40,6 @@
             transition: transform 0.3s ease;
         }
 
-        
         .sidebar::-webkit-scrollbar {
             width: 5px;
         }
@@ -100,7 +96,6 @@
             transform: translateY(-1px);
         }
 
-        
         .main-content { 
             margin-left: 250px; 
             min-height: 100vh; 
@@ -110,7 +105,6 @@
             transition: margin 0.3s ease, width 0.3s ease;
         }
 
-        
         .mobile-header {
             display: none;
             background-color: var(--navy);
@@ -131,7 +125,6 @@
             z-index: 1035;
         }
 
-        
         @@media (max-width: 991.98px) {
             .mobile-header {
                 display: flex;
@@ -154,7 +147,6 @@
             }
         }
 
-        
         @@media (max-height: 800px) {
             .sidebar-brand-box {
                 margin-bottom: 1.5rem !important;
@@ -171,8 +163,6 @@
     </style>
 </head>
 <body>
-    
-    
     <header class="mobile-header shadow-sm">
         <button type="button" class="btn btn-outline-light btn-sm border-0 fs-4 py-0" id="sidebarToggle" aria-label="Abrir menu lateral">
             <i class="bi bi-list"></i>
@@ -184,30 +174,22 @@
         <div style="width: 32px;"></div> 
     </header>
 
-    
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    
     <div class="sidebar d-flex flex-column py-3 shadow-lg" id="appSidebar">
-        
         <div class="d-flex flex-column align-items-center px-4 mb-4 sidebar-brand-box">
             <img src="~/images/logo-principal-cerebro-coracao 2.png"
-                alt="Logo NeuroSync"
-                class="mb-2"
-                style="height: 72px;
-                        width: auto;
-                        object-fit: contain;
-                        filter: drop-shadow(0 0 10px rgba(49, 91, 239, 0.45));" />
+                 alt="Logo NeuroSync"
+                 class="mb-2"
+                 style="height: 72px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(49, 91, 239, 0.45));" />
 
             <h4 class="text-white fw-bold mb-0">
                 Neuro<span class="text-info">Sync</span>
             </h4>
         </div>
         
-        
         <nav class="flex-grow-1">
             @{
-                
                 var controllerAtual = ViewContext.RouteData.Values["controller"]?.ToString();
             }
 
@@ -236,7 +218,6 @@
             </a>
         </nav>
 
-        
         <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 px-2">
             @if (User?.Identity?.IsAuthenticated == true)
             {
@@ -266,9 +247,7 @@
         </div>
     </div>
 
-    
     <div class="main-content">
-        
         <main role="main">
             @RenderBody()
         </main>
@@ -277,7 +256,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        
         const sidebarToggle = document.getElementById('sidebarToggle');
         const appSidebar = document.getElementById('appSidebar');
         const sidebarBackdrop = document.getElementById('sidebarBackdrop');
