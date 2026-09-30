@@ -201,7 +201,6 @@
 
 <div class="container-fluid px-0">
 
-    <!-- CABEÇALHO -->
     <div class="config-header d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div class="config-title-group">
             <div class="d-flex align-items-center gap-2 mb-1">
@@ -214,7 +213,6 @@
         </div>
     </div>
 
-    <!-- MENSAGENS DE SUCESSO / ERRO -->
     @if (TempData["SucessoPerfil"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
@@ -253,12 +251,8 @@
 
     <div class="row g-4">
 
-        <!-- ========================================== -->
-        <!-- COLUNA PRINCIPAL: PERFIL E SENHA           -->
-        <!-- ========================================== -->
         <div class="col-12 col-lg-7">
 
-            <!-- CARD 1: DADOS DO PERFIL -->
             <div class="card-settings">
                 <div class="card-settings-header">
                     <div class="card-settings-icon icon-blue">
@@ -322,7 +316,6 @@
                         </div>
                     </div>
 
-                    <!-- PREVIEW DA SAUDAÇÃO -->
                     <div class="preview-greeting-box">
                         <div class="preview-greeting-icon">
                             <i class="bi bi-chat-quote-fill"></i>
@@ -343,7 +336,6 @@
                 </form>
             </div>
 
-            <!-- CARD 2: ALTERAÇÃO DE SENHA -->
             <div class="card-settings">
                 <div class="card-settings-header">
                     <div class="card-settings-icon icon-amber">
@@ -425,13 +417,8 @@
             </div>
 
         </div>
-
-        <!-- ========================================== -->
-        <!-- COLUNA LATERAL: STATUS E INFORMAÇÕES       -->
-        <!-- ========================================== -->
         <div class="col-12 col-lg-5">
 
-            <!-- CARD INFORMAÇÕES DA CONTA -->
             <div class="card-settings">
                 <div class="card-settings-header">
                     <div class="card-settings-icon icon-cyan">
@@ -473,7 +460,6 @@
                 </div>
             </div>
 
-            <!-- CARD DICA PROFISSIONAL -->
             <div class="card-settings border-primary border-opacity-25" style="background: #f8fafc;">
                 <div class="d-flex align-items-start gap-3">
                     <div class="rounded-circle p-2 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;">
@@ -495,7 +481,6 @@
 
 @section Scripts {
     <script>
-        // Função para mostrar/ocultar senha
         function toggleSenhaVisibility(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
@@ -509,8 +494,7 @@
                 icon.classList.add('bi-eye');
             }
         }
-
-        // Preview dinâmico do nome e saudação enquanto digita
+        
         document.addEventListener('DOMContentLoaded', function () {
             const inputNome = document.getElementById('inputNome');
             const inputEmail = document.getElementById('inputEmail');

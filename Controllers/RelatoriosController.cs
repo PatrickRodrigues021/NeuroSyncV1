@@ -9,20 +9,10 @@ using NeuroSync.Models;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador responsável pelos Relatórios Clínicos, Indicadores de Neuropsicopedagogia,
-/// Auditoria de Prontuário e Exportação de Atendimentos.
-/// </summary>
 [Authorize]
 public class RelatoriosController(AppDbContext context) : Controller
 {
-    // =========================================================================
-    // 1. TELA PRINCIPAL: INDICADORES E HISTÓRICO DE ATENDIMENTOS
-    // =========================================================================
 
-    /// <summary>
-    /// Calcula os indicadores clínicos do período e carrega o histórico filtrável de sessões.
-    /// </summary>
     public async Task<IActionResult> Index(
         string? aba,
         DateTime? dataInicio,
@@ -50,7 +40,6 @@ public class RelatoriosController(AppDbContext context) : Controller
             StatusSelecionado = status ?? "Todos"
         };
 
-        // 1. Consulta de atendimentos no período selecionado e no período anterior (para variação percentual)
         var atendimentosPeriodo = await context.Agendamentos
             .Include(a => a.Paciente)
             .Where(a => a.DataHora >= inicio && a.DataHora <= fim.AddDays(1).AddTicks(-1))
@@ -67,22 +56,18 @@ public class RelatoriosController(AppDbContext context) : Controller
         var realizadosAnterior = atendimentosAnteriores.Count(a => a.Status.Contains("Realizado"));
         var faltasAnterior = atendimentosAnteriores.Count(a => a.Status.Contains("Falta"));
 
-        // 2. Pacientes ativos únicos com atendimentos no período
         var pacientesAtivosCount = atendimentosPeriodo.Select(a => a.PacienteId).Distinct().Count();
         var pacientesAtivosAnteriorCount = atendimentosAnteriores.Select(a => a.PacienteId).Distinct().Count();
 
-        // 3. Novas avaliações realizadas
         var novasAvaliacoesCount = atendimentosPeriodo.Count(a => a.TipoSessao.Contains("Avaliação"));
         var novasAvaliacoesAnterior = atendimentosAnteriores.Count(a => a.TipoSessao.Contains("Avaliação"));
 
-        // 4. Indicadores de prontuário e pareceres emitidos
         model.EvolucoesRegistradasCount = await context.Evolucoes
             .CountAsync(e => e.DataRegistro >= inicio && e.DataRegistro <= fim.AddDays(1).AddTicks(-1));
 
         model.PareceresEmitidosCount = await context.PareceresTecnicos
             .CountAsync(p => p.DataEmissao >= inicio && p.DataEmissao <= fim.AddDays(1).AddTicks(-1));
 
-        // 5. Consolidação dos KPIs ou preenchimento de padrões demonstrativos elegantes
         if (totalGeral > 0)
         {
             model.AtendimentosRealizados = totalRealizados;
@@ -123,7 +108,6 @@ public class RelatoriosController(AppDbContext context) : Controller
             model.VariacaoNovasAvaliacoes = 12.0;
         }
 
-        // 6. Foco Clínico Neuropsicopedagógico (Donut Chart)
         var intervencoes = atendimentosPeriodo.Count(a => a.TipoSessao.Contains("Intervenção") || a.TipoSessao.Contains("Estimulação") || a.TipoSessao.Contains("Rotina"));
         var avaliacoes = atendimentosPeriodo.Count(a => a.TipoSessao.Contains("Avaliação"));
         var devolutivas = atendimentosPeriodo.Count(a => a.TipoSessao.Contains("Devolutiva"));
@@ -149,7 +133,6 @@ public class RelatoriosController(AppDbContext context) : Controller
             ];
         }
 
-        // 7. Evolução dos últimos 5 meses (Gráfico de Linha)
         string[] mesesPt = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
         List<DateTime> ultimosMeses = [
             hoje.AddMonths(-4), hoje.AddMonths(-3), hoje.AddMonths(-2), hoje.AddMonths(-1), hoje
@@ -170,7 +153,6 @@ public class RelatoriosController(AppDbContext context) : Controller
             model.EvolucaoValores.Add(qtd > 0 ? qtd : defaultCurve[i]);
         }
 
-        // 8. Tabela da aba Histórico de Atendimentos com auditoria de evolução no prontuário
         var queryAtendimentos = context.Agendamentos
             .Include(a => a.Paciente)
             .Where(a => a.DataHora >= inicio && a.DataHora <= fim.AddDays(1).AddTicks(-1))
@@ -189,7 +171,6 @@ public class RelatoriosController(AppDbContext context) : Controller
             .OrderByDescending(a => a.DataHora)
             .ToListAsync();
 
-        // Mapeia quais atendimentos já possuem nota clínica registrada no prontuário
         var idsPacientesNaLista = agendamentosFiltrados.Select(a => a.PacienteId).Distinct().ToList();
         var datasEvolucoes = await context.Evolucoes
             .Where(e => idsPacientesNaLista.Contains(e.PacienteId))
@@ -220,14 +201,6 @@ public class RelatoriosController(AppDbContext context) : Controller
 
         return View(model);
     }
-
-    // =========================================================================
-    // 2. EXPORTAÇÃO CSV COMPATÍVEL COM EXCEL
-    // =========================================================================
-
-    /// <summary>
-    /// Exporta os atendimentos filtrados em CSV com separador ponto e vírgula e encoding UTF-8 com BOM.
-    /// </summary>
     public async Task<IActionResult> Exportar(
         DateTime? dataInicio,
         DateTime? dataFim,

@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class CorrecaoDadosPais : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
@@ -81,8 +79,6 @@ namespace NeuroSync.Migrations
                 nullable: false,
                 defaultValue: "");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

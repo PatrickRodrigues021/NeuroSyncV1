@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Prontuário - " + Model.Nome;
     
-    // Cálculo seguro de idade
+    
     var idade = DateTime.Today.Year - Model.DataNascimento.Year;
     if (Model.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
 
@@ -23,7 +23,7 @@
 }
 
 <style>
-    /* Cabeçalho Limpo */
+    
     .prontuario-header { 
         background: #ffffff; 
         border-radius: 16px; 
@@ -44,7 +44,7 @@
         margin-left: 10px; 
     }
 
-    /* Menu Lateral Vertical Moderno */
+    
     .nav-pills-custom .nav-link {
         color: #475569;
         font-weight: 600;
@@ -79,7 +79,7 @@
         box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
     }
 
-    /* Área de Conteúdo */
+    
     .tab-content-area {
         background: #ffffff;
         border-radius: 16px;
@@ -98,7 +98,7 @@
         gap: 8px;
     }
 
-    /* Badges de Status com Alto Contraste e Legibilidade Garantida */
+    
     .badge-status-atendimento {
         font-size: 0.8rem;
         font-weight: 700;
@@ -197,7 +197,7 @@
         box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
     }
 
-    /* Badges de Evolução com Alto Contraste e Legibilidade Garantida */
+    
     .badge-tipo-sessao {
         background-color: #eff6ff !important;
         color: #1e40af !important;
@@ -258,7 +258,7 @@
         </div>
     }
 
-    <!-- CABEÇALHO DO PACIENTE -->
+    
     <div class="prontuario-header">
         <div class="d-flex align-items-center">
             <div class="me-3" style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; border: 1px solid #bfdbfe;">
@@ -299,10 +299,10 @@
         </div>
     </div>
 
-    <!-- CORPO: MENU NA ESQUERDA E CONTEÚDO NA DIREITA -->
+    
     <div class="row g-4">
         
-        <!-- COLUNA ESQUERDA: AS ABAS DO PRONTUÁRIO -->
+        
         <div class="col-lg-3 col-md-4">
             <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <button class="nav-link @(abaAtiva == "resumo" ? "active" : "")" data-bs-toggle="pill" data-bs-target="#resumo" type="button" role="tab">
@@ -337,11 +337,11 @@
             </div>
         </div>
 
-        <!-- COLUNA DIREITA: CONTEÚDO DAS ABAS -->
+        
         <div class="col-lg-9 col-md-8">
             <div class="tab-content tab-content-area" id="v-pills-tabContent">
                 
-                <!-- 1. RESUMO -->
+                
                 <div class="tab-pane fade @(abaAtiva == "resumo" ? "show active" : "")" id="resumo" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                         <div class="section-title">
@@ -353,7 +353,7 @@
                         </a>
                     </div>
 
-                    <!-- 3 Cards de Indicadores do Paciente -->
+                    
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
                             <div class="card-kpi-subtle">
@@ -381,7 +381,7 @@
                         </div>
                     </div>
 
-                    <!-- Informações Clínicas Centrais -->
+                    
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-4 border h-100">
@@ -439,7 +439,7 @@
                     </div>
                 </div>
 
-                <!-- 2. ANAMNESE -->
+                
                 <div class="tab-pane fade @(abaAtiva == "anamnese" ? "show active" : "")" id="anamnese" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                         <div class="section-title">
@@ -452,7 +452,7 @@
                     </div>
 
                     <div class="row g-4">
-                        <!-- Histórico Escolar -->
+                        
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-4 border h-100">
                                 <h6 class="fw-bold text-dark mb-3"><i class="bi bi-mortarboard text-primary me-2"></i>Histórico Escolar</h6>
@@ -475,7 +475,7 @@
                             </div>
                         </div>
 
-                        <!-- Dados Familiares -->
+                        
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-4 border h-100">
                                 <h6 class="fw-bold text-dark mb-3"><i class="bi bi-people text-success me-2"></i>Filiação e Família</h6>
@@ -492,7 +492,7 @@
                             </div>
                         </div>
 
-                        <!-- Plano Terapêutico e Queixa -->
+                        
                         <div class="col-12">
                             <div class="p-3 bg-light rounded-4 border">
                                 <h6 class="fw-bold text-dark mb-3"><i class="bi bi-card-checklist text-warning me-2"></i>Metas e Diretrizes Terapêuticas</h6>
@@ -515,7 +515,7 @@
                     </div>
                 </div>
 
-                <!-- 3. EVOLUÇÃO (LINHA DO TEMPO) -->
+                
                 <div class="tab-pane fade @(abaAtiva == "evolucao" ? "show active" : "")" id="evolucao" role="tabpanel">
                     @{
                         string GetBadgeClass(string tipo) => tipo switch
@@ -559,7 +559,7 @@
                         </span>
                     </div>
                     
-                    <!-- Formulário de Nova Anotação -->
+                    
                     <form asp-action="AdicionarEvolucao" method="post" class="mb-4 bg-white p-3 p-md-4 rounded-4 border shadow-sm">
                         <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -616,7 +616,7 @@
                         </div>
                     </form>
 
-                    <!-- Timeline e Lista de Evoluções -->
+                    
                     @if (evolucoes.Any())
                     {
                         <div class="ps-3 border-start border-3 border-primary border-opacity-25 mt-4 d-flex flex-column gap-3">
@@ -683,7 +683,7 @@
                     }
                 </div>
 
-                <!-- 4. ATENDIMENTOS -->
+                
                 <div class="tab-pane fade @(abaAtiva == "atendimentos" ? "show active" : "")" id="atendimentos" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                         <div class="section-title">
@@ -793,7 +793,7 @@
                     }
                 </div>
 
-                <!-- 5. EMITIR PARECER TÉCNICO (NOVA ABA PRINCIPAL) -->
+                
                 <div class="tab-pane fade @(abaAtiva == "parecer" ? "show active" : "")" id="parecer" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 flex-wrap gap-2">
                         <div>
@@ -808,7 +808,7 @@
                         </button>
                     </div>
 
-                    <!-- TABELA DE PARECERES EMITIDOS -->
+                    
                     <div class="mb-4">
                         <h6 class="fw-bold text-dark mb-3"><i class="bi bi-folder2-open text-primary me-2"></i>Pareceres Emitidos para @Model.Nome</h6>
                         @if (pareceres.Any())
@@ -860,7 +860,7 @@
                         }
                     </div>
 
-                    <!-- FORMULÁRIO DE EMISSÃO (CONFORME IMAGEM DE REFERÊNCIA) -->
+                    
                     <div class="collapse @(pareceres.Count == 0 ? "show" : "")" id="formNovoParecer">
                         <div class="card border border-primary-subtle rounded-4 p-4 shadow-sm bg-white mb-4">
                             <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
@@ -880,43 +880,43 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="PacienteId" value="@Model.IdPaciente" />
 
-                                <!-- 1. TÍTULO -->
+                                
                                 <div class="mb-3">
                                     <label class="form-label-custom">1. Título do Relatório / Laudo</label>
                                     <input type="text" name="Titulo" class="form-control form-control-lg rounded-3 fw-bold text-dark" value="Relatório de Avaliação Neuropsicopedagógica" required />
                                 </div>
 
-                                <!-- 2. MOTIVO DA AVALIAÇÃO -->
+                                
                                 <div class="mb-3">
                                     <label class="form-label-custom">2. Motivo da Avaliação</label>
                                     <textarea name="MotivoAvaliacao" class="form-control form-textarea-custom" rows="3" placeholder="Descreva a queixa principal, motivo do encaminhamento (escola, neuropediatra, iniciativa familiar) e metas da investigação clínica..."></textarea>
                                 </div>
 
-                                <!-- 3. PROCEDIMENTOS E RECURSOS UTILIZADOS -->
+                                
                                 <div class="mb-3">
                                     <label class="form-label-custom">3. Procedimentos e Recursos Utilizados</label>
                                     <textarea name="ProcedimentosRecursos" class="form-control form-textarea-custom" rows="3" placeholder="Ex: Bateria neuropsicológica, escalas padronizadas, observação lúdica orientada, sessões com o paciente, entrevistas com responsáveis e contato com a equipe pedagógica escolar..."></textarea>
                                 </div>
 
-                                <!-- 4. ANÁLISE DO PROCESSO AVALIATIVO -->
+                                
                                 <div class="mb-3">
                                     <label class="form-label-custom">4. Análise do Processo Avaliativo</label>
                                     <textarea name="AnaliseAvaliativa" class="form-control form-textarea-custom" rows="4" placeholder="Descreva pormenorizadamente o desempenho das funções cognitivas, atenção concentrada e sustentada, memória operacional, funções executivas, linguagem, praxias, raciocínio lógico e aspectos comportamentais/afetivos..."></textarea>
                                 </div>
 
-                                <!-- 5. SÍNTESE AVALIATIVA E DIAGNÓSTICA -->
+                                
                                 <div class="mb-3">
                                     <label class="form-label-custom">5. Síntese Avaliativa e Diagnóstica</label>
                                     <textarea name="SinteseAvaliativa" class="form-control form-textarea-custom" rows="3" placeholder="Conclusão diagnóstica ou indicativa, síntese do perfil neuropsicopedagógico e hipóteses funcionais levantadas..."></textarea>
                                 </div>
 
-                                <!-- 6. RECOMENDAÇÕES E CONSIDERAÇÕES FINAIS -->
+                                
                                 <div class="mb-4">
                                     <label class="form-label-custom">6. Recomendações e Considerações Finais</label>
                                     <textarea name="RecomendacoesFinais" class="form-control form-textarea-custom" rows="3" placeholder="Orientações e adaptações curriculares para a escola, orientações de rotina familiar, frequência de atendimentos terapêuticos e encaminhamentos médicos ou complementares..."></textarea>
                                 </div>
 
-                                <!-- DADOS DO PROFISSIONAL RESPONSÁVEL -->
+                                
                                 <div class="row g-3 p-3 bg-light rounded-4 border mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label-custom">Nome do Profissional Responsável</label>
@@ -928,7 +928,7 @@
                                     </div>
                                 </div>
 
-                                <!-- AVISO DE CONFIDENCIALIDADE -->
+                                
                                 <div class="alert alert-light border rounded-3 p-3 d-flex align-items-center gap-3 mb-4 text-muted small">
                                     <i class="bi bi-shield-lock-fill fs-4 text-primary"></i>
                                     <div>
@@ -936,7 +936,7 @@
                                     </div>
                                 </div>
 
-                                <!-- BOTÃO DE ENVIO -->
+                                
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#formNovoParecer">
                                         Cancelar
@@ -950,7 +950,7 @@
                     </div>
                 </div>
 
-                <!-- 6. DOCUMENTOS (ATESTADOS E DECLARAÇÕES RÁPIDAS) -->
+                
                 <div class="tab-pane fade @(abaAtiva == "documentos" ? "show active" : "")" id="documentos" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                         <div class="section-title">
@@ -1013,7 +1013,7 @@
                     </div>
                 </div>
 
-                <!-- 7. ANEXOS (UPLOAD) -->
+                
                 <div class="tab-pane fade @(abaAtiva == "anexos" ? "show active" : "")" id="anexos" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                         <div class="section-title">
@@ -1065,7 +1065,7 @@
                     }
                 </div>
 
-                <!-- 8. FINANCEIRO -->
+                
                 <div class="tab-pane fade @(abaAtiva == "financeiro" ? "show active" : "")" id="financeiro" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 flex-wrap gap-2">
                         <div class="section-title">
@@ -1077,7 +1077,7 @@
                         </a>
                     </div>
 
-                    <!-- Indicadores Financeiros do Paciente -->
+                    
                     @{
                         var totalFaturado = cobrancas.Sum(c => c.Valor);
                         var totalPago = cobrancas.Where(c => c.Status == "Pago").Sum(c => c.Valor);
@@ -1168,7 +1168,7 @@
     </div>
 </div>
 
-<!-- MODAL DE VISUALIZAÇÃO COMPLETA DA EVOLUÇÃO -->
+
 <div class="modal fade" id="modalVisualizarEvolucao" tabindex="-1" aria-labelledby="modalVisualizarEvolucaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">

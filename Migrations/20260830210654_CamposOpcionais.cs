@@ -4,10 +4,8 @@
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class CamposOpcionais : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -190,8 +188,6 @@ namespace NeuroSync.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 14);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(

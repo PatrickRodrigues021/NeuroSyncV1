@@ -3,10 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Entidade de agendamento de agenda legada.
-/// Preservada para compatibilidade de integridade referencial com a tabela 'agenda' do banco de dados SQLite.
-/// </summary>
 [Table("agenda")]
 public class Agenda
 {

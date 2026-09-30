@@ -4,39 +4,39 @@
 }
 
 <style>
-    /* 1. MÁGICA DO CONTRASTE: Pinta o fundo da tela de "Gelo" para os cartões brancos se destacarem */
+    
     body, main, .container, .pb-3 {
         background-color: #f1f5f9 !important; 
     }
 
 
-    /* 2. CABEÇALHO COMPACTO: Tudo mais próximo e alinhado à esquerda */
+    
     .header-card {
         background-color: #ffffff;
         border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.04); /* Sombra suave para dar destaque */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
         padding: 24px 32px;
         margin-bottom: 32px;
         border: none;
         display: flex;
         align-items: center;
-        justify-content: flex-start; /* Mantém tudo do lado esquerdo */
-        gap: 40px; /* Dá um respiro de 40px entre o texto e a barra de busca */
+        justify-content: flex-start; 
+        gap: 40px; 
         flex-wrap: wrap; 
     }
     
     .header-text { display: flex; flex-direction: column; }
 
-    /* 3. BARRA DE BUSCA */
+    
     .search-input-group {
         width: 100%;
-        max-width: 320px; /* Deixei a barra um pouco mais delicada */
+        max-width: 320px; 
     }
     .search-input-group .input-group-text { background-color: #f8fafc; border-color: #e2e8f0; }
     .search-input-group .form-control { background-color: #f8fafc; border-color: #e2e8f0; font-weight: 500; }
     .search-input-group .form-control:focus { background-color: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(49, 91, 239, 0.1); }
 
-    /* 4. CARTÕES DOS PACIENTES (Com efeito hover!) */
+    
     .patient-card {
         background-color: #ffffff;
         border-radius: 16px;
@@ -44,21 +44,21 @@
         border: none;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    /* Quando passar o mouse, o cartão flutua e a sombra aumenta */
+    
     .patient-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
 </style>
 
-<!-- CABEÇALHO DENTRO DO CARTÃO -->
+
 <div class="header-card mt-4">
     <div class="header-text">
         <h3 class="fw-bold mb-1" style="color: var(--text-dark);">Prontuários Eletrônicos</h3>
         <p class="text-muted fw-bold mb-0">Selecione um paciente para acessar o histórico.</p>
     </div>
     
-    <!-- BARRA DE PESQUISA -->
+    
     <div class="search-input-group">
         <div class="input-group">
             <span class="input-group-text border-end-0 text-muted rounded-start-pill ps-4">
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-<!-- LISTA DE CARTÕES DE PACIENTES -->
+
 <div class="row g-4" id="gradePacientes">
     @foreach (var paciente in Model)
     {
@@ -94,7 +94,7 @@
         </div>
     }
 
-    <!-- MENSAGEM CASO A BUSCA NÃO ENCONTRE NINGUÉM -->
+    
     <div id="mensagemVazia" class="col-12 text-center py-5" style="display: none;">
         <i class="bi bi-search text-muted mb-3" style="font-size: 3rem;"></i>
         <h5 class="fw-bold text-muted">Nenhum paciente encontrado</h5>

@@ -4,13 +4,13 @@ using NeuroSync.Data;
 using NeuroSync.Models;
 using QuestPDF.Infrastructure;
 
-// 1. Configuração da Licença Comunitária do QuestPDF (para emissão de relatórios clínicos e pareceres)
+
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 2. Injeção de Dependências e Serviços
-// Configuração do contexto do banco de dados SQLite
+
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase))
 {
@@ -19,10 +19,10 @@ if (string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("Se
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// Suporte para controllers MVC e Views Razor
+
 builder.Services.AddControllersWithViews();
 
-// Configuração de Autenticação baseada em Cookies
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
-// 3. Pipeline de Requisições HTTP
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -50,27 +50,27 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 4. Inicialização e Migrações do Banco de Dados SQLite
+
 InicializarBancoDeDados(app);
 
 app.Run();
 
-// =========================================================================
-// MÉTODOS AUXILIARES DE INICIALIZAÇÃO DO BANCO DE DADOS
-// =========================================================================
 
-/// <summary>
-/// Garante que o banco SQLite esteja criado, atualiza esquemas de tabelas e popula dados iniciais.
-/// </summary>
+
+
+
+
+
+
 static void InicializarBancoDeDados(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    // Garante que a estrutura básica do banco exista
+    
     db.Database.EnsureCreated();
 
-    // Cria tabelas complementares caso ainda não existam no SQLite
+    
     db.Database.ExecuteSqlRaw(@"
         CREATE TABLE IF NOT EXISTS parecer_tecnico (
             id_parecer INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,10 +107,10 @@ static void InicializarBancoDeDados(WebApplication app)
         );
     ");
 
-    // Verifica e adiciona colunas ausentes na tabela 'evolucao' sem recriar a tabela
+    
     VerificarColunasEvolucao(db);
 
-    // Cria o usuário padrão da profissional (Dra. Mariana Silva) se a base estiver vazia
+    
     if (!db.Usuarios.Any())
     {
         db.Usuarios.Add(new Usuario
@@ -123,16 +123,16 @@ static void InicializarBancoDeDados(WebApplication app)
         db.SaveChanges();
     }
 
-    // Popula despesas realistas para o mês corrente na primeira execução
+    
     if (!db.Despesas.Any())
     {
         PopularDespesasIniciais(db);
     }
 }
 
-/// <summary>
-/// Adiciona colunas complementares à tabela 'evolucao' caso a base SQLite venha de versão anterior.
-/// </summary>
+
+
+
 static void VerificarColunasEvolucao(AppDbContext db)
 {
     var conn = db.Database.GetDbConnection();
@@ -161,9 +161,9 @@ static void VerificarColunasEvolucao(AppDbContext db)
     }
 }
 
-/// <summary>
-/// Popula despesas operacionais realistas da clínica (Luz, Água, Internet, Aluguel, etc.).
-/// </summary>
+
+
+
 static void PopularDespesasIniciais(AppDbContext db)
 {
     var hoje = DateTime.Today;

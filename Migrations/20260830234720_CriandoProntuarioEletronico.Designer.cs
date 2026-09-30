@@ -14,7 +14,6 @@ namespace NeuroSync.Migrations
     [Migration("20260830234720_CriandoProntuarioEletronico")]
     partial class CriandoProntuarioEletronico
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

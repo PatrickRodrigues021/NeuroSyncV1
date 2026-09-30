@@ -3,10 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Entidade de plano de intervenção terapêutica legada.
-/// Preservada para compatibilidade de integridade referencial com a tabela 'intervencao' do banco de dados SQLite.
-/// </summary>
 [Table("intervencao")]
 public class Intervencao
 {
@@ -26,8 +22,5 @@ public class Intervencao
     [Column("status")]
     public string Status { get; set; } = "Em Andamento";
 
-    /// <summary>
-    /// Coleção de sessões vinculadas à intervenção.
-    /// </summary>
     public ICollection<Sessao> Sessoes { get; set; } = [];
 }

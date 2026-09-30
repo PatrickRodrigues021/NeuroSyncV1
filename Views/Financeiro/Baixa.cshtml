@@ -5,18 +5,15 @@
 }
 
 <style>
-    /* Estilos Modernos da Tela de Baixa / Pagamento */
     .finance-baixa-wrapper {
         padding-top: 0.5rem;
         padding-bottom: 3rem;
     }
 
-    /* Esconde barra de validação vazia */
     .validation-summary-valid {
         display: none !important;
     }
 
-    /* Cabeçalho da Página */
     .page-header-box {
         display: flex;
         justify-content: space-between;
@@ -57,7 +54,6 @@
         margin-bottom: 0;
     }
 
-    /* Cartão Principal */
     .card-modern-form {
         background: #FFFFFF;
         border-radius: 20px;
@@ -113,7 +109,6 @@
         outline: none;
     }
 
-    /* Chips de Atalho Rápido para Data */
     .quick-chips-wrapper {
         display: flex;
         flex-wrap: wrap;
@@ -143,7 +138,6 @@
         transform: translateY(-1px);
     }
 
-    /* Box de Resumo da Fatura */
     .payment-summary-box {
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
@@ -178,7 +172,6 @@
         font-weight: 700;
     }
 
-    /* Cartão Lateral de Recibo */
     .invoice-preview-card {
         background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
         border-radius: 20px;
@@ -224,7 +217,6 @@
         line-height: 1.1;
     }
 
-    /* Dica Informativa */
     .info-tip-card {
         background: #F0FDF4;
         border: 1px solid #BBF7D0;
@@ -247,7 +239,6 @@
 
 <div class="finance-baixa-wrapper">
 
-    <!-- CABEÇALHO -->
     <div class="page-header-box">
         <div>
             <div class="page-title">
@@ -269,11 +260,9 @@
 
         <div class="row g-4">
             
-            <!-- COLUNA ESQUERDA: FORMULÁRIO DE CONFIRMAÇÃO -->
             <div class="col-12 col-lg-8">
                 <div class="card-modern-form">
                     
-                    @* Só exibe o alerta de erro se houver realmente algum erro de validação *@
                     @if (!ViewData.ModelState.IsValid)
                     {
                         <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3 mb-4"></div>
@@ -289,7 +278,6 @@
                         </div>
                     }
 
-                    <!-- Resumo Rápido da Cobrança -->
                     <div class="form-section-title">
                         <i class="bi bi-receipt"></i>
                         <span>Dados da Cobrança</span>
@@ -314,7 +302,6 @@
                         </div>
                     </div>
 
-                    <!-- Seção da Data de Pagamento -->
                     <div class="form-section-title mt-4">
                         <i class="bi bi-calendar2-check"></i>
                         <span>Liquidação Financeira</span>
@@ -323,8 +310,7 @@
                     <div class="mb-4">
                         <label asp-for="DataPagamento" class="form-label-custom">Data do Recebimento *</label>
                         <input asp-for="DataPagamento" id="inputDataPagamento" type="date" class="input-custom" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
-                        
-                        <!-- Chips de datas rápidas -->
+        
                         <div class="quick-chips-wrapper">
                             <button type="button" class="quick-chip-btn" onclick="setDataPagamentoHoje()">
                                 <i class="bi bi-check2"></i> Recebido Hoje
@@ -338,7 +324,6 @@
                         </div>
                     </div>
 
-                    <!-- BARRINHA DE BOTÕES DE AÇÃO -->
                     <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
                         <a href="/Financeiro" class="btn btn-light fw-bold text-muted px-4 py-2 rounded-pill border">
                             Cancelar
@@ -353,8 +338,6 @@
 
                 </div>
             </div>
-
-            <!-- COLUNA DIREITA: RECIBO VISUAL -->
             <div class="col-12 col-lg-4">
                 <div class="invoice-preview-card">
                     
@@ -391,8 +374,6 @@
                             <span class="badge bg-success text-white rounded-pill px-2">Pago</span>
                         </div>
                     </div>
-
-                    <!-- Dica Informativa -->
                     <div class="info-tip-card">
                         <i class="bi bi-check-circle-fill"></i>
                         <div>

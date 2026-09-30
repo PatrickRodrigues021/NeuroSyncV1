@@ -10,20 +10,10 @@ using QuestPDF.Infrastructure;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador central para gestão dos Pacientes, Prontuário Eletrônico (PEP),
-/// Evoluções Clínicas, Pareceres Técnicos de Neuropsicopedagogia e Anexos.
-/// </summary>
 [Authorize]
 public class PacientesController(AppDbContext context, IWebHostEnvironment hostEnvironment) : Controller
 {
-    // =========================================================================
-    // 1. BUSCA E LISTAGEM DE PACIENTES
-    // =========================================================================
 
-    /// <summary>
-    /// Lista os pacientes cadastrados com filtro dinâmico por termo de busca.
-    /// </summary>
     public async Task<IActionResult> Index(string termoBusca)
     {
         var pacientes = context.Pacientes.AsQueryable();
@@ -37,14 +27,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return View(await pacientes.OrderBy(p => p.Nome).ToListAsync());
     }
-
-    // =========================================================================
-    // 2. PRONTUÁRIO CLÍNICO INTEGRADO (PEP)
-    // =========================================================================
-
-    /// <summary>
-    /// Exibe a ficha completa do paciente: resumo, anamnese, evoluções, atendimentos, pareceres, cobranças e anexos.
-    /// </summary>
     public async Task<IActionResult> Details(int? id, string? aba = null)
     {
         if (id == null) return NotFound();
@@ -52,7 +34,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         var paciente = await context.Pacientes.FirstOrDefaultAsync(m => m.IdPaciente == id);
         if (paciente == null) return NotFound();
 
-        // 1. Evoluções clínicas registradas
         var evolucoes = await context.Evolucoes
             .Where(e => e.PacienteId == id)
             .OrderByDescending(e => e.DataRegistro)
@@ -60,7 +41,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         ViewBag.Evolucoes = evolucoes;
         ViewBag.UltimasEvolucoes = evolucoes;
 
-        // 2. Histórico de agendamentos e próximos atendimentos
         var todosAgendamentos = await context.Agendamentos
             .Where(a => a.PacienteId == id)
             .OrderByDescending(a => a.DataHora)
@@ -69,19 +49,16 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         ViewBag.Agendamentos = todosAgendamentos.Where(a => a.DataHora >= DateTime.Today).OrderBy(a => a.DataHora).ToList();
         ViewBag.ProximosAtendimentos = ViewBag.Agendamentos;
 
-        // 3. Pareceres técnicos emitidos
         ViewBag.PareceresTecnicos = await context.PareceresTecnicos
             .Where(p => p.PacienteId == id)
             .OrderByDescending(p => p.DataEmissao)
             .ToListAsync();
 
-        // 4. Cobranças e faturamento do paciente
         ViewBag.Cobrancas = await context.Cobrancas
             .Where(c => c.PacienteId == id)
             .OrderByDescending(c => c.DataVencimento)
             .ToListAsync();
 
-        // 5. Arquivos e documentos anexados
         ViewBag.Anexos = await context.Anexos
             .Where(a => a.PacienteId == id)
             .OrderByDescending(a => a.DataUpload)
@@ -92,13 +69,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         return View(paciente);
     }
 
-    // =========================================================================
-    // 3. EVOLUÇÕES CLÍNICAS (REGISTRO, CONSULTA, IMPRESSÃO E PDF)
-    // =========================================================================
-
-    /// <summary>
-    /// Registra uma nova evolução de sessão no prontuário do paciente.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AdicionarEvolucao(int PacienteId, string Anotacao, string? TipoEvolucao, string? ProfissionalNome)
@@ -125,10 +95,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return RedirectToAction(nameof(Details), new { id = PacienteId, aba = "evolucao" });
     }
-
-    /// <summary>
-    /// Abre a tela de visualização individual e detalhada da evolução clínica.
-    /// </summary>
     public async Task<IActionResult> VisualizarEvolucao(int id)
     {
         var evolucao = await context.Evolucoes
@@ -137,10 +103,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return evolucao == null ? NotFound() : View(evolucao);
     }
-
-    /// <summary>
-    /// Abre folha timbrada web pronta para impressão direta da evolução clínica.
-    /// </summary>
     public async Task<IActionResult> ImprimirEvolucao(int id)
     {
         var evolucao = await context.Evolucoes
@@ -149,10 +111,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return evolucao == null ? NotFound() : View(evolucao);
     }
-
-    /// <summary>
-    /// Emite documento oficial em PDF da evolução clínica com identidade visual NeuroSync via QuestPDF.
-    /// </summary>
     public async Task<IActionResult> GerarEvolucaoPdf(int id)
     {
         var evolucao = await context.Evolucoes
@@ -182,7 +140,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
                 page.Margin(32);
                 page.DefaultTextStyle(x => x.FontSize(9.5f).FontColor(Color.FromHex("#1e293b")));
 
-                // 1. Cabeçalho Timbrado
                 page.Header().Column(headerCol =>
                 {
                     headerCol.Item().Row(row =>
@@ -218,7 +175,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
                     headerCol.Item().PaddingTop(8).LineHorizontal(2).LineColor(Color.FromHex("#315BEF"));
                 });
 
-                // 2. Corpo do Documento
                 page.Content().PaddingTop(16).Column(col =>
                 {
                     col.Item().Background(Color.FromHex("#F8FAFC")).Border(1).BorderColor(Color.FromHex("#E2E8F0")).Padding(12).Column(pCol =>
@@ -265,7 +221,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
                     });
                 });
 
-                // 3. Rodapé
                 page.Footer().Column(fCol =>
                 {
                     fCol.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten1);
@@ -288,13 +243,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         return File(pdfBytes, "application/pdf", $"Evolucao-{paciente.Nome.Replace(" ", "_")}-{evolucao.DataRegistro:yyyyMMdd}.pdf");
     }
 
-    // =========================================================================
-    // 4. PARECERES TÉCNICOS DE NEUROPSICOPEDAGOGIA
-    // =========================================================================
-
-    /// <summary>
-    /// Cria ou atualiza o parecer técnico de avaliação neuropsicopedagógica.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SalvarParecerTecnico(ParecerTecnico model)
@@ -323,9 +271,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         return RedirectToAction(nameof(Details), new { id = model.PacienteId, aba = "parecer" });
     }
 
-    /// <summary>
-    /// Emite documento formal em PDF do parecer técnico neuropsicopedagógico via QuestPDF.
-    /// </summary>
     public async Task<IActionResult> GerarParecerPdf(int id)
     {
         var parecer = await context.PareceresTecnicos
@@ -354,8 +299,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
                 page.Size(PageSizes.A4);
                 page.Margin(32);
                 page.DefaultTextStyle(x => x.FontSize(9.5f).FontColor(Color.FromHex("#1e293b")));
-
-                // 1. Cabeçalho
                 page.Header().Column(headerCol =>
                 {
                     headerCol.Item().Row(row =>
@@ -390,8 +333,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
                     headerCol.Item().PaddingTop(8).LineHorizontal(2).LineColor(Color.FromHex("#315BEF"));
                 });
-
-                // 2. Conteúdo do Laudo
                 page.Content().PaddingTop(12).Column(contentCol =>
                 {
                     contentCol.Item().Border(1).BorderColor(Color.FromHex("#e2e8f0")).Background(Color.FromHex("#f8fafc")).Padding(10).Column(pCol =>
@@ -434,8 +375,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
                         sigCol.Item().AlignCenter().Text(parecer.RegistroProfissional ?? "Neuropsicopedagoga Clínica").FontSize(9).FontColor(Colors.Grey.Darken2);
                     });
                 });
-
-                // 3. Rodapé
                 page.Footer().Row(r =>
                 {
                     r.RelativeItem().Text("NeuroSync • Prontuário Eletrônico e Gestão Clínica").FontSize(8).FontColor(Colors.Grey.Medium);
@@ -455,13 +394,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         return File(pdfBytes, "application/pdf", $"Parecer_Tecnico_{nomeSanitizado}_{parecer.IdParecer}.pdf");
     }
 
-    // =========================================================================
-    // 5. UPLOAD E GESTÃO DE ANEXOS
-    // =========================================================================
-
-    /// <summary>
-    /// Salva arquivo anexo (PDF, exame, foto de atividade) vinculado ao prontuário do paciente.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadArquivo(int PacienteId, IFormFile arquivoUpload)
@@ -493,11 +425,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return RedirectToAction(nameof(Details), new { id = PacienteId, aba = "anexos" });
     }
-
-    // =========================================================================
-    // 6. CADASTRO, EDIÇÃO E EXCLUSÃO DE PACIENTES
-    // =========================================================================
-
+    
     [HttpGet]
     public IActionResult Create() => View();
 

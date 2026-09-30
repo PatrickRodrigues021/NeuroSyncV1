@@ -3,19 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Representa o cadastro completo do paciente atendido no consultório de Neuropsicopedagogia,
-/// contendo dados demográficos, filiação, contexto escolar e anamnese clínica.
-/// Mapeada para a tabela 'paciente' do banco de dados SQLite.
-/// </summary>
 [Table("paciente")]
 public class Paciente
 {
     [Key]
     [Column("id_paciente")]
     public int IdPaciente { get; set; }
-
-    // --- IDENTIFICAÇÃO DO PACIENTE ---
 
     [Required(ErrorMessage = "O Nome é obrigatório.")]
     [MaxLength(100)]
@@ -38,8 +31,6 @@ public class Paciente
 
     [Column("data_cadastro")]
     public DateTime DataCadastro { get; set; } = DateTime.Now;
-
-    // --- ENDEREÇO RESIDENCIAL ---
 
     [MaxLength(10)]
     [Column("cep")]
@@ -77,8 +68,6 @@ public class Paciente
     [Column("telefone")]
     public string? Telefone { get; set; }
 
-    // --- FILIAÇÃO: DADOS DO PAI ---
-
     [MaxLength(100)]
     [Column("nome_pai")]
     public string? NomePai { get; set; }
@@ -101,8 +90,6 @@ public class Paciente
     [MaxLength(100)]
     [Column("profissao_pai")]
     public string? ProfissaoPai { get; set; }
-
-    // --- FILIAÇÃO: DADOS DA MÃE ---
 
     [MaxLength(100)]
     [Column("nome_mae")]
@@ -127,8 +114,6 @@ public class Paciente
     [Column("profissao_mae")]
     public string? ProfissaoMae { get; set; }
 
-    // --- CONTEXTO ESCOLAR ---
-
     [MaxLength(150)]
     [Column("escola_estuda")]
     public string? EscolaEstuda { get; set; }
@@ -148,8 +133,6 @@ public class Paciente
     [Required]
     [Column("criado_em")]
     public DateTime CriadoEm { get; set; } = DateTime.Now;
-
-    // --- ANAMNESE E CONDUTA CLÍNICA ---
 
     [Column("diagnostico_principal")]
     public string? DiagnosticoPrincipal { get; set; }

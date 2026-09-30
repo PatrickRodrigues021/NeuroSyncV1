@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class AdicionandoResponsavel : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
@@ -25,8 +23,6 @@ namespace NeuroSync.Migrations
                 maxLength: 100,
                 nullable: true);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

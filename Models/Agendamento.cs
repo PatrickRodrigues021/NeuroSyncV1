@@ -3,10 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Representa um atendimento agendado na clínica.
-/// Suporta modalidades como Avaliação Neuropsicopedagógica, Intervenção Cognitiva e Devolutiva.
-/// </summary>
 [Table("agendamento")]
 public class Agendamento
 {
@@ -27,11 +23,11 @@ public class Agendamento
 
     [MaxLength(50)]
     [Column("status")]
-    public string Status { get; set; } = "Agendado"; // Agendado, Realizado, Cancelado, Falta, Em atendimento
+    public string Status { get; set; } = "Agendado"; 
 
     [MaxLength(50)]
     [Column("tipo_sessao")]
-    public string TipoSessao { get; set; } = "Intervenção"; // Intervenção, Avaliação, Devolutiva, Orientação Escolar
+    public string TipoSessao { get; set; } = "Intervenção"; 
 
     [MaxLength(500)]
     [Column("observacoes")]

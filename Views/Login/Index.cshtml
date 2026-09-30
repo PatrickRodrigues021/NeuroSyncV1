@@ -10,9 +10,9 @@
     <title>Login - NeuroSync</title>
     <link rel="icon" type="image/png" href="~/images/logo-principal-cerebro-coracao 2.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https:
     
-    <!-- CSS DO MAPLIBRE (Necessário para o OpenFreeMap) -->
+    
     <link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet" />
     
     <style>
@@ -35,7 +35,7 @@
             min-height: 100dvh;
         }
 
-        /* --- ESTILOS DA BARRA LATERAL ESCURA --- */
+        
         .bg-navy { background-color: var(--navy); }
         .text-cyan { color: var(--cyan); }
         
@@ -50,7 +50,7 @@
         .form-control.input-dark { border-left: none; }
         .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
 
-        /* Estilos Responsivos de Login */
+        
         .login-page, .login-row {
             min-height: 100vh;
         }
@@ -83,7 +83,7 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Adaptação para monitores com altura reduzida (< 850px ou zoom 125%/150%) */
+        
         @@media (max-height: 850px) {
             .login-sidebar {
                 padding: clamp(1rem, 2.5vh, 2rem) !important;
@@ -122,9 +122,9 @@
     <div class="container-fluid p-0 login-page">
         <div class="row g-0 login-page login-row">
 
-            <!-- ========================================== -->
-            <!-- COLUNA ESQUERDA: LOGIN                     -->
-            <!-- ========================================== -->
+            
+            
+            
             <div class="col-12 col-lg-5 col-xl-4 bg-navy d-flex flex-column justify-content-between p-4 p-md-5 shadow-lg position-relative z-3 login-sidebar">
                 
                 <div class="text-center">
@@ -211,7 +211,7 @@
                         </div>
                     </form>
 
-                    <!-- MAPA DA CLÍNICA -->
+                    
                     <div class="mt-4 border-top border-secondary pt-3">
                         <label class="form-label text-white fw-bold small mb-2"><i class="bi bi-geo-alt-fill text-cyan"></i> Onde estamos</label>
                         <div id="mapa-clinica"></div>
@@ -231,9 +231,9 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- COLUNA DIREITA (Ilustração e Apresentação)  -->
-            <!-- ========================================== -->
+            
+            
+            
             <div class="col-lg-7 col-xl-8 d-none d-lg-flex flex-column login-content justify-content-between"
                  style="background-color: #f4f6fa;">
                 
@@ -258,11 +258,11 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SCRIPTS DA PÁGINA                            -->
-    <!-- ========================================== -->
+    
+    
+    
     <script>
-        // Lógica de alternar a visualização da senha
+        
         const botao = document.getElementById("alternarSenha");
         const senha = document.getElementById("senha");
 
@@ -280,22 +280,22 @@
         });
     </script>
     
-    <!-- SCRIPTS DO OPENFREEMAP (MapLibre) -->
-    <script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+    
+    <script src="https:
     <script>
-        // Ordem do MapLibre: [Longitude, Latitude]
-        // Mantido o centro em Curitiba para testes
+        
+        
         const coordenadasClinica = [-49.2733, -25.4284]; 
 
         const map = new maplibregl.Map({
             container: 'mapa-clinica',
-            style: 'https://tiles.openfreemap.org/styles/liberty', // Estilo do mapa
+            style: 'https:
             center: coordenadasClinica,
             zoom: 14,
-            attributionControl: false // Remove os textos de direitos autorais para visual mais limpo
+            attributionControl: false 
         });
 
-        // Adiciona o pino no mapa usando a cor da sua paleta (--cyan)
+        
         new maplibregl.Marker({ color: "#16C4C8" })
             .setLngLat(coordenadasClinica)
             .addTo(map);

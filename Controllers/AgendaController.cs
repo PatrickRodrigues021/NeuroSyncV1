@@ -7,20 +7,10 @@ using NeuroSync.Models;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador responsável pela gestão da agenda clínica e agendamento de sessões.
-/// Suporta recorrência automática (semanas) e geração integrada de cobrança por sessão.
-/// </summary>
+
 [Authorize]
 public class AgendaController(AppDbContext context) : Controller
 {
-    // =========================================================================
-    // 1. LISTAGEM DA AGENDA
-    // =========================================================================
-
-    /// <summary>
-    /// Exibe a lista completa de atendimentos agendados em ordem cronológica.
-    /// </summary>
     public async Task<IActionResult> Index()
     {
         var agendamentos = await context.Agendamentos
@@ -31,13 +21,6 @@ public class AgendaController(AppDbContext context) : Controller
         return View(agendamentos);
     }
 
-    // =========================================================================
-    // 2. NOVO AGENDAMENTO
-    // =========================================================================
-
-    /// <summary>
-    /// Abre o formulário para cadastro de um novo agendamento.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Create(int? pacienteId, string? data)
     {
@@ -69,9 +52,6 @@ public class AgendaController(AppDbContext context) : Controller
         return View(agendamento);
     }
 
-    /// <summary>
-    /// Salva o agendamento com suporte à repetição semanal (1, 4, 12 ou 24 semanas) e geração de cobrança.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Agendamento agendamento, int semanasRepeticao = 1, decimal? valorSessao = null)
@@ -80,7 +60,6 @@ public class AgendaController(AppDbContext context) : Controller
         {
             var novasSessoes = new List<Agendamento>();
 
-            // Cria os registros das sessões recorrentes de acordo com o intervalo selecionado
             for (int i = 0; i < semanasRepeticao; i++)
             {
                 var novaSessao = new Agendamento
@@ -96,10 +75,8 @@ public class AgendaController(AppDbContext context) : Controller
                 novasSessoes.Add(novaSessao);
             }
 
-            // Persiste as sessões para obter os Ids gerados
             await context.SaveChangesAsync();
 
-            // Gera cobranças pendentes automáticas caso um valor por sessão tenha sido informado
             if (valorSessao is > 0)
             {
                 foreach (var sessao in novasSessoes)
@@ -124,13 +101,6 @@ public class AgendaController(AppDbContext context) : Controller
         return View(agendamento);
     }
 
-    // =========================================================================
-    // 3. EDIÇÃO DE AGENDAMENTO
-    // =========================================================================
-
-    /// <summary>
-    /// Abre o formulário de edição de um atendimento existente.
-    /// </summary>
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -142,9 +112,6 @@ public class AgendaController(AppDbContext context) : Controller
         return View(agendamento);
     }
 
-    /// <summary>
-    /// Salva as alterações efetuadas em um atendimento.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Agendamento agendamento)
@@ -162,13 +129,7 @@ public class AgendaController(AppDbContext context) : Controller
         return View(agendamento);
     }
 
-    // =========================================================================
-    // 4. EXCLUSÃO DE AGENDAMENTO
-    // =========================================================================
 
-    /// <summary>
-    /// Abre a tela de confirmação de exclusão do agendamento.
-    /// </summary>
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
@@ -180,9 +141,6 @@ public class AgendaController(AppDbContext context) : Controller
         return agendamento == null ? NotFound() : View(agendamento);
     }
 
-    /// <summary>
-    /// Executa a exclusão definitiva do agendamento selecionado.
-    /// </summary>
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -197,13 +155,6 @@ public class AgendaController(AppDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // =========================================================================
-    // 5. TRANSIÇÃO CLÍNICA: INICIAR ATENDIMENTO
-    // =========================================================================
-
-    /// <summary>
-    /// Marca o agendamento como "Em atendimento" e redireciona para a aba de evolução do paciente.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> IniciarAtendimento(int? id, int? pacienteId)
     {

@@ -3,10 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Entidade de liquidação financeira legada.
-/// Preservada para compatibilidade de integridade referencial com a tabela 'pagamento' do banco de dados SQLite.
-/// </summary>
 [Table("pagamento")]
 public class Pagamento
 {

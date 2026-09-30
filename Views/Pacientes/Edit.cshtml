@@ -6,7 +6,7 @@
 }
 
 <style>
-    /* Estilos Premium da Tela de Edição de Paciente */
+    
     .edit-page-header {
         margin-bottom: 24px;
     }
@@ -182,7 +182,7 @@
 
 <div class="container-fluid px-0">
 
-    <!-- CABEÇALHO DO PACIENTE -->
+    
     <div class="patient-hero-badge">
         <div class="d-flex align-items-center gap-3">
             <div class="patient-avatar-box">
@@ -214,7 +214,7 @@
         </div>
     </div>
 
-    <!-- FORMULÁRIO PRINCIPAL DE EDIÇÃO -->
+    
     <form asp-action="Edit" method="post" id="formEditPaciente">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="IdPaciente" />
@@ -222,7 +222,7 @@
         <input type="hidden" asp-for="DataCadastro" />
         <input type="hidden" name="abaAtiva" id="abaAtivaInput" value="@abaAtiva" />
 
-        <!-- ABAS DE NAVEGAÇÃO SUPERIORES -->
+        
         <ul class="nav nav-tabs-modern" id="editTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link @(abaAtiva == "resumo" ? "active" : "")" id="tab-resumo-btn" data-bs-toggle="tab" data-bs-target="#tab-resumo" type="button" role="tab" onclick="setAbaAtiva('resumo')">
@@ -236,15 +236,15 @@
             </li>
         </ul>
 
-        <!-- CONTEÚDO DAS ABAS -->
+        
         <div class="tab-content" id="editTabsContent">
 
-            <!-- ========================================== -->
-            <!-- ABA 1: RESUMO & DADOS CADASTRAIS           -->
-            <!-- ========================================== -->
+            
+            
+            
             <div class="tab-pane fade @(abaAtiva == "resumo" ? "show active" : "")" id="tab-resumo" role="tabpanel">
 
-                <!-- CARD 1: IDENTIFICAÇÃO DO PACIENTE -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-blue">
@@ -305,7 +305,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: ENDEREÇO RESIDENCIAL -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-cyan">
@@ -355,7 +355,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: DADOS FAMILIARES (PAIS) -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-purple">
@@ -368,7 +368,7 @@
                     </div>
 
                     <div class="row g-4">
-                        <!-- MÃE -->
+                        
                         <div class="col-lg-6">
                             <div class="family-card h-100">
                                 <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
@@ -406,7 +406,7 @@
                             </div>
                         </div>
 
-                        <!-- PAI -->
+                        
                         <div class="col-lg-6">
                             <div class="family-card h-100">
                                 <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
@@ -448,12 +448,12 @@
 
             </div>
 
-            <!-- ========================================== -->
-            <!-- ABA 2: ANAMNESE & HISTÓRICO CLÍNICO        -->
-            <!-- ========================================== -->
+            
+            
+            
             <div class="tab-pane fade @(abaAtiva == "anamnese" ? "show active" : "")" id="tab-anamnese" role="tabpanel">
 
-                <!-- CARD 1: DIAGNÓSTICO E MEDICAMENTOS -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-rose">
@@ -494,7 +494,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: HISTÓRICO ESCOLAR -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-amber">
@@ -529,7 +529,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: METAS TERAPÊUTICAS -->
+                
                 <div class="card-edit-section">
                     <div class="edit-section-header">
                         <div class="edit-section-icon icon-emerald">
@@ -572,7 +572,7 @@
 
         </div>
 
-        <!-- BARRA INFERIOR DE AÇÕES -->
+        
         <div class="bottom-save-bar">
             <a asp-action="Details" asp-route-id="@Model.IdPaciente" asp-route-aba="@abaAtiva" class="btn btn-light fw-bold text-muted px-4 rounded-pill">
                 <i class="bi bi-x-circle me-1"></i> Cancelar Alterações
@@ -587,14 +587,14 @@
 
 @section Scripts {
     <script>
-        // Função para manter registro da aba ativa
+        
         function setAbaAtiva(aba) {
             document.getElementById('abaAtivaInput').value = aba;
         }
 
-        // ==========================================
-        // 1. CÁLCULO DINÂMICO DE IDADE
-        // ==========================================
+        
+        
+        
         document.getElementById('campoDataNascimento').addEventListener('change', function () {
             var dataSelecionada = new Date(this.value);
             if (!isNaN(dataSelecionada.getTime())) {
@@ -610,9 +610,9 @@
             }
         });
 
-        // ==========================================
-        // 2. BUSCA AUTOMÁTICA DE CEP VIA VIACEP
-        // ==========================================
+        
+        
+        
         const cepInput = document.getElementById('Cep');
         if (cepInput) {
             cepInput.addEventListener('blur', function () {
@@ -621,7 +621,7 @@
                     const loading = document.getElementById('loadingCep');
                     if (loading) loading.classList.remove('d-none');
 
-                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    fetch(`https:
                         .then(response => response.json())
                         .then(data => {
                             if (loading) loading.classList.add('d-none');

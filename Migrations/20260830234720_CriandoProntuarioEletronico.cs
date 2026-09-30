@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class CriandoProntuarioEletronico : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -88,8 +86,6 @@ namespace NeuroSync.Migrations
                 table: "evolucao",
                 column: "id_paciente");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

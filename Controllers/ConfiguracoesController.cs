@@ -9,29 +9,21 @@ using NeuroSync.Models;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador responsável pelas configurações da conta da profissional (perfil e segurança).
-/// </summary>
+
 [Authorize]
 public class ConfiguracoesController(AppDbContext context) : Controller
 {
-    // =========================================================================
-    // 1. MÉTODOS AUXILIARES
-    // =========================================================================
 
-    /// <summary>
-    /// Localiza o usuário atualmente autenticado a partir dos claims da sessão ou fallback seguro.
-    /// </summary>
     private async Task<Usuario?> ObterUsuarioAtualAsync()
     {
-        // 1. Tenta buscar pelo ID numérico no Claim
+      
         if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int idUsuario))
         {
             var userById = await context.Usuarios.FindAsync(idUsuario);
             if (userById != null) return userById;
         }
 
-        // 2. Tenta buscar pelo E-mail no Claim
+       
         var claimEmail = User.FindFirstValue(ClaimTypes.Email);
         if (!string.IsNullOrEmpty(claimEmail))
         {
@@ -39,7 +31,7 @@ public class ConfiguracoesController(AppDbContext context) : Controller
             if (userByEmail != null) return userByEmail;
         }
 
-        // 3. Tenta buscar pelo Nome de exibição
+        
         var claimNome = User.Identity?.Name;
         if (!string.IsNullOrEmpty(claimNome))
         {
@@ -50,9 +42,7 @@ public class ConfiguracoesController(AppDbContext context) : Controller
         return await context.Usuarios.FirstOrDefaultAsync();
     }
 
-    /// <summary>
-    /// Extrai o primeiro nome ou título profissional para saudações (ex: "Dra. Mariana").
-    /// </summary>
+
     public static string ExtrairPrimeiroNome(string? nomeCompleto)
     {
         if (string.IsNullOrWhiteSpace(nomeCompleto)) return "Usuário";
@@ -65,13 +55,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
             : partes[0];
     }
 
-    // =========================================================================
-    // 2. TELAS E AÇÕES DE CONFIGURAÇÃO
-    // =========================================================================
-
-    /// <summary>
-    /// Exibe os dados cadastrais da profissional e o formulário de alteração de senha.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -88,9 +71,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
         });
     }
 
-    /// <summary>
-    /// Atualiza o nome e e-mail do usuário e renova a identidade de autenticação (Cookie).
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AtualizarPerfil(AtualizarPerfilInputModel model)
@@ -110,7 +90,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
         context.Update(usuario);
         await context.SaveChangesAsync();
 
-        // Renova o Cookie de autenticação com o novo nome/e-mail
         Claim[] claims = [
             new(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
             new(ClaimTypes.Name, usuario.Nome),
@@ -124,9 +103,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    /// <summary>
-    /// Altera a senha de acesso da profissional com validação da senha atual.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AlterarSenha(AlterarSenhaInputModel senhaModel)

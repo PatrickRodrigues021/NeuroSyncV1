@@ -12,7 +12,7 @@
         <div class="card-body p-4">
             <h5 class="text-center mb-4">Tem certeza de que deseja excluir permanentemente este paciente?</h5>
             
-            <!-- Resumo dos dados do paciente -->
+            
             <div class="bg-light p-3 rounded mb-4">
                 <p class="mb-1"><strong>Nome:</strong> @Model.Nome</p>
                 <p class="mb-1"><strong>Idade:</strong> @Model.Idade anos</p>
@@ -24,9 +24,9 @@
                 <strong>Atenção:</strong> Esta ação não pode ser desfeita. Todos os dados serão apagados do banco de dados.
             </p>
 
-            <!-- Formulário com os botões -->
+            
             <form asp-action="Delete" method="post" class="d-flex justify-content-between">
-                <!-- O ID escondido para o sistema saber quem apagar -->
+                
                 <input type="hidden" asp-for="IdPaciente" />
                 
                 <a asp-controller="Home" asp-action="Index" class="btn btn-secondary px-4 fw-bold">Cancelar</a>

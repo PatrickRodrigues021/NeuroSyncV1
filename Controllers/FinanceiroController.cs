@@ -12,20 +12,9 @@ using QuestPDF.Infrastructure;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador responsável pelo módulo Financeiro: Faturamento de Pacientes (Receitas),
-/// Despesas Operacionais da Clínica (Contas), Comparativos em Gráfico e Exportações.
-/// </summary>
 [Authorize]
 public class FinanceiroController(AppDbContext context, IWebHostEnvironment hostEnvironment) : Controller
 {
-    // =========================================================================
-    // 1. MÉTODOS DE FILTRAGEM
-    // =========================================================================
-
-    /// <summary>
-    /// Consulta cobranças filtradas por paciente, status e competência (Ano-Mês).
-    /// </summary>
     private List<Cobranca> ObterCobrancasFiltradas(int? pacienteId, string? status, string? competencia)
     {
         var query = context.Cobrancas
@@ -50,9 +39,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return query.OrderBy(c => c.DataVencimento).ToList();
     }
 
-    /// <summary>
-    /// Consulta despesas filtradas por categoria, status (Pagas/Pendentes) e competência.
-    /// </summary>
     private List<Despesa> ObterDespesasFiltradas(string? categoria, string? status, string? competencia)
     {
         var query = context.Despesas.AsQueryable();
@@ -72,13 +58,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return query.OrderBy(d => d.DataVencimento).ToList();
     }
 
-    // =========================================================================
-    // 2. TELA PRINCIPAL (RESUMO, RECEITAS E DESPESAS)
-    // =========================================================================
-
-    /// <summary>
-    /// Carrega as três visões financeiras: KPIs consolidados de resultado líquido, cobranças e despesas operacionais.
-    /// </summary>
     public async Task<IActionResult> Index(
         string? aba,
         int? pacienteId,
@@ -95,7 +74,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         var inicioMesAtual = new DateTime(hoje.Year, hoje.Month, 1);
         var fimMesAtual = inicioMesAtual.AddMonths(1).AddDays(-1);
 
-        // Cobranças e despesas do mês corrente para o Resumo
         var cobrancasMes = await context.Cobrancas
             .Where(c => c.DataVencimento >= inicioMesAtual && c.DataVencimento <= fimMesAtual)
             .ToListAsync();
@@ -116,7 +94,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
             .ToListAsync();
         decimal totalContasReceber = todasCobrancasAbertas.Sum(c => c.Valor);
 
-        // Histórico comparativo Receita x Despesa dos últimos 5 meses
         string[] mesesNomes = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
         List<string> mesesLabels = [];
         List<decimal> receitasMeses = [];
@@ -146,7 +123,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
             despesasMeses.Add(desp);
         }
 
-        // Distribuição de despesas por categoria para o Donut Chart
         var categoriasAgrupadas = despesasMes
             .GroupBy(d => d.Categoria)
             .OrderByDescending(g => g.Sum(x => x.Valor))
@@ -155,7 +131,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         var categoriasLabels = categoriasAgrupadas.Select(g => g.Key).ToList();
         var categoriasValores = categoriasAgrupadas.Select(g => g.Sum(x => x.Valor)).ToList();
 
-        // Movimentações recentes
         var ultimasReceitas = await context.Cobrancas
             .Include(c => c.Paciente)
             .OrderByDescending(c => c.DataPagamento ?? c.DataVencimento)
@@ -168,7 +143,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
             .Take(5)
             .ToListAsync();
 
-        // KPIs específicos
         decimal despesasPagas = despesas.Where(d => d.Status == "Pago").Sum(d => d.Valor);
         decimal despesasAPagar = despesas.Where(d => d.Status == "Pendente").Sum(d => d.Valor);
         string maiorCategoria = categoriasLabels.FirstOrDefault() ?? "Geral";
@@ -216,13 +190,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return View(viewModel);
     }
 
-    // =========================================================================
-    // 3. GESTÃO DE DESPESAS DA CLÍNICA
-    // =========================================================================
-
-    /// <summary>
-    /// Cadastra uma nova despesa da clínica via modal.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CriarDespesa(Despesa despesa)
@@ -243,9 +210,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return RedirectToAction(nameof(Index), new { aba = "Despesas" });
     }
 
-    /// <summary>
-    /// Registra o pagamento efetuado de uma despesa da clínica.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> BaixarDespesa(int id, DateTime? dataPagamento)
@@ -261,9 +225,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return RedirectToAction(nameof(Index), new { aba = "Despesas" });
     }
 
-    /// <summary>
-    /// Reabre uma despesa previamente marcada como paga, retornando-a para o status Pendente.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ReabrirDespesa(int id)
@@ -279,9 +240,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         return RedirectToAction(nameof(Index), new { aba = "Despesas" });
     }
 
-    /// <summary>
-    /// Exclui o registro de uma despesa do banco de dados.
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ExcluirDespesa(int id)
@@ -295,10 +253,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         }
         return RedirectToAction(nameof(Index), new { aba = "Despesas" });
     }
-
-    // =========================================================================
-    // 4. GESTÃO DE COBRANÇAS DE PACIENTES (RECEITAS)
-    // =========================================================================
 
     [HttpGet]
     public async Task<IActionResult> Create()
@@ -427,14 +381,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         }
         return RedirectToAction(nameof(Index), new { aba = "Receitas" });
     }
-
-    // =========================================================================
-    // 5. EXPORTAÇÕES (EXCEL E PDF)
-    // =========================================================================
-
-    /// <summary>
-    /// Gera planilha Excel formatada (.xlsx) com as cobranças filtradas.
-    /// </summary>
     public IActionResult ExportarExcel(int? pacienteId, string? status, string? competencia)
     {
         var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
@@ -474,10 +420,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         workbook.SaveAs(stream);
         return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"financeiro_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }
-
-    /// <summary>
-    /// Emite relatório financeiro em PDF de alta qualidade com QuestPDF.
-    /// </summary>
     public IActionResult ExportarPdf(int? pacienteId, string? status, string? competencia)
     {
         var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
@@ -500,8 +442,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
                 page.Size(PageSizes.A4);
                 page.Margin(30);
                 page.DefaultTextStyle(x => x.FontSize(9).FontColor(Colors.Grey.Darken3));
-
-                // 1. Cabeçalho Timbrado
                 page.Header().Column(headerCol =>
                 {
                     headerCol.Item().Row(row =>
@@ -533,11 +473,8 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
 
                     headerCol.Item().PaddingTop(6).LineHorizontal(1.5f).LineColor(Color.FromHex("#315BEF"));
                 });
-
-                // 2. Conteúdo e Tabela
                 page.Content().PaddingTop(12).Column(contentCol =>
                 {
-                    // Cards de Totais
                     contentCol.Item().Row(kpiRow =>
                     {
                         kpiRow.RelativeItem().Background(Color.FromHex("#F8FAFC")).Border(1).BorderColor(Color.FromHex("#E2E8F0")).Padding(8).Column(c =>
@@ -564,8 +501,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
                             c.Item().Text(totalCancelado.ToString("C", culturaBr)).FontSize(12).Bold().FontColor(Color.FromHex("#BE123C"));
                         });
                     });
-
-                    // Tabela de Cobranças
                     contentCol.Item().PaddingTop(14).Table(tabela =>
                     {
                         tabela.ColumnsDefinition(columns =>
@@ -602,8 +537,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
                         }
                     });
                 });
-
-                // 3. Rodapé
                 page.Footer().Row(r =>
                 {
                     r.RelativeItem().Text("NeuroSync • Gestão Clínica Integrada").FontSize(8).FontColor(Colors.Grey.Medium);
@@ -621,11 +554,6 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         var pdfBytes = documento.GeneratePdf();
         return File(pdfBytes, "application/pdf", $"RelatorioFinanceiro_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
     }
-
-    // =========================================================================
-    // 6. CORES E ÍCONES DE CATEGORIAS
-    // =========================================================================
-
     private static string ObterCorCategoria(string cat) => cat switch
     {
         "Energia Elétrica" => "#F59E0B",

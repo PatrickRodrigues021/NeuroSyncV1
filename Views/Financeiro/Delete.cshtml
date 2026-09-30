@@ -5,13 +5,11 @@
 }
 
 <style>
-    /* Estilos Modernos da Tela de Exclusão */
     .finance-delete-wrapper {
         padding-top: 0.5rem;
         padding-bottom: 3rem;
     }
 
-    /* Cabeçalho da Página */
     .page-header-box {
         display: flex;
         justify-content: space-between;
@@ -52,7 +50,6 @@
         margin-bottom: 0;
     }
 
-    /* Cartão Principal */
     .card-modern-form {
         background: #FFFFFF;
         border-radius: 20px;
@@ -79,7 +76,6 @@
         font-size: 1.15rem;
     }
 
-    /* Box de Resumo da Cobrança */
     .delete-summary-box {
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
@@ -114,7 +110,6 @@
         font-weight: 700;
     }
 
-    /* Cartão Lateral de Recibo */
     .invoice-preview-card {
         background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
         border-radius: 20px;
@@ -160,7 +155,6 @@
         line-height: 1.1;
     }
 
-    /* Card Alternativo para Reabertura */
     .reopen-suggestion-card {
         background: #FFFBEB;
         border: 1px solid #FDE68A;
@@ -172,7 +166,6 @@
 
 <div class="finance-delete-wrapper">
 
-    <!-- CABEÇALHO -->
     <div class="page-header-box">
         <div>
             <div class="page-title">
@@ -194,11 +187,9 @@
 
         <div class="row g-4">
             
-            <!-- COLUNA ESQUERDA: CONFIRMAÇÃO DE EXCLUSÃO -->
             <div class="col-12 col-lg-8">
                 <div class="card-modern-form">
                     
-                    <!-- Alerta de Segurança -->
                     <div class="alert alert-danger border-danger-subtle bg-danger-subtle text-danger rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
                         <i class="bi bi-exclamation-octagon-fill fs-2 flex-shrink-0"></i>
                         <div>
@@ -207,7 +198,6 @@
                         </div>
                     </div>
 
-                    <!-- Dados da Cobrança -->
                     <div class="form-section-title">
                         <i class="bi bi-receipt"></i>
                         <span>Dados do Registro a ser Excluído</span>
@@ -256,7 +246,6 @@
                         </div>
                     </div>
 
-                    <!-- BARRINHA DE BOTÕES DE AÇÃO -->
                     <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
                         <a href="/Financeiro" class="btn btn-light fw-bold text-muted px-4 py-2 rounded-pill border">
                             Cancelar e Voltar
@@ -271,7 +260,6 @@
                 </div>
             </div>
 
-            <!-- COLUNA DIREITA: RECIBO E OPÇÃO DE REABERTURA -->
             <div class="col-12 col-lg-4">
                 <div class="invoice-preview-card">
                     
@@ -305,7 +293,6 @@
                         </div>
                     </div>
 
-                    <!-- SUGESTÃO DE REABRIR SE JÁ ESTIVER PAGA -->
                     @if (Model.Status == "Pago")
                     {
                         <div class="reopen-suggestion-card">

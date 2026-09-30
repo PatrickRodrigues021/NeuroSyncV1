@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NeuroSync.Models;
 
-/// <summary>
-/// Modelo de exibição para a tela de Configurações de Perfil e Segurança.
-/// </summary>
 public class ConfiguracoesViewModel
 {
     public int IdUsuario { get; set; }
@@ -14,9 +11,6 @@ public class ConfiguracoesViewModel
     public string PrimeiroNome { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Modelo de formulário para edição dos dados cadastrais do perfil da profissional.
-/// </summary>
 public class AtualizarPerfilInputModel
 {
     public int IdUsuario { get; set; }
@@ -34,16 +28,9 @@ public class AtualizarPerfilInputModel
     public DateTime CriadoEm { get; set; }
 
     public string PrimeiroNome { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Sub-modelo para alteração opcional de senha de acesso.
-    /// </summary>
     public AlterarSenhaInputModel SenhaModel { get; set; } = new();
 }
 
-/// <summary>
-/// Modelo de validação para alteração segura de senha com verificação de requisitos mínimos.
-/// </summary>
 public class AlterarSenhaInputModel
 {
     [Required(ErrorMessage = "A senha atual é obrigatória.")]

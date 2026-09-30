@@ -9,19 +9,9 @@ using NeuroSync.Models;
 
 namespace NeuroSync.Controllers;
 
-/// <summary>
-/// Controlador principal do sistema: Dashboard Clínico, Resumo do Dia (Boas-Vindas) e Tratamento de Erros.
-/// </summary>
 [Authorize]
 public class HomeController(AppDbContext context) : Controller
 {
-    // =========================================================================
-    // 1. MÉTODOS AUXILIARES
-    // =========================================================================
-
-    /// <summary>
-    /// Identifica o primeiro nome ou título da usuária conectada para saudações personalizadas.
-    /// </summary>
     private async Task<string> ObterNomeExibicaoAsync()
     {
         string? nomeCompleto = null;
@@ -45,14 +35,6 @@ public class HomeController(AppDbContext context) : Controller
 
         return ConfiguracoesController.ExtrairPrimeiroNome(nomeCompleto);
     }
-
-    // =========================================================================
-    // 2. DASHBOARD CLÍNICO PRINCIPAL
-    // =========================================================================
-
-    /// <summary>
-    /// Carrega as métricas consolidadas do dia e do mês, gráfico de status e lista de atendimentos.
-    /// </summary>
     public async Task<IActionResult> Index()
     {
         var agora = DateTime.Now;
@@ -73,22 +55,18 @@ public class HomeController(AppDbContext context) : Controller
             NomeMes = culture.TextInfo.ToTitleCase(culture.DateTimeFormat.GetMonthName(hoje.Month))
         };
 
-        // 1. Contadores gerais (Pacientes e Aniversariantes)
         model.TotalPacientesAtivos = await context.Pacientes.CountAsync();
         model.AniversariantesMes = await context.Pacientes.CountAsync(p => p.DataNascimento.Month == hoje.Month);
 
-        // 2. Receita recebida no mês corrente
         var valoresRecebidos = await context.Cobrancas
             .Where(c => c.Status == "Pago" && c.DataPagamento >= inicioDoMes && c.DataPagamento <= fimDoMes)
             .Select(c => c.Valor)
             .ToListAsync();
         model.ReceitaMes = valoresRecebidos.Sum();
 
-        // 3. Atendimentos passados pendentes de registro clínico
         model.PendenciasHoje = await context.Agendamentos
             .CountAsync(a => a.DataHora.Date < hoje && !a.Status.Contains("Realizado") && !a.Status.Contains("Cancelado"));
 
-        // 4. Status consolidado das sessões do mês
         var sessoesMes = await context.Agendamentos
             .Where(a => a.DataHora >= inicioDoMes && a.DataHora <= fimDoMes)
             .ToListAsync();
@@ -103,7 +81,6 @@ public class HomeController(AppDbContext context) : Controller
         }
         else
         {
-            // Dados de demonstração harmoniosos caso o banco esteja no primeiro dia do mês
             model.TotalSessoesMes = 13;
             model.RealizadasMes = 2;
             model.AgendadasMes = 10;
@@ -113,7 +90,6 @@ public class HomeController(AppDbContext context) : Controller
 
         model.SessoesRealizadasMes = model.RealizadasMes;
 
-        // 5. Atendimentos previstos para hoje
         var agendamentosHoje = await context.Agendamentos
             .Include(a => a.Paciente)
             .Where(a => a.DataHora.Date == hoje)
@@ -149,7 +125,6 @@ public class HomeController(AppDbContext context) : Controller
         }
         else
         {
-            // Carga demonstrativa de rotina para apresentação visual inicial
             model.AtendimentosHoje = 8;
             model.ConcluidosHoje = 2;
             model.ConfirmadosHoje = 6;
@@ -170,7 +145,6 @@ public class HomeController(AppDbContext context) : Controller
             ];
         }
 
-        // 6. Ritmo Semanal (Distribuição Seg a Sex)
         int diff = (7 + (hoje.DayOfWeek - DayOfWeek.Monday)) % 7;
         var inicioSemana = hoje.AddDays(-diff).Date;
         var fimSemana = inicioSemana.AddDays(6).Date;
@@ -194,14 +168,6 @@ public class HomeController(AppDbContext context) : Controller
 
         return View(model);
     }
-
-    // =========================================================================
-    // 3. TELA DE BOAS-VINDAS / RESUMO EXECUTIVO DO DIA
-    // =========================================================================
-
-    /// <summary>
-    /// Exibe o panorama executivo diário: atendimentos de hoje, aniversariantes do mês e atalhos ágeis.
-    /// </summary>
     public async Task<IActionResult> BoasVindas()
     {
         var agora = DateTime.Now;
@@ -297,13 +263,6 @@ public class HomeController(AppDbContext context) : Controller
         return View(model);
     }
 
-    // =========================================================================
-    // 4. TRATAMENTO DE ERROS DA APLICAÇÃO
-    // =========================================================================
-
-    /// <summary>
-    /// Exibe a página amigável de erro não tratado com rastreamento da requisição (RequestId).
-    /// </summary>
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
         View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

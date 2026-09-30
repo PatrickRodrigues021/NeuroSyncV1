@@ -11,11 +11,9 @@
     <title>Resumo do Dia - NeuroSync</title>
     <link rel="icon" type="image/png" href="~/images/logo-principal-cerebro-coracao 2.png" />
     
-    <!-- Bootstrap 5 & Bootstrap Icons -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -40,7 +38,6 @@
             padding: clamp(14px, 2.5vw, 32px);
         }
 
-        /* Elementos decorativos de fundo suaves */
         body::before {
             content: "";
             position: absolute;
@@ -90,7 +87,6 @@
             }
         }
 
-        /* --- BARRA SUPERIOR --- */
         .top-navbar {
             display: flex;
             align-items: center;
@@ -152,7 +148,6 @@
             font-size: 0.82rem;
         }
 
-        /* --- SEÇÃO HERO --- */
         .hero-section {
             display: flex;
             align-items: center;
@@ -275,20 +270,18 @@
             color: #0284c7;
         }
 
-        /* Espaçador à direita no hero para equilibrar com o logo à esquerda */
         .hero-right-spacer {
             flex: 0 1 260px;
             max-width: 260px;
             pointer-events: none;
         }
 
-        /* Personagem posicionada elegantemente como plano de fundo sem cobrir textos */
         .character-backdrop {
             position: absolute;
             right: 0px;
             top: 20px;
             width: 360px;
-            z-index: 1; /* Fica atrás dos cards da direita (z-index: 3) */
+            z-index: 1; 
             pointer-events: none;
             display: flex;
             justify-content: flex-end;
@@ -303,10 +296,9 @@
             filter: drop-shadow(0 18px 36px rgba(0, 50, 120, 0.15));
         }
 
-        /* --- 4 CARDS DE INDICADORES (KPIS) --- */
         .kpi-row {
             position: relative;
-            z-index: 3; /* Sobrepostos na frente da personagem */
+            z-index: 3;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 18px;
@@ -394,10 +386,9 @@
             color: #0062ff;
         }
 
-        /* --- SEÇÃO DE 2 CARDS CENTRAIS --- */
         .middle-cards-row {
             position: relative;
-            z-index: 3; /* Sobrepostos na frente da personagem */
+            z-index: 3; 
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 18px;
@@ -450,7 +441,6 @@
             color: #0062ff;
         }
 
-        /* Lista de Próximos Atendimentos */
         .appointment-list {
             display: flex;
             flex-direction: column;
@@ -514,7 +504,6 @@
             letter-spacing: 0.2px;
         }
 
-        /* Banner informativo interno */
         .bottom-card-info-banner {
             background: #eff6ff;
             border-radius: 12px;
@@ -541,7 +530,6 @@
             margin-right: 8px;
         }
 
-        /* Card Momentos Especiais */
         .birthday-banner {
             display: flex;
             align-items: flex-start;
@@ -624,7 +612,6 @@
             100% { transform: translateY(-5px); }
         }
 
-        /* --- FAIXA DE MENSAGEM MOTIVADORA --- */
         .motivation-strip {
             position: relative;
             z-index: 3;
@@ -686,7 +673,6 @@
             filter: drop-shadow(0 4px 10px rgba(14, 165, 233, 0.12));
         }
 
-        /* Barra de progresso sutil */
         .timer-progress-bar {
             position: fixed;
             top: 0;
@@ -698,7 +684,6 @@
             transition: width 0.1s linear;
         }
 
-        /* Responsividade Avançada */
         @@media (max-width: 1400px) {
             .character-backdrop {
                 width: 300px;
@@ -759,7 +744,6 @@
             }
         }
 
-        /* Adaptação para monitores com altura compacta (< 850px ou zoom 125%/150%) */
         @@media (max-height: 850px) {
             .screen-container {
                 gap: 10px;
@@ -840,12 +824,10 @@
 </head>
 <body>
 
-    <!-- Linha de progresso no topo da tela -->
     <div class="timer-progress-bar" id="progressBar"></div>
 
     <div class="screen-container">
 
-        <!-- 1. BARRA SUPERIOR -->
         <header class="top-navbar">
             <a href="@Url.Action("Index", "Home")" class="brand-logo-area">
                 <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="NeuroSync Logo" class="brand-logo-img" />
@@ -861,14 +843,11 @@
             </div>
         </header>
 
-        <!-- 2. SEÇÃO HERO DE BOAS-VINDAS -->
         <section class="hero-section">
-            <!-- Esquerda: Cérebro / Coração com folhas ampliado -->
             <div class="hero-left-art">
                 <img src="~/images/logo-principal-cerebro-coracao 2.png" alt="Cérebro e Coração" />
             </div>
 
-            <!-- Centro: Saudação, botão e contador -->
             <div class="hero-center-content">
                 <h1 class="hero-greeting">@Model.Saudacao, @Model.NomeProfissional! 👋</h1>
                 <div class="hero-subtitle">Vamos começar mais um dia de cuidado e evolução.</div>
@@ -887,18 +866,14 @@
                 </div>
             </div>
 
-            <!-- Espaçador à direita para manter o centro alinhado -->
             <div class="hero-right-spacer"></div>
         </section>
 
-        <!-- Personagem em tamanho grande, posicionada atrás dos cards da direita -->
         <div class="character-backdrop">
             <img src="~/images/personagem-tablet-fundo-transparente.png" alt="Terapeuta com tablet" />
         </div>
 
-        <!-- 3. LINHA DE 4 CARDS DE INDICADORES (KPIS) -->
         <section class="kpi-row">
-            <!-- Card 1: Atendimentos hoje -->
             <div class="kpi-card">
                 <div class="kpi-icon-badge badge-blue">
                     <i class="bi bi-calendar3"></i>
@@ -912,7 +887,6 @@
                 </div>
             </div>
 
-            <!-- Card 2: Confirmados -->
             <div class="kpi-card">
                 <div class="kpi-icon-badge badge-green">
                     <i class="bi bi-check-circle-fill"></i>
@@ -926,7 +900,6 @@
                 </div>
             </div>
 
-            <!-- Card 3: Aguardando confirmação -->
             <div class="kpi-card">
                 <div class="kpi-icon-badge badge-purple">
                     <i class="bi bi-clock"></i>
@@ -940,7 +913,6 @@
                 </div>
             </div>
 
-            <!-- Card 4: Aniversariantes este mês -->
             <div class="kpi-card">
                 <div class="kpi-icon-badge badge-violet">
                     <i class="bi bi-gift"></i>
@@ -955,10 +927,8 @@
             </div>
         </section>
 
-        <!-- 4. SEÇÃO CENTRAL COM 2 CARTÕES (PRÓXIMOS ATENDIMENTOS E MOMENTOS ESPECIAIS) -->
         <section class="middle-cards-row">
             
-            <!-- Cartão Esquerdo: Próximos atendimentos -->
             <div class="content-card">
                 <div>
                     <div class="content-card-header">
@@ -980,39 +950,27 @@
                                     <div class="avatar-circle">
                                         @if (item.GeneroOuAvatar == "girl")
                                         {
-                                            <!-- Avatar Menina Ilustrado -->
                                             <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <circle cx="22" cy="22" r="22" fill="#d1fae5"/>
-                                                <!-- Cabelo longo castanho -->
                                                 <path d="M12 26C12 16 16 11 22 11C28 11 32 16 32 26C32 28 31 32 30 32C29 32 28 26 28 24C28 24 25 24 22 24C19 24 16 24 16 24C16 26 15 32 14 32C13 32 12 28 12 26Z" fill="#3b2d22"/>
-                                                <!-- Rosto -->
                                                 <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
-                                                <!-- Franja -->
                                                 <path d="M14 19C16 15 20 14 22 14C24 14 28 15 30 19C28 17 24 16 22 16C20 16 16 17 14 19Z" fill="#3b2d22"/>
-                                                <!-- Olhos e sorriso -->
                                                 <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
                                                 <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
                                                 <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#e11d48" stroke-width="1" stroke-linecap="round"/>
-                                                <!-- Camisa -->
                                                 <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#ec4899"/>
                                             </svg>
                                         }
                                         else
                                         {
-                                            <!-- Avatar Menino Ilustrado -->
                                             <svg viewBox="0 0 44 44" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <circle cx="22" cy="22" r="22" fill="#cffafe"/>
-                                                <!-- Cabelo curto escuro -->
                                                 <path d="M14 19C14 14 17 11 22 11C27 11 30 14 30 19C30 20 29 20 28 18C26 16 24 16 22 16C20 16 18 16 16 18C15 20 14 20 14 19Z" fill="#1e293b"/>
-                                                <!-- Rosto -->
                                                 <circle cx="22" cy="21" r="9" fill="#fcd3b2"/>
-                                                <!-- Topete -->
                                                 <path d="M16 16C18 13 24 12 28 15C25 14 21 14 18 15Z" fill="#1e293b"/>
-                                                <!-- Olhos e sorriso -->
                                                 <circle cx="19" cy="20.5" r="1" fill="#1e293b"/>
                                                 <circle cx="25" cy="20.5" r="1" fill="#1e293b"/>
                                                 <path d="M20 24C21 25.2 23 25.2 24 24" stroke="#0284c7" stroke-width="1.2" stroke-linecap="round"/>
-                                                <!-- Camisa -->
                                                 <path d="M15 37C15 31 18 29 22 29C26 29 29 31 29 37Z" fill="#0284c7"/>
                                             </svg>
                                         }
@@ -1037,7 +995,6 @@
                 </a>
             </div>
 
-            <!-- Cartão Direito: Momentos especiais -->
             <div class="content-card">
                 <div>
                     <div class="content-card-header">
@@ -1050,7 +1007,6 @@
                         </a>
                     </div>
 
-                    <!-- Faixa comemorativa dentro do card -->
                     <div class="birthday-banner">
                         <div class="birthday-banner-icon">
                             <i class="bi bi-balloon-heart-fill"></i>
@@ -1062,7 +1018,7 @@
                     </div>
 
                     <div class="birthday-split-content">
-                        <!-- Lista de aniversariantes -->
+
                         <div class="birthday-patients-col">
                             @foreach (var niver in Model.Aniversariantes)
                             {
@@ -1106,7 +1062,6 @@
                             }
                         </div>
 
-                        <!-- Ilustração do Bolo com fundo transparente ampliado -->
                         <div class="birthday-cake-art">
                             <img src="~/images/bolo-fundo-transparente.png" alt="Bolo de Aniversário" />
                         </div>
@@ -1115,20 +1070,17 @@
             </div>
         </section>
 
-        <!-- 5. FAIXA DE MENSAGEM MOTIVADORA -->
         <footer class="motivation-strip">
-            <!-- Esquerda: Esfera 3D Cérebro / Coração -->
+
             <div class="motivation-sphere-art">
                 <img src="~/images/coracao-brain-esfera.png" alt="Emblema NeuroSync" />
             </div>
 
-            <!-- Centro: Texto Motivador -->
             <div class="motivation-text-content">
                 <h4 class="motivation-title">Seu foco faz a diferença!</h4>
                 <p class="motivation-desc">Cada sessão, cada evolução e cada conquista são passos importantes no desenvolvimento dos seus pacientes.</p>
             </div>
 
-            <!-- Direita: Folhas Decorativas -->
             <div class="motivation-leaves-art">
                 <img src="~/images/folhas-decorativas.png" alt="Folhas Decorativas" />
             </div>
@@ -1136,7 +1088,6 @@
 
     </div>
 
-    <!-- Script de Contagem Regressiva e Redirecionamento (25 segundos) -->
     <script>
         (function () {
             const totalSegundos = 25;
@@ -1151,7 +1102,6 @@
                     contadorEl.textContent = segundosRestantes;
                 }
 
-                // Atualiza barra de progresso no topo
                 const percentualConcluido = ((totalSegundos - segundosRestantes) / totalSegundos) * 100;
                 if (progressBar) {
                     progressBar.style.width = percentualConcluido + '%';
@@ -1163,7 +1113,6 @@
                 }
             }, 1000);
 
-            // Redirecionamento imediato no clique do botão
             const btn = document.getElementById('btnDashboard');
             if (btn) {
                 btn.addEventListener('click', function (e) {

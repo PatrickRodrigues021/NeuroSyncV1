@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class CriandoTabelaAgenda : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -39,8 +37,6 @@ namespace NeuroSync.Migrations
                 table: "agendamento",
                 column: "id_paciente");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

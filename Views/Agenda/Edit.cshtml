@@ -52,7 +52,6 @@
 <div class="container py-4">
     <div class="edit-session-wrapper">
 
-        <!-- CABEÇALHO -->
         <div class="edit-header-card">
             <div class="d-flex align-items-center gap-3">
                 <div style="width: 46px; height: 46px; border-radius: 14px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">
@@ -68,19 +67,16 @@
             </a>
         </div>
 
-        <!-- FORMULÁRIO -->
         <div class="edit-form-card">
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="IdAgendamento" />
 
-                <!-- Paciente Selecionado -->
                 <div class="mb-4">
                     <label asp-for="PacienteId" class="form-label fw-bold text-dark">Paciente <span class="text-danger">*</span></label>
                     <select asp-for="PacienteId" id="buscaPaciente" class="form-select" asp-items="ViewBag.Pacientes" required></select>
                 </div>
 
                 <div class="row g-3 mb-4">
-                    <!-- Data e Horário -->
                     <div class="col-12 col-md-6">
                         <label asp-for="DataHora" class="form-label fw-bold text-dark">Data e Horário <span class="text-danger">*</span></label>
                         <div class="input-group">
@@ -89,7 +85,6 @@
                         </div>
                     </div>
 
-                    <!-- Tipo de Sessão -->
                     <div class="col-12 col-md-6">
                         <label asp-for="TipoSessao" class="form-label fw-bold text-dark">Tipo de Sessão</label>
                         <select asp-for="TipoSessao" class="form-select">
@@ -101,7 +96,6 @@
                     </div>
                 </div>
 
-                <!-- CAMPO DE STATUS COM DESTAQUE CLÍNICO -->
                 <div class="status-highlight-box mb-4">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <label asp-for="Status" class="form-label fw-bold text-dark mb-0">
@@ -119,14 +113,12 @@
                     </select>
                 </div>
 
-                <!-- Observações -->
                 <div class="mb-4">
                     <label asp-for="Observacoes" class="form-label fw-bold text-dark">Observações Clínicas / Administrativas</label>
                     <textarea asp-for="Observacoes" class="form-control" rows="3" placeholder="Anotações sobre a sessão, queixas ou avisos da família..."></textarea>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between pt-3 border-top">
-                    <!-- Link de Acesso ao Prontuário -->
                     <a href="/Pacientes/Details/@Model.PacienteId" class="btn btn-outline-primary rounded-pill px-3 fw-bold btn-sm">
                         <i class="bi bi-file-earmark-medical me-1"></i> Abrir Prontuário
                     </a>

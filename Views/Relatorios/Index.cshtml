@@ -5,7 +5,7 @@
 }
 
 <style>
-    /* Estilos Gerais da Área de Relatórios */
+    
     .reports-container {
         padding-top: 0.5rem;
         padding-bottom: 3rem;
@@ -18,7 +18,7 @@
         letter-spacing: -0.5px;
     }
 
-    /* Abas Superiores */
+    
     .reports-nav-tabs {
         display: flex;
         gap: 2rem;
@@ -59,7 +59,7 @@
         border-radius: 3px 3px 0 0;
     }
 
-    /* Botões de Ação do Topo */
+    
     .btn-action-custom {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
@@ -100,7 +100,7 @@
         color: #1D4ED8;
     }
 
-    /* Barra de Filtros */
+    
     .filter-card {
         background: #FFFFFF;
         border-radius: 16px;
@@ -129,7 +129,7 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
-    /* Cards de KPIs */
+    
     .kpi-card {
         background: #FFFFFF;
         border-radius: 16px;
@@ -179,7 +179,7 @@
         font-weight: 500;
     }
 
-    /* Cards de Gráficos e Tabelas */
+    
     .chart-card, .table-card {
         background: #FFFFFF;
         border-radius: 16px;
@@ -227,7 +227,7 @@
         background-color: #F8FAFC;
     }
 
-    /* Badges de Status de Atendimento */
+    
     .status-badge {
         font-size: 0.78rem;
         font-weight: 700;
@@ -263,7 +263,7 @@
         border: 1px solid #FCA5A5;
     }
 
-    /* Badges de Tipo de Sessão Neuropsicopedagógica */
+    
     .badge-tipo-sessao {
         font-size: 0.78rem;
         font-weight: 600;
@@ -280,7 +280,7 @@
     .sessao-devolutiva  { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
     .sessao-orientacao  { background: #FAF5FF; color: #6B21A8; border: 1px solid #E9D5FF; }
 
-    /* Legenda customizada do Donut Chart */
+    
     .legend-item {
         display: flex;
         align-items: center;
@@ -298,7 +298,7 @@
         flex-shrink: 0;
     }
 
-    /* Otimização para Impressão */
+    
     @@media print {
         .sidebar, .reports-nav-tabs, .btn-action-custom, .filter-card, .dropdown, .btn, .no-print {
             display: none !important;
@@ -331,7 +331,7 @@
 
 <div class="reports-container">
 
-    <!-- CABEÇALHO PARA IMPRESSÃO (EXIBIDO APENAS AO IMPRIMIR) -->
+    
     <div class="print-header">
         <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -344,7 +344,7 @@
         </div>
     </div>
 
-    <!-- CABEÇALHO DA TELA -->
+    
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 no-print">
         <div>
             <h2 class="page-title mb-0">Relatórios Clínicos</h2>
@@ -354,7 +354,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Seletor de Período -->
+            
             <div class="dropdown">
                 <button class="btn-action-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-calendar3 text-primary"></i>
@@ -379,7 +379,7 @@
                 </div>
             </div>
 
-            <!-- Botão Exportar Excel / CSV -->
+            
             <a asp-action="Exportar" 
                asp-route-dataInicio="@Model.DataInicio.ToString("yyyy-MM-dd")" 
                asp-route-dataFim="@Model.DataFim.ToString("yyyy-MM-dd")"
@@ -392,7 +392,7 @@
                 <span>Exportar Planilha</span>
             </a>
 
-            <!-- Botão Imprimir -->
+            
             <button type="button" onclick="window.print()" class="btn-action-custom btn-print" title="Imprimir relatório formal ou salvar em PDF">
                 <i class="bi bi-printer"></i>
                 <span>Imprimir Relatório</span>
@@ -400,7 +400,7 @@
         </div>
     </div>
 
-    <!-- ABAS DE NAVEGAÇÃO (APENAS INDICADORES CLÍNICOS & HISTÓRICO DE ATENDIMENTOS) -->
+    
     <div class="reports-nav-tabs no-print">
         <a href="@Url.Action("Index", new { aba = "Indicadores", dataInicio = Model.DataInicio.ToString("yyyy-MM-dd"), dataFim = Model.DataFim.ToString("yyyy-MM-dd") })" 
            class="reports-nav-item @(Model.AbaAtiva == "Indicadores" ? "active" : "")">
@@ -419,10 +419,10 @@
     @* ========================================================================= *@
     @if (Model.AbaAtiva == "Indicadores")
     {
-        <!-- 4 CARDS DE INDICADORES CLÍNICOS -->
+        
         <div class="row g-4 mb-4">
             
-            <!-- Card 1: Sessões Realizadas -->
+            
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="kpi-card">
                     <div>
@@ -436,7 +436,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: Taxa de Assiduidade -->
+            
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="kpi-card">
                     <div>
@@ -449,7 +449,7 @@
                 </div>
             </div>
 
-            <!-- Card 3: Pacientes em Acompanhamento -->
+            
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="kpi-card">
                     <div>
@@ -463,7 +463,7 @@
                 </div>
             </div>
 
-            <!-- Card 4: Novas Avaliações -->
+            
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="kpi-card">
                     <div>
@@ -478,10 +478,10 @@
 
         </div>
 
-        <!-- LINHA DE GRÁFICOS CLÍNICOS -->
+        
         <div class="row g-4 mb-4">
             
-            <!-- GRÁFICO 1: FOCO CLÍNICO NEUROPSICOPEDAGÓGICO (Donut Chart) -->
+            
             <div class="col-12 col-lg-6">
                 <div class="chart-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -493,14 +493,14 @@
                     </div>
                     
                     <div class="row align-items-center">
-                        <!-- Canvas Donut -->
+                        
                         <div class="col-12 col-sm-6 d-flex justify-content-center mb-3 mb-sm-0">
                             <div style="width: 200px; height: 200px; position: relative;">
                                 <canvas id="graficoFocoClinico"></canvas>
                             </div>
                         </div>
 
-                        <!-- Legenda Lateral -->
+                        
                         <div class="col-12 col-sm-6 ps-sm-3">
                             @foreach (var item in Model.FocoClinicoItens)
                             {
@@ -517,7 +517,7 @@
                 </div>
             </div>
 
-            <!-- GRÁFICO 2: EVOLUÇÃO DE ATENDIMENTOS (Line/Area Chart) -->
+            
             <div class="col-12 col-lg-6">
                 <div class="chart-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -535,7 +535,7 @@
 
         </div>
 
-        <!-- BANNER DE RESUMO DE PRODUÇÃO & PRONTUÁRIOS -->
+        
         <div class="p-4 bg-white rounded-4 border shadow-sm">
             <div class="row align-items-center g-3">
                 <div class="col-12 col-md-8">
@@ -560,14 +560,14 @@
     @* ========================================================================= *@
     @if (Model.AbaAtiva == "Atendimentos")
     {
-        <!-- BARRA DE FILTROS OPERACIONAIS -->
+        
         <div class="filter-card no-print">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="aba" value="Atendimentos" />
                 <input type="hidden" name="dataInicio" value="@Model.DataInicio.ToString("yyyy-MM-dd")" />
                 <input type="hidden" name="dataFim" value="@Model.DataFim.ToString("yyyy-MM-dd")" />
 
-                <!-- Filtro de Paciente -->
+                
                 <div class="col-12 col-md-4">
                     <label class="filter-label">Paciente</label>
                     <select name="pacienteId" asp-items="ViewBag.Pacientes" class="form-select filter-input">
@@ -575,7 +575,7 @@
                     </select>
                 </div>
 
-                <!-- Filtro de Tipo de Sessão -->
+                
                 <div class="col-12 col-md-3">
                     <label class="filter-label">Foco / Tipo de Sessão</label>
                     <select name="tipoSessao" class="form-select filter-input">
@@ -590,7 +590,7 @@
                     </select>
                 </div>
 
-                <!-- Filtro de Status -->
+                
                 <div class="col-12 col-md-3">
                     <label class="filter-label">Status da Sessão</label>
                     <select name="status" class="form-select filter-input">
@@ -602,7 +602,7 @@
                     </select>
                 </div>
 
-                <!-- Botões Filtrar e Limpar -->
+                
                 <div class="col-12 col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3 py-2">
                         <i class="bi bi-funnel-fill me-1"></i> Filtrar
@@ -614,7 +614,7 @@
             </form>
         </div>
 
-        <!-- 4 MINIS INDICADORES DA TABELA DE ATENDIMENTOS -->
+        
         <div class="row g-3 mb-4 no-print">
             <div class="col-6 col-md-3">
                 <div class="p-3 bg-white border rounded-3 text-center">
@@ -642,7 +642,7 @@
             </div>
         </div>
 
-        <!-- TABELA ANALÍTICA DE ATENDIMENTOS -->
+        
         <div class="table-card">
             <div class="table-card-header">
                 <div>
@@ -755,7 +755,7 @@
 }
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https:
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -763,9 +763,9 @@
             @if (Model.AbaAtiva == "Indicadores")
             {
                 <text>
-                // ==========================================
-                // 1. GRÁFICO DONUT: FOCO CLÍNICO NEUROPSICOPEDAGÓGICO
-                // ==========================================
+                
+                
+                
                 const canvasFoco = document.getElementById('graficoFocoClinico');
                 if (canvasFoco) {
                     const ctxFoco = canvasFoco.getContext('2d');
@@ -802,9 +802,9 @@
                     });
                 }
 
-                // ==========================================
-                // 2. GRÁFICO DE ÁREA/LINHA: EVOLUÇÃO TEMPORAL
-                // ==========================================
+                
+                
+                
                 const canvasEvolucao = document.getElementById('graficoEvolucao');
                 if (canvasEvolucao) {
                     const ctxEvolucao = canvasEvolucao.getContext('2d');

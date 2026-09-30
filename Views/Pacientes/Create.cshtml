@@ -5,7 +5,7 @@
 }
 
 <style>
-    /* Estilos Premium para o Formulário */
+    
     .card-form { background-color: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: none; }
     .section-title { color: var(--text-dark); font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
     
@@ -13,7 +13,7 @@
     .form-control { border-radius: 8px; border: 1px solid #e2e8f0; padding: 12px 16px; background-color: #f8fafc; transition: 0.3s; color: var(--text-dark); font-weight: 500; }
     .form-control:focus { border-color: var(--primary); background-color: white; box-shadow: 0 0 0 4px rgba(49, 91, 239, 0.1); }
     .form-control[readonly] { background-color: #e2e8f0; opacity: 0.7; }
-    /* Esconde a barra vermelha de erros quando não há erros */
+    
     .validation-summary-valid { display: none; }
 </style>
 
@@ -32,9 +32,9 @@
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="All" class="alert alert-danger fw-bold rounded-3"></div>
                 
-                <!-- ========================================== -->
-                <!-- SESSÃO 1: DADOS DO PACIENTE E ESCOLARES    -->
-                <!-- ========================================== -->
+                
+                
+                
                 <h5 class="section-title text-primary border-bottom pb-2"><i class="bi bi-person-badge"></i> Dados do Paciente (Criança / Adolescente)</h5>
                 
                 <div class="row g-3 mb-3">
@@ -52,7 +52,7 @@
                     </div>
                 </div>
 
-                <!-- CAMPO NOVO ADICIONADO AQUI -->
+                
                 <div class="row g-3 mb-4">
                     <div class="col-md-12">
                         <label asp-for="Responsavel" class="form-label">Nome do Responsável Legal</label>
@@ -90,9 +90,9 @@
                     </div>
                 </div>
 
-                <!-- ========================================== -->
-                <!-- SESSÃO 2: ENDEREÇO (VIA CEP)               -->
-                <!-- ========================================== -->
+                
+                
+                
                 <h5 class="section-title text-primary border-bottom pb-2"><i class="bi bi-geo-alt"></i> Endereço Residencial</h5>
                 <div class="row g-3 mb-5">
                     
@@ -135,12 +135,12 @@
                     </div>
                 </div>
 
-                <!-- ========================================== -->
-                <!-- SESSÃO 3: DADOS FAMILIARES                 -->
-                <!-- ========================================== -->
+                
+                
+                
                 <h5 class="section-title text-primary border-bottom pb-2"><i class="bi bi-people"></i> Dados Familiares</h5>
                 
-                <!-- Dados da Mãe -->
+                
                 <h6 class="fw-bold text-secondary mt-4 mb-3">Dados da Mãe</h6>
                 <div class="row g-3 mb-3">
                     <div class="col-md-5">
@@ -171,7 +171,7 @@
                     </div>
                 </div>
 
-                <!-- Dados do Pai -->
+                
                 <h6 class="fw-bold text-secondary mt-4 mb-3">Dados do Pai</h6>
                 <div class="row g-3 mb-3">
                     <div class="col-md-5">
@@ -202,7 +202,7 @@
                     </div>
                 </div>
 
-                <!-- BOTÕES -->
+                
                 <div class="d-flex justify-content-end gap-3 pt-4 border-top">
                     <a asp-controller="Pacientes" asp-action="Index" class="btn btn-light fw-bold px-4 rounded-pill text-muted">Cancelar</a>
                     <button type="submit" class="btn btn-primary fw-bold px-5 rounded-pill shadow-sm">
@@ -216,9 +216,9 @@
 
 @section Scripts {
     <script>
-        // ==========================================
-        // 1. SCRIPT DE CÁLCULO DE IDADE (Seu código original)
-        // ==========================================
+        
+        
+        
         document.getElementById('campoDataNascimento').addEventListener('change', function () {
             var dataSelecionada = new Date(this.value);
             if (!isNaN(dataSelecionada.getTime())) {
@@ -234,14 +234,14 @@
             }
         });
 
-        // ==========================================
-        // 2. SCRIPT DO VIACEP (Busca Automática)
-        // ==========================================
+        
+        
+        
         document.getElementById('Cep').addEventListener('blur', function() {
             let cep = this.value.replace(/\D/g, '');
             if (cep.length === 8) {
                 document.getElementById('loadingCep').classList.remove('d-none');
-                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                fetch(`https:
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('loadingCep').classList.add('d-none');

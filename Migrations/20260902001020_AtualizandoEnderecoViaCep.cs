@@ -4,11 +4,8 @@
 
 namespace NeuroSync.Migrations
 {
-    /// <inheritdoc />
     public partial class AtualizandoEnderecoViaCep : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+    {        protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
                 name: "endereco",
@@ -57,8 +54,6 @@ namespace NeuroSync.Migrations
                 maxLength: 20,
                 nullable: true);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
