@@ -816,6 +816,12 @@
                                         <div class="d-inline-flex gap-1 align-items-center">
                                             @if (item.Status != "Pago")
                                             {
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold me-1" 
+                                                        title="Gerar QR Code Pix para pagamento"
+                                                        onclick="carregarPixModal(@item.IdCobranca)">
+                                                    <i class="bi bi-qr-code me-1"></i> Pix
+                                                </button>
+
                                                 <a asp-action="Baixa" asp-route-id="@item.IdCobranca" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" title="Registrar Pagamento">
                                                     <i class="bi bi-check2-circle me-1"></i> Baixar
                                                 </a>
@@ -1069,6 +1075,65 @@
 
 </div>
 
+<!-- Modal QR Code Pix -->
+<div class="modal fade" id="modalPix" tabindex="-1" aria-labelledby="modalPixLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-primary-subtle p-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-25 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-qr-code fs-4 text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalPixLabel">Pagamento via Pix</h5>
+                        <small class="text-muted">Escaneie o QR Code ou copie o código</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <div class="modal-body p-4 text-center">
+                <div class="bg-light p-3 rounded-3 border mb-3">
+                    <div class="d-flex justify-content-between mb-1 small text-muted">
+                        <span>Paciente:</span>
+                        <strong class="text-dark" id="pixPaciente">—</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Valor:</span>
+                        <strong class="text-success fs-6" id="pixValor">—</strong>
+                    </div>
+                </div>
+
+                <div id="pixLoading" class="py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="small text-muted mt-2 mb-0">Gerando QR Code...</p>
+                </div>
+
+                <div id="pixConteudo" style="display: none;">
+                    <div class="mb-3">
+                        <img id="pixQrCodeImg" src="" alt="QR Code Pix" class="img-fluid border p-2 rounded-3 shadow-sm" style="max-width: 210px;" />
+                    </div>
+
+                    <label class="form-label small fw-bold text-dark mb-1">Código Pix Copia e Cola</label>
+                    <div class="input-group mb-2">
+                        <input type="text" id="pixCopiaECola" class="form-control form-control-sm text-center font-monospace bg-light" readonly />
+                        <button class="btn btn-primary btn-sm fw-bold px-3" type="button" onclick="copiarPix()">
+                            <i class="bi bi-clipboard me-1"></i> Copiar
+                        </button>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Cole este código no seu aplicativo do banco para concluir o pagamento.</small>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold border" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalNovaDespesa" tabindex="-1" aria-labelledby="modalNovaDespesaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -1111,7 +1176,7 @@
                         </div>
 
                         <div class="col-12 col-sm-6">
-                            <label class="form-label small fw-bold text-dark">Valor (R$) *</label>
+                            <label class="form-label small fw-bold text-dark">Valor (R\$) *</label>
                             <input type="number" step="0.01" name="Valor" id="despesaValor" required class="form-control" placeholder="0,00" />
                         </div>
 
@@ -1500,6 +1565,45 @@
             }
 
         });
+
+        function carregarPixModal(idCobranca) {
+            document.getElementById('pixLoading').style.display = 'block';
+            document.getElementById('pixConteudo').style.display = 'none';
+
+            const modalEl = document.getElementById('modalPix');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            fetch(`/Financeiro/GerarQrCodePix?id=${idCobranca}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        document.getElementById('pixPaciente').textContent = data.paciente;
+                        document.getElementById('pixValor').textContent = data.valor;
+                        document.getElementById('pixQrCodeImg').src = data.qrCodeBase64;
+                        document.getElementById('pixCopiaECola').value = data.copiaECola;
+
+                        document.getElementById('pixLoading').style.display = 'none';
+                        document.getElementById('pixConteudo').style.display = 'block';
+                    } else {
+                        alert('Não foi possível gerar o QR Code do Pix.');
+                        modal.hide();
+                    }
+                })
+                .catch(err => {
+                    console.error('Erro ao gerar Pix:', err);
+                    alert('Erro ao processar requisição do Pix.');
+                    modal.hide();
+                });
+        }
+
+        function copiarPix() {
+            const input = document.getElementById('pixCopiaECola');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            alert('Código Pix Copia e Cola copiado com sucesso!');
+        }
+
         function abrirModalNovaDespesa() {
             document.getElementById('formNovaDespesa').reset();
             document.getElementById('despesaVencimento').value = new Date().toISOString().split('T')[0];

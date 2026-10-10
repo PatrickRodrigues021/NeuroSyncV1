@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
+using NeuroSync.Utils;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -13,7 +14,6 @@ namespace NeuroSync.Controllers;
 [Authorize]
 public class PacientesController(AppDbContext context, IWebHostEnvironment hostEnvironment) : Controller
 {
-
     public async Task<IActionResult> Index(string termoBusca)
     {
         var pacientes = context.Pacientes.AsQueryable();
@@ -27,6 +27,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return View(await pacientes.OrderBy(p => p.Nome).ToListAsync());
     }
+
     public async Task<IActionResult> Details(int? id, string? aba = null)
     {
         if (id == null) return NotFound();
@@ -95,6 +96,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return RedirectToAction(nameof(Details), new { id = PacienteId, aba = "evolucao" });
     }
+
     public async Task<IActionResult> VisualizarEvolucao(int id)
     {
         var evolucao = await context.Evolucoes
@@ -103,6 +105,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return evolucao == null ? NotFound() : View(evolucao);
     }
+
     public async Task<IActionResult> ImprimirEvolucao(int id)
     {
         var evolucao = await context.Evolucoes
@@ -111,6 +114,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return evolucao == null ? NotFound() : View(evolucao);
     }
+
     public async Task<IActionResult> GerarEvolucaoPdf(int id)
     {
         var evolucao = await context.Evolucoes
@@ -120,7 +124,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         if (evolucao?.Paciente == null) return NotFound();
 
         var paciente = evolucao.Paciente;
-        var culturaBr = new CultureInfo("pt-BR");
 
         var idade = DateTime.Today.Year - paciente.DataNascimento.Year;
         if (paciente.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
@@ -240,7 +243,8 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         });
 
         byte[] pdfBytes = documento.GeneratePdf();
-        return File(pdfBytes, "application/pdf", $"Evolucao-{paciente.Nome.Replace(" ", "_")}-{evolucao.DataRegistro:yyyyMMdd}.pdf");
+        string nomeSanitizado = DocumentoUtils.SanitizarNomeArquivo(paciente.Nome);
+        return File(pdfBytes, "application/pdf", $"Evolucao-{nomeSanitizado}-{evolucao.DataRegistro:yyyyMMdd}.pdf");
     }
 
     [HttpPost]
@@ -280,7 +284,6 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         if (parecer?.Paciente == null) return NotFound();
 
         var paciente = parecer.Paciente;
-        var culturaBr = new CultureInfo("pt-BR");
 
         var idade = DateTime.Today.Year - paciente.DataNascimento.Year;
         if (paciente.DataNascimento.Date > DateTime.Today.AddYears(-idade)) idade--;
@@ -390,7 +393,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
         });
 
         var pdfBytes = documento.GeneratePdf();
-        var nomeSanitizado = string.Join("_", paciente.Nome.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
+        string nomeSanitizado = DocumentoUtils.SanitizarNomeArquivo(paciente.Nome);
         return File(pdfBytes, "application/pdf", $"Parecer_Tecnico_{nomeSanitizado}_{parecer.IdParecer}.pdf");
     }
 
@@ -425,7 +428,7 @@ public class PacientesController(AppDbContext context, IWebHostEnvironment hostE
 
         return RedirectToAction(nameof(Details), new { id = PacienteId, aba = "anexos" });
     }
-    
+
     [HttpGet]
     public IActionResult Create() => View();
 

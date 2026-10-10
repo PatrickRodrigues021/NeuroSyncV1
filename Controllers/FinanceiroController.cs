@@ -9,6 +9,7 @@ using NeuroSync.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using NeuroSync.Utils;
 
 namespace NeuroSync.Controllers;
 
@@ -188,6 +189,48 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         ViewBag.CategoriasDespesa = new SelectList(new[] { "Todas", "Energia Elétrica", "Água", "Telefonia", "Internet", "Material de Escritório", "Sistemas", "Aluguel", "Limpeza", "Outros" }, despesaCategoria);
 
         return View(viewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GerarQrCodePix(int id)
+    {
+        try
+        {
+            var cobranca = await context.Cobrancas
+                .Include(c => c.Paciente)
+                .FirstOrDefaultAsync(c => c.IdCobranca == id);
+
+            if (cobranca == null)
+                return Json(new { sucesso = false, mensagem = "Cobrança não encontrada." });
+
+            string chavePix = "financeiro@neurosync.com.br";
+            string nomeRecebedor = "NeuroSync Clinica";
+            string cidade = "Curitiba";
+
+            string copiaECola = PixQrCodeUtils.GerarPixCopiaECola(
+                chavePix,
+                nomeRecebedor,
+                cidade,
+                cobranca.Valor,
+                $"COB{cobranca.IdCobranca}"
+            );
+
+            string qrCodeImageBase64 = PixQrCodeUtils.GerarQrCodeBase64(copiaECola);
+
+            return Json(new
+            {
+                sucesso = true,
+                idCobranca = cobranca.IdCobranca,
+                paciente = cobranca.Paciente?.Nome ?? "Paciente",
+                valor = cobranca.Valor.ToString("C", new CultureInfo("pt-BR")),
+                copiaECola = copiaECola,
+                qrCodeBase64 = qrCodeImageBase64
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { sucesso = false, mensagem = $"Erro ao gerar QR Code: {ex.Message}" });
+        }
     }
 
     [HttpPost]
@@ -381,6 +424,7 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         }
         return RedirectToAction(nameof(Index), new { aba = "Receitas" });
     }
+
     public IActionResult ExportarExcel(int? pacienteId, string? status, string? competencia)
     {
         var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
@@ -420,6 +464,7 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         workbook.SaveAs(stream);
         return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"financeiro_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }
+
     public IActionResult ExportarPdf(int? pacienteId, string? status, string? competencia)
     {
         var cobrancas = ObterCobrancasFiltradas(pacienteId, status, competencia);
@@ -554,29 +599,4 @@ public class FinanceiroController(AppDbContext context, IWebHostEnvironment host
         var pdfBytes = documento.GeneratePdf();
         return File(pdfBytes, "application/pdf", $"RelatorioFinanceiro_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
     }
-    private static string ObterCorCategoria(string cat) => cat switch
-    {
-        "Energia Elétrica" => "#F59E0B",
-        "Água" => "#06B6D4",
-        "Telefonia" => "#8B5CF6",
-        "Internet" => "#3B82F6",
-        "Material de Escritório" => "#EC4899",
-        "Sistemas" => "#6366F1",
-        "Aluguel" => "#10B981",
-        "Limpeza" => "#14B8A6",
-        _ => "#64748B"
-    };
-
-    private static string ObterIconeCategoria(string cat) => cat switch
-    {
-        "Energia Elétrica" => "bi-lightning-charge-fill",
-        "Água" => "bi-droplet-fill",
-        "Telefonia" => "bi-telephone-fill",
-        "Internet" => "bi-wifi",
-        "Material de Escritório" => "bi-box-seam-fill",
-        "Sistemas" => "bi-laptop",
-        "Aluguel" => "bi-building",
-        "Limpeza" => "bi-stars",
-        _ => "bi-receipt"
-    };
 }

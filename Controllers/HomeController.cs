@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
+using NeuroSync.Utils;
 
 namespace NeuroSync.Controllers;
 
@@ -33,8 +34,9 @@ public class HomeController(AppDbContext context) : Controller
             if (!string.IsNullOrWhiteSpace(primeiroUsuario?.Nome)) nomeCompleto = primeiroUsuario.Nome;
         }
 
-        return ConfiguracoesController.ExtrairPrimeiroNome(nomeCompleto);
+        return TextoUtils.ExtrairPrimeiroNome(nomeCompleto);
     }
+
     public async Task<IActionResult> Index()
     {
         var agora = DateTime.Now;
@@ -168,6 +170,7 @@ public class HomeController(AppDbContext context) : Controller
 
         return View(model);
     }
+
     public async Task<IActionResult> BoasVindas()
     {
         var agora = DateTime.Now;

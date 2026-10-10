@@ -6,24 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
+using NeuroSync.Utils;
 
 namespace NeuroSync.Controllers;
-
 
 [Authorize]
 public class ConfiguracoesController(AppDbContext context) : Controller
 {
-
     private async Task<Usuario?> ObterUsuarioAtualAsync()
     {
-      
         if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int idUsuario))
         {
             var userById = await context.Usuarios.FindAsync(idUsuario);
             if (userById != null) return userById;
         }
 
-       
         var claimEmail = User.FindFirstValue(ClaimTypes.Email);
         if (!string.IsNullOrEmpty(claimEmail))
         {
@@ -31,7 +28,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
             if (userByEmail != null) return userByEmail;
         }
 
-        
         var claimNome = User.Identity?.Name;
         if (!string.IsNullOrEmpty(claimNome))
         {
@@ -40,19 +36,6 @@ public class ConfiguracoesController(AppDbContext context) : Controller
         }
 
         return await context.Usuarios.FirstOrDefaultAsync();
-    }
-
-
-    public static string ExtrairPrimeiroNome(string? nomeCompleto)
-    {
-        if (string.IsNullOrWhiteSpace(nomeCompleto)) return "Usuário";
-        var partes = nomeCompleto.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (partes.Length == 0) return "Usuário";
-
-        string[] titulos = ["dr.", "dra.", "dr", "dra", "prof.", "profa.", "prof", "profa"];
-        return titulos.Contains(partes[0].ToLower()) && partes.Length > 1
-            ? $"{partes[0]} {partes[1]}"
-            : partes[0];
     }
 
     [HttpGet]
@@ -67,7 +50,7 @@ public class ConfiguracoesController(AppDbContext context) : Controller
             Nome = usuario.Nome,
             Email = usuario.Email,
             CriadoEm = usuario.CriadoEm,
-            PrimeiroNome = ExtrairPrimeiroNome(usuario.Nome)
+            PrimeiroNome = TextoUtils.ExtrairPrimeiroNome(usuario.Nome)
         });
     }
 

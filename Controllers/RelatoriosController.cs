@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
+using NeuroSync.Utils;
 
 namespace NeuroSync.Controllers;
 
 [Authorize]
 public class RelatoriosController(AppDbContext context) : Controller
 {
-
     public async Task<IActionResult> Index(
         string? aba,
         DateTime? dataInicio,
@@ -201,6 +201,7 @@ public class RelatoriosController(AppDbContext context) : Controller
 
         return View(model);
     }
+
     public async Task<IActionResult> Exportar(
         DateTime? dataInicio,
         DateTime? dataFim,

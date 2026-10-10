@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NeuroSync.Data;
 using NeuroSync.Models;
+using NeuroSync.Utils;
 
 namespace NeuroSync.Controllers;
-
 
 [Authorize]
 public class AgendaController(AppDbContext context) : Controller
@@ -25,27 +25,10 @@ public class AgendaController(AppDbContext context) : Controller
     public async Task<IActionResult> Create(int? pacienteId, string? data)
     {
         ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", pacienteId);
-        
-        var agora = DateTime.Now;
-        DateTime dataSugerida;
-
-        if (!string.IsNullOrWhiteSpace(data) && DateTime.TryParse(data, out var dataInformada))
-        {
-            dataSugerida = dataInformada;
-        }
-        else if (agora.Hour >= 8 && agora.Hour < 18)
-        {
-            dataSugerida = DateTime.Today.AddHours(agora.Hour + 1);
-        }
-        else
-        {
-            var dia = agora.Hour >= 18 ? DateTime.Today.AddDays(1) : DateTime.Today;
-            dataSugerida = dia.AddHours(9);
-        }
 
         var agendamento = new Agendamento
         {
-            DataHora = dataSugerida
+            DataHora = AgendaUtils.ObterDataSugerida(data)
         };
 
         if (pacienteId.HasValue) agendamento.PacienteId = pacienteId.Value;
@@ -128,7 +111,6 @@ public class AgendaController(AppDbContext context) : Controller
         ViewBag.Pacientes = new SelectList(await context.Pacientes.OrderBy(p => p.Nome).ToListAsync(), "IdPaciente", "Nome", agendamento.PacienteId);
         return View(agendamento);
     }
-
 
     public async Task<IActionResult> Delete(int? id)
     {
